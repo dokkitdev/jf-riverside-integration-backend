@@ -1,0 +1,87 @@
+replicaCount: 1
+
+persistence:
+  enabled: false
+  existingClaim: ""
+  storage: 1Gi
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 350Mi
+  requests:
+    cpu: 10m
+    memory: 128Mi
+
+autoscale:
+  enabled: false
+  min: 2
+  max: 5
+  CPULimit: 70
+  MemoryLimit: 512Mi
+
+ingress:
+  enabled: true
+
+cronjobs:
+  enabled: false
+
+worker:
+  enabled: false
+  replicaCount: 1
+  autoscale:
+    enabled: false
+    min: 3
+    max: 6
+    CPULimit: 70
+    MemoryLimit: 1568Mi
+  cmd: "php /app/artisan queue:work --sleep=3 --tries=3 --queue=default,mails --memory=128"
+
+migrate:
+  enabled: true
+  timeout: 260
+  cmd: "php artisan migrate --force"
+
+smtp:
+  enabled: true
+
+# For Google Cloud Storage
+gcs:
+  enabled: false
+  projectId: "ronas-it-development"
+  bucketName: "ronasit-development"
+  apiUri: "https://storage.googleapis.com/ronasit-development"
+  key: "secret"
+
+# For Google Cloud SQL
+sqlproxy:
+  enabled: false
+  instance: ""
+  project: ""
+  region: ""
+  port: "5432"
+
+postgres:
+  enabled: true
+  image: "postgres"
+  imageTag: "12.5"
+  persistence:
+    enabled: true
+    size: 1Gi
+    
+mysql:
+  enabled: false
+  image: "ronasit/mysql"
+  imageTag: "5.7-lowmem"
+  persistence:
+    enabled: true
+    size: 1Gi
+
+redis:
+  enabled: false
+
+elasticsearch:
+  enabled: false
+  persistence:
+    enabled: false
+    size: 1Gi

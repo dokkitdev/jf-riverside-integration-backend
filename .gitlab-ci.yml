@@ -1,0 +1,83 @@
+stages:
+  - prepare
+  - tests
+  - push
+  - deploy
+
+variables:
+  CI_PROJECT_NAME: jf-riverside-integration-backend
+  DOMAIN: api.riverside.dokkit.co.uk
+  DOCKERFILE: ./Dockerfile
+  CHART_REPO: ronasit/laravel
+  CHART_VERSION: &ref 8.2.7
+  CHART_VALUES: k8s/values.yaml
+  DOCKER_CONTAINER_REGISTRY: gcr.io/ronas-it-development/${CI_PROJECT_NAME}-${CI_ENVIRONMENT_SLUG}
+  APP_NAME: Laravel
+
+include:
+  - project: 'k8s-tools/charts/laravel'
+    ref: *ref
+    file: '/helpers/.gitlab-ci-template.yml'
+  - project: "ansible/laravel"
+    ref: ubuntu-20
+    file: "/helpers/.gitlab-ci-template.yml"
+
+cache: &global_cache
+  paths:
+    - ./vendor
+  policy: pull
+
+php_dependencies:
+  stage: prepare
+  image: ronasit/php-nginx:7.4
+  cache:
+    <<: *global_cache
+    policy: pull-push
+  script:
+    - composer install
+  tags:
+    - docker
+    - linux
+
+tests:
+  stage: tests
+  variables:
+    DB_CONNECTION: pgsql
+    DB_HOST: pgsql_test
+    POSTGRES_USER: forge
+    POSTGRES_DB: forge
+    POSTGRES_PASSWORD: ""
+    REDIS_HOST: "redis"
+    MAIL_DRIVER: log
+    FILESYSTEM_DRIVER: testing
+    APP_ENV: testing
+    APP_DEBUG: "true"
+    APP_LOG_LEVEL: debug
+    APP_URL: http://localhost
+    DATA_COLLECTOR_KEY: jfCusomterPortal
+    FAIL_EXPORT_JSON: "true"
+  image: ronasit/php-nginx:7.4
+  services:
+    - name: ronasit/postgres:12.5
+      alias: pgsql_test
+  script:
+    - composer install
+    - php artisan jwt:secret --env=testing
+    - php artisan key:generate --env=testing
+    - php vendor/bin/phpunit --stop-on-failure ./tests/
+  after_script:
+    - cat storage/logs/*.log || true
+  tags:
+    - docker
+    - linux
+
+deploy:
+  extends: .deploy_ansible
+  variables:
+    PLAYBOOK: site.yml
+    HOSTS_FILE: hosts
+  environment:
+    name: "development"
+    url:  https://${DOMAIN}
+  only:
+    - main

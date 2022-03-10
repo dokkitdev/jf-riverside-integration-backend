@@ -1,0 +1,3 @@
+dev ansible_host=138.68.180.67 ansible_user=ci ansible_python_interpreter=python3 ansible_become=true
+[dev]
+dev

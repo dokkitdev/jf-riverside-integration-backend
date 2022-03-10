@@ -1,0 +1,161 @@
+# for installing php
+ansible_pkg_mgr: apt
+
+# if need will install python
+python: true
+
+# if need will install enable web-server
+nginx: true
+
+# if need will install php dependencies
+php: true
+
+# # if need will install composer
+composer: true
+
+# run migrations
+migrations: true
+
+# enable cronjob
+cronjob: true
+
+# enable worker
+worker: true
+
+# enable ssl
+ssl: true
+
+# config for worker in supervisor
+supervisor_programs:
+  - name: "worker"
+    command: php {{ remote_path }}/artisan queue:work --daemon --sleep=30 --delay=60 --tries=3
+    state: present
+    configuration: |
+      process_name=%(program_name)s_%(process_num)02d
+      autostart=true
+      autorestart=true
+      startretries=1
+      startsecs=1
+      numprocs=4
+      redirect_stderr=true
+      user=root
+
+# enable mysql
+mysql: false
+
+# enable postgres
+postgres: false
+
+# enable redis
+redis: false
+
+# prefix for finding sv's
+prefix: K8S_SECRET_
+
+# php config
+php_version: "7.4" # 5.6, 7.0, 7.1, 7.2, 7.3
+php_max_execution_time: "120"
+php_memory_limit: "768M"
+php_default_version_debian: "{{ php_version }}"
+php_versions_debian: "{{ php_version }}"
+php_enable_webserver: false
+php_install_recommends: false
+php_packages:
+  - git
+  - php{{ php_version }}-fpm
+  - php{{ php_version }}-cli
+  - php{{ php_version }}-common
+  - php{{ php_version }}-curl
+  - php{{ php_version }}-json
+  - php{{ php_version }}-gd
+  - php{{ php_version }}-odbc
+  - php{{ php_version }}-pgsql
+  - php{{ php_version }}-mbstring
+  - php{{ php_version }}-mysql
+  - php{{ php_version }}-xmlrpc
+  - php{{ php_version }}-opcache
+  - php{{ php_version }}-intl
+  - php{{ php_version }}-bz2
+  - php{{ php_version }}-xml
+  - php{{ php_version }}-bcmath
+  - php{{ php_version }}-imap
+  - php{{ php_version }}-zip
+  - php{{ php_version }}-apcu
+  - "{{ 'php' ~ php_version ~'-mcrypt' if php_version | float() < 7.2  else 'mcrypt' }}"
+
+# nginx config
+nginx_vhosts:
+  - listen: "80"
+    server_name: "{{ app_host }}"
+    # server_name_redirect: "www.example.com"
+    root: "{{ remote_path }}/public"
+    index: "index.php index.html index.htm"
+    filename: "{{ app_host }}.conf"
+    extra_parameters: |
+      location / {
+          try_files $uri $uri/ /index.php?$query_string;
+      }
+      location ~ \.php$ {
+          fastcgi_pass unix:/var/run/php/php{{ php_version }}-fpm.sock;
+          fastcgi_index index.php;
+          fastcgi_read_timeout 300;
+          fastcgi_buffers 16 16k;
+          fastcgi_buffer_size 32k;
+          fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+          include fastcgi_params;
+      }
+tls_mail: apetrosyan@ronasit.com
+remote_path: "/var/www/{{ app_name }}"
+app_key:
+app_host:
+app_name:
+environment_app:
+
+# Environment variables where each key-value pair will be stored in .env file dynamically.
+env:
+  APP_URL: "https://{{ app_host }}"
+  APP_NAME: "{{ app_name }}"
+  APP_KEY: "{{ app_key }}"
+  APP_ENV: "{{ environment_app }}"
+# Database
+db_name: laravel
+db_user: laravel
+db_pass: secret
+
+# For external database
+db_connection:
+db_host:
+db_port:
+
+# MySQL
+mysql_root_password: secret
+mysql_databases:
+  - name: "{{ db_name if env.DB_DATABASE is not defined else env.DB_DATABASE }}"
+mysql_users:
+  - name: "{{ db_user if env.DB_USERNAME is not defined else env.DB_USERNAME }}"
+    host: "%"
+    password: "{{ db_pass if env.DB_PASSWORD is not defined else env.DB_PASSWORD }}"
+    priv: "{{ db_name if env.DB_DATABASE is not defined else env.DB_DATABASE }}.*:ALL"
+
+# Postgres
+postgresql_version: 12
+postgresql_encoding: "UTF-8"
+postgresql_locale: "en_US.UTF-8"
+postgresql_ctype: "en_US.UTF-8"
+
+postgresql_admin_user: "postgres"
+
+postgresql_databases:
+  - name: "{{ db_name if env.DB_DATABASE is not defined else env.DB_DATABASE }}"
+    owner: "{{ db_user if env.DB_USERNAME is not defined else env.DB_USERNAME }}"
+
+postgresql_users:
+  - name: "{{ db_user if env.DB_USERNAME is not defined else env.DB_USERNAME }}"
+    pass: "{{ db_pass if env.DB_PASSWORD is not defined else env.DB_PASSWORD }}"
+    encrypted: true
+
+postgresql_user_privileges:
+  - name: "{{ db_user if env.DB_USERNAME is not defined else env.DB_USERNAME }}"
+    db: "{{ db_name if env.DB_DATABASE is not defined else env.DB_DATABASE }}"
+    priv: "ALL"
+    role_attr_flags: "CREATEDB"

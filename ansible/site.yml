@@ -1,0 +1,36 @@
+# install python
+- name: check existing python
+  strategy: linear
+  hosts: dev
+  gather_facts: false
+  vars_files:
+    - main.yml
+  tasks:
+    - name: check for python
+      raw: test -e /usr/bin/python
+      changed_when: false
+      failed_when: false
+      register: check_python
+      when: python == true
+    - name: Install Python
+      raw: test -e /usr/bin/apt && (apt update && apt install -y python3-minimal) || (yum -y install python libselinux-python)
+      when: 
+        - check_python.rc is defined 
+    - name: install pip3
+      become: yes
+      apt: name=python3-pip state=present update_cache=true
+    - name: Install psycopg2 for ansible to be able to create postgresql users
+      become: yes
+      pip: name=psycopg2-binary
+  tags:
+    - python
+
+# prepare env and deploy app 
+- name: deploy app 
+  hosts: dev
+  vars_files:
+    - main.yml
+  roles:
+    - { role: "laravel-deploy" }
+  tags:
+    - deploy
