@@ -104,6 +104,11 @@ nginx_vhosts:
           fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
           include fastcgi_params;
       }
+      location /metabase/ {
+          proxy_pass http://localhost:3000;
+          rewrite  ^/metabase/(.*)  /$1 break;
+          proxy_set_header   Host $host;
+      }
 tls_mail: apetrosyan@ronasit.com
 remote_path: "/var/www/{{ app_name }}"
 app_key:
