@@ -1,0 +1,2 @@
+INSERT INTO public.request_logs (id, destination, url, method, request_body, request_headers, response_status_code, response_body, response_headers, created_at, updated_at) VALUES
+  (1, 'self', 'http://localhost/jobs', 'POST', 'previous-request-raw-body', '{"request_header_key": "request_header_value"}', 200, '', '{"response_header_key": "response_header_value"}', '2018-11-11 11:11:11', '2018-11-11 11:11:11');
