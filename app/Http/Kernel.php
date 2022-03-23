@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\LogRequest;
 use Fruitcake\Cors\HandleCors;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use RonasIT\Support\AutoDoc\Http\Middleware\AutoDocMiddleware;
@@ -21,7 +22,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        AutoDocMiddleware::class
+        AutoDocMiddleware::class,
+        LogRequest::class,
     ];
 
     /**
