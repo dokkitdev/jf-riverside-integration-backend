@@ -14,7 +14,7 @@ class RequestLogsTableCreate extends Migration
 
             $table->enum('destination', ['self', 'simpro', 'riverside']);
             $table->text('url');
-            $table->string('method', 5);
+            $table->string('method');
             $table->text('request_body');
             $table->text('request_headers');
             $table->integer('response_status_code');
