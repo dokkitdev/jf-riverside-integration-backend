@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\JobController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,4 +47,6 @@ Route::group(['middleware' => 'guest'], function () {
     Route::post('/auth/token/check', ['uses' => AuthController::class . '@checkRestoreToken']);
 
     Route::get('/status', ['uses' => StatusController::class . '@status']);
+
+    Route::post('/jobs', ['uses' => JobController::class . '@create']);
 });
