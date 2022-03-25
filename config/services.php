@@ -40,4 +40,9 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'simpro' => [
+        'api_url' => env('SIMPRO_API_URL', 'https://gassure.simprocloud.com'),
+        'token' => env('SIMPRO_TOKEN', 'fake_simpro_token'),
+        'company_id' => (int) env('SIMPRO_COMPANY_ID', 0),
+    ]
 ];
