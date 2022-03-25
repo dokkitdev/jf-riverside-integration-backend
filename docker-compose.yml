@@ -21,10 +21,28 @@ services:
           REDIS_PORT: "6379"
           php.xdebug.max_nesting_level: 250
           XDEBUG_PROFILER_ENABLE: 0
-          XDEBUG_START_WITH_REQUEST: 1
+          XDEBUG_REMOTE_AUTOSTART: 1
           XDEBUG_DISCOVER_CLIENT_HOST: 0
-          XDEBUG_CLIENT_PORT: 9000
-          XDEBUG_CLIENT_HOST: host.docker.internal
+          XDEBUG_REMOTE_PORT: 9000
+          XDEBUG_REMOTE_HOST: ${DOCKER_COMPOSE_XDEBUG_CLIENT_HOST:-host.docker.internal}
+          PHP_IDE_CONFIG: "serverName=nginx"
+
+  nginx_without_debug:
+      image: ronasit/php-nginx:7.4
+      working_dir: /app
+      command: >
+          bash -c "chmod +x ./docker/entrypoint.sh && ./docker/entrypoint.sh && cd /opt/docker && supervisord"
+      ports:
+          - 81:80
+          - 444:443
+      volumes:
+          - ./:/app
+      links:
+          - pgsql
+          - pgsql_test
+      environment:
+          WEB_DOCUMENT_ROOT: /app/public
+          WEB_DOCUMENT_INDEX: index.php
 
   pgsql:
     image: ronasit/postgres:12.5
