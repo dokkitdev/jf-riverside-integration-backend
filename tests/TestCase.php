@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use RonasIT\Support\Tests\TestCase as BaseTestCase;
 use RonasIT\Support\AutoDoc\Tests\AutoDocTestCaseTrait;
 
@@ -26,6 +27,13 @@ abstract class TestCase extends BaseTestCase
         $app->make(Kernel::class)->bootstrap();
 
         return $app;
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Queue::fake();
     }
 
     public function tearDown(): void
@@ -95,5 +103,18 @@ abstract class TestCase extends BaseTestCase
             ->map(function ($record) {
                 return (array) $record;
             });
+    }
+
+    public function xml(string $method, string $uri, string $xmlFixture, array $headers = [])
+    {
+        $content = $this->getFixture($xmlFixture);
+
+        return $this->call(
+            $method,
+            $uri,
+            [], [], [],
+            $this->transformHeadersToServerVars($headers),
+            $content
+        );
     }
 }

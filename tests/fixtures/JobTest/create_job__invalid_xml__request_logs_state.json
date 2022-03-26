@@ -1,0 +1,19 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 2,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "self",
+            "url": "http:\/\/localhost\/jobs",
+            "method": "POST",
+            "request_body": "<?xml version=\"1.0\" ?>\n<Jobs>\n    <Job\n        job_no=\"test_job_no\n        jobs_type_code=\"SORJ\"\n        short_description=\"test_short_description\"\n        long_description=\"test_long_description\"\n        sub_location_description=\"test_sub_location_description\"\n        job_type=\"test_job_type\"\n        Access_info=\"test_Access_info\"\n        initial_priority=\"0\"\n    \/>\n    <SOR\n        element_code=\"test_element_code\"\n        element_description=\"test_element_description\"\n    \/>\n    <Location\n        place_ref=\"test_place_ref\"\n        address1=\"test_address1\"\n        address2=\"test_address2\"\n        address3=\"test_address3\"\n        post_code=\"test_post_code\"\n    \/>\n    <Occupants\n        Person_Title=\"test_Person_Title\"\n        Person_Forenames=\"test_Person_Forenames\"\n        Person_Surname=\"test_Person_Surname\"\n    \/>\n    <Contact\n        Contact_Type=\"EML\"\n        Contact_Details=\"test_Contact_Details\"\n        Priority=\"3\"\n    \/>\n<\/Jobs>\n",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"text\\\/html,application\\\/xhtml+xml,application\\\/xml;q=0.9,*\\\/*;q=0.8\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"header-name\":[\"HEADER_VALUE\"],\"content-type\":[\"application\\\/x-www-form-urlencoded\"]}",
+            "response_status_code": 400,
+            "response_body": "{\"error\":\"Can't parse XML payload\"}",
+            "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"application\\/json\"],\"x-ratelimit-limit\":[60],\"x-ratelimit-remaining\":[59]}"
+        }
+    ],
+    "deleted": []
+}
