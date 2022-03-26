@@ -2,7 +2,9 @@
 
 namespace App\ApiClients;
 
+use App\Exceptions\TooManySitesFoundException;
 use App\Models\RequestLog;
+use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 
 class SimproApiClient extends BaseApiClient
@@ -10,6 +12,8 @@ class SimproApiClient extends BaseApiClient
     protected string $baseUrl;
     protected string $token;
     protected int $companyId;
+    protected int $customerId;
+    protected int $uprnFieldId;
 
     public function __construct()
     {
@@ -18,6 +22,48 @@ class SimproApiClient extends BaseApiClient
         $this->baseUrl = config('services.simpro.api_url');
         $this->token = config('services.simpro.token');
         $this->companyId = config('services.simpro.company_id');
+        $this->customerId = config('services.simpro.customer_id');
+        $this->uprnFieldId = config('services.simpro.uprn_field_id');
+    }
+
+    public function findSiteIdByUprn(string $uprn): ?int
+    {
+        $response = $this->makeRequest('get', '/sites/', [
+            'CustomFields.Value' => $uprn,
+            'CustomFields.CustomField.ID' => $this->uprnFieldId,
+            'columns' => 'ID'
+        ]);
+
+        if (empty($response)) {
+            return null;
+        } elseif (count($response) > 1) {
+            throw new TooManySitesFoundException($uprn, $response);
+        }
+
+        return Arr::get(Arr::first($response), 'ID');
+    }
+
+    public function postSite(string $uprn, array $data): int
+    {
+        $data['Customers'] = [$this->customerId];
+        $uprnData = [
+            'Value' => $uprn
+        ];
+
+        $response = $this->makeRequest('post', '/sites/', $data, [], Response::HTTP_CREATED);
+
+        $newSiteId = $response['ID'];
+
+        $this->makeRequest('patch', "/sites/{$newSiteId}/customFields/{$this->uprnFieldId}", $uprnData, [],Response::HTTP_NO_CONTENT);
+
+        return $newSiteId;
+    }
+
+    public function patchSite(int $siteId, array $data): void
+    {
+        $data['Customers'] = [$this->customerId];
+
+        $this->makeRequest('patch', "/sites/{$siteId}", $data, [], Response::HTTP_NO_CONTENT);
     }
 
     protected function getUrl(string $action): string

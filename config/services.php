@@ -44,5 +44,7 @@ return [
         'api_url' => env('SIMPRO_API_URL', 'https://gassure.simprocloud.com'),
         'token' => env('SIMPRO_TOKEN', 'fake_simpro_token'),
         'company_id' => (int) env('SIMPRO_COMPANY_ID', 0),
+        'customer_id' => (int) env('SIMPRO_CUSTOMER_ID', 83),
+        'uprn_field_id' => (int) env('SIMPRO_UPRN_FIELD_ID', 2),
     ]
 ];
