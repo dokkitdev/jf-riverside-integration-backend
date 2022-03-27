@@ -14,6 +14,7 @@ trait MockSimproApiClientTrait
             $this->findSiteIdByUprnSiteNotFound(),
             $this->postSiteStage1PostSite(),
             $this->postSiteStage2PatchSiteCustomField(),
+            $this->postJob(1234)
         ]);
     }
 
@@ -22,6 +23,7 @@ trait MockSimproApiClientTrait
         $this->mockHttpRequestService([
             $this->findSiteIdByUprnSiteExists(),
             $this->patchSite(),
+            $this->postJob(2345)
         ]);
     }
 
@@ -38,6 +40,53 @@ trait MockSimproApiClientTrait
         $this->mockHttpRequestService([
             $this->findSiteIdByUprnSiteNotFound(Response::HTTP_INTERNAL_SERVER_ERROR),
         ]);
+    }
+
+    protected function mockSendJobToSimproPostJobFailed()
+    {
+        $this->mockHttpRequestService([
+            $this->findSiteIdByUprnSiteNotFound(),
+            $this->postSiteStage1PostSite(),
+            $this->postSiteStage2PatchSiteCustomField(),
+            $this->postJob(1234, Response::HTTP_UNPROCESSABLE_ENTITY)
+        ]);
+    }
+
+    protected function postJob(int $siteId, int $statusCode = Response::HTTP_CREATED)
+    {
+        return [
+            'type' => 'post',
+            'arguments' => [
+                'https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/',
+                [
+                    'Site' => $siteId,
+                    'Type' => 'Service',
+                    'Stage' => 'Pending',
+                    'Customer' => 83,
+                    'Status' => 7,
+                    'OrderNo' => 'test_job_no',
+                    'Tags' => [4],
+                    'Name' => 'test_short_description',
+                    'Description' => 'test_job_type test_long_description test_sub_location_description',
+                    'Notes' => 'test_Access_info test_element_code test_element_description',
+                    'DueDate' => '2018-11-11',
+                    'DueTime' => '15:11',
+                    'ResponseTime' => 3,
+                ],
+                [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer fake_simpro_token',
+                ],
+            ],
+            'response' => [
+                'status_code' => $statusCode,
+                'fixture' => [
+                    'content' => [],
+                    'headers' => [],
+                ],
+            ],
+        ];
     }
 
     protected function patchSite(int $statusCode = Response::HTTP_NO_CONTENT)

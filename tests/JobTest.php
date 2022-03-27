@@ -93,4 +93,15 @@ class JobTest extends TestCase
 
         $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__find_site_failed__request_logs_state.json', self::$originRequestLogs);
     }
+
+    public function testSendJobToSimproPostJobFailed()
+    {
+        $this->mockSendJobToSimproPostJobFailed();
+
+        try {
+            (new SendJobToSimproJob($this->getJsonFixture('create_job__data_from_riverside.json')))->handle();
+        } catch (ApiClientHttpException $e) {}
+
+        $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__post_job_failed__request_logs_state.json', self::$originRequestLogs);
+    }
 }
