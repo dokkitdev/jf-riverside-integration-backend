@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\ApiClients\SimproApiClient;
+use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\SendJobToSimproJob;
 use Illuminate\Support\Arr;
 use Exception;
@@ -92,6 +93,13 @@ class JobsService
         }
 
         $this->simproApiClient->postJob($siteId, $jobData);
+
+        dispatch(new NotifyRiversideAboutCreatedJobJob($jobData['OrderNo'], $now));
+    }
+
+    public function notifyRiversideAboutCreatedJob(string $jobOrderNo, Carbon $date)
+    {
+
     }
 
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array

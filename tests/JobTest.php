@@ -3,8 +3,10 @@
 namespace App\Tests;
 
 use App\Exceptions\ApiClientHttpException;
+use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\SendJobToSimproJob;
 use App\Tests\Support\MockSimproApiClientTrait;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,6 +63,15 @@ class JobTest extends TestCase
         (new SendJobToSimproJob($this->getJsonFixture('create_job__data_from_riverside.json')))->handle();
 
         $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__new_site__request_logs_state.json', self::$originRequestLogs);
+
+        $this->assertCount(1, Queue::pushedJobs()[NotifyRiversideAboutCreatedJobJob::class]);
+
+        Queue::assertPushed(NotifyRiversideAboutCreatedJobJob::class, function (NotifyRiversideAboutCreatedJobJob $job) {
+            $this->assertEquals('test_job_no', $job->getJobOrderNo());
+            $this->assertEquals(Carbon::parse('2018-11-11 11:11:11'), $job->getDate());
+
+            return true;
+        });
     }
 
     public function testSendJobToSimproSiteExists()
@@ -70,6 +81,15 @@ class JobTest extends TestCase
         (new SendJobToSimproJob($this->getJsonFixture('create_job__data_from_riverside.json')))->handle();
 
         $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__site_exists__request_logs_state.json', self::$originRequestLogs);
+
+        $this->assertCount(1, Queue::pushedJobs()[NotifyRiversideAboutCreatedJobJob::class]);
+
+        Queue::assertPushed(NotifyRiversideAboutCreatedJobJob::class, function (NotifyRiversideAboutCreatedJobJob $job) {
+            $this->assertEquals('test_job_no', $job->getJobOrderNo());
+            $this->assertEquals(Carbon::parse('2018-11-11 11:11:11'), $job->getDate());
+
+            return true;
+        });
     }
 
     public function testSendJobToSimproPostSiteFailed()
@@ -81,6 +101,8 @@ class JobTest extends TestCase
         } catch (ApiClientHttpException $e) {}
 
         $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__post_site_failed__request_logs_state.json', self::$originRequestLogs);
+
+        Queue::assertNothingPushed();
     }
 
     public function testSendJobToSimproFindSiteFailed()
@@ -92,6 +114,8 @@ class JobTest extends TestCase
         } catch (ApiClientHttpException $e) {}
 
         $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__find_site_failed__request_logs_state.json', self::$originRequestLogs);
+
+        Queue::assertNothingPushed();
     }
 
     public function testSendJobToSimproPostJobFailed()
@@ -103,5 +127,7 @@ class JobTest extends TestCase
         } catch (ApiClientHttpException $e) {}
 
         $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__post_job_failed__request_logs_state.json', self::$originRequestLogs);
+
+        Queue::assertNothingPushed();
     }
 }
