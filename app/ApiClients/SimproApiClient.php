@@ -9,11 +9,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SimproApiClient extends BaseApiClient
 {
+    protected const JOB_TYPE = 'Service';
+    protected const JOB_INITIAL_STAGE = 'Pending';
+
     protected string $baseUrl;
     protected string $token;
     protected int $companyId;
     protected int $customerId;
     protected int $uprnFieldId;
+    protected int $jobInitialStatusId;
 
     public function __construct()
     {
@@ -24,6 +28,7 @@ class SimproApiClient extends BaseApiClient
         $this->companyId = config('services.simpro.company_id');
         $this->customerId = config('services.simpro.customer_id');
         $this->uprnFieldId = config('services.simpro.uprn_field_id');
+        $this->jobInitialStatusId = config('services.simpro.job_initial_status_id');
     }
 
     public function findSiteIdByUprn(string $uprn): ?int
@@ -64,6 +69,17 @@ class SimproApiClient extends BaseApiClient
         $data['Customers'] = [$this->customerId];
 
         $this->makeRequest('patch', "/sites/{$siteId}", $data, [], Response::HTTP_NO_CONTENT);
+    }
+
+    public function postJob(int $siteId, array $data): void
+    {
+        $data['Site'] = $siteId;
+        $data['Type'] = self::JOB_TYPE;
+        $data['Stage'] = self::JOB_INITIAL_STAGE;
+        $data['Customer'] = $this->customerId;
+        $data['Status'] = $this->jobInitialStatusId;
+
+        $this->makeRequest('post', "/jobs/", $data, [], Response::HTTP_CREATED);
     }
 
     protected function getUrl(string $action): string
