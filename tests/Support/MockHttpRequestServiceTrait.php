@@ -2,9 +2,9 @@
 
 namespace App\Tests\Support;
 
+use App\Support\HttpRequestService;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Support\Arr;
-use RonasIT\Support\Services\HttpRequestService;
 
 trait MockHttpRequestServiceTrait
 {
