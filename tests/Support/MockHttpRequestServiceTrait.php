@@ -42,7 +42,7 @@ trait MockHttpRequestServiceTrait
         return new GuzzleResponse(
             $response['status_code'],
             $responseData['headers'],
-            json_encode($responseData['content'])
+            is_array($responseData['content']) ? json_encode($responseData['content']) : $responseData['content']
         );
     }
 }

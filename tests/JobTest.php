@@ -5,6 +5,7 @@ namespace App\Tests;
 use App\Exceptions\ApiClientHttpException;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\SendJobToSimproJob;
+use App\Tests\Support\MockRiversideApiClientTrait;
 use App\Tests\Support\MockSimproApiClientTrait;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -13,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class JobTest extends TestCase
 {
-    use MockSimproApiClientTrait;
+    use MockSimproApiClientTrait, MockRiversideApiClientTrait;
 
     protected static Collection $originRequestLogs;
 
@@ -129,5 +130,46 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__post_job_failed__request_logs_state.json', self::$originRequestLogs);
 
         Queue::assertNothingPushed();
+    }
+
+    public function testNotifyRiversideAboutCreatedJob()
+    {
+        $this->mockNotifyRiversideAboutCreatedJob(
+            'mock_notify_riverside_about_create_job__request.xml',
+            'mock_notify_riverside_about_create_job__response__success.xml'
+        );
+
+        (new NotifyRiversideAboutCreatedJobJob('test_job_no', Carbon::now()))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__request_logs_state.json', self::$originRequestLogs);
+    }
+
+    public function testNotifyRiversideAboutCreatedJobHttpErrorCode()
+    {
+        $this->mockNotifyRiversideAboutCreatedJob(
+            'mock_notify_riverside_about_create_job__request.xml',
+            'mock_notify_riverside_about_create_job__response__success.xml',
+            Response::HTTP_INTERNAL_SERVER_ERROR
+        );
+
+        try {
+            (new NotifyRiversideAboutCreatedJobJob('test_job_no', Carbon::now()))->handle();
+        } catch (ApiClientHttpException $e) {}
+
+        $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__http_error_code__request_logs_state.json', self::$originRequestLogs);
+    }
+
+    public function testNotifyRiversideAboutCreatedJobErrorInResponseBody()
+    {
+        $this->mockNotifyRiversideAboutCreatedJob(
+            'mock_notify_riverside_about_create_job__request.xml',
+            'mock_notify_riverside_about_create_job__response__failed.xml'
+        );
+
+        try {
+            (new NotifyRiversideAboutCreatedJobJob('test_job_no', Carbon::now()))->handle();
+        } catch (ApiClientHttpException $e) {}
+
+        $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__error_in_response_body__request_logs_state.json', self::$originRequestLogs);
     }
 }
