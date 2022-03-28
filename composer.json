@@ -10,10 +10,12 @@
   "require": {
     "php": "^7.4",
     "ext-json": "^7.4",
+    "ext-simplexml": "^7.4",
     "doctrine/dbal": "^2.10",
     "laravel/framework": "^8.0",
     "laravel/tinker": "^2.4",
     "laravel/ui": "^3.0",
+    "sentry/sentry-laravel": "^2.11",
     "superbalist/laravel-google-cloud-storage": "^2.2",
     "symfony/yaml": "^4.4",
     "ronasit/laravel-helpers": "2.0.0-beta",
