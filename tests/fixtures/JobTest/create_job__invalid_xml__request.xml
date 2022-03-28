@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<Jobs>
+    <Job
+        job_no="test_job_no
+        jobs_type_code="SORJ"
+        short_description="test_short_description"
+        long_description="test_long_description"
+        sub_location_description="test_sub_location_description"
+        job_type="test_job_type"
+        Access_info="test_Access_info"
+        initial_priority="0"
+    />
+    <SOR
+        element_code="test_element_code"
+        element_description="test_element_description"
+    />
+    <Location
+        place_ref="test_place_ref"
+        address1="test_address1"
+        address2="test_address2"
+        address3="test_address3"
+        post_code="test_post_code"
+    />
+    <Occupants
+        Person_Title="test_Person_Title"
+        Person_Forenames="test_Person_Forenames"
+        Person_Surname="test_Person_Surname"
+    />
+    <Contact
+        Contact_Type="EML"
+        Contact_Details="test_Contact_Details"
+        Priority="3"
+    />
+</Jobs>

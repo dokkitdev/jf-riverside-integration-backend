@@ -40,4 +40,13 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'simpro' => [
+        'api_url' => env('SIMPRO_API_URL', 'https://gassure.simprocloud.com'),
+        'token' => env('SIMPRO_TOKEN', 'fake_simpro_token'),
+        'company_id' => (int) env('SIMPRO_COMPANY_ID', 0),
+        'customer_id' => (int) env('SIMPRO_CUSTOMER_ID', 83),
+        'uprn_field_id' => (int) env('SIMPRO_UPRN_FIELD_ID', 2),
+        'job_initial_status_id' => (int) env('SIMPRO_JOB_INITIAL_STATUS_ID', 7),
+        'job_type_codes_map' => json_decode(env('SIMPRO_JOB_TYPE_CODES_MAP', '{"SORJ": 4, "GASE": 4, "GSERV": 2, "default": 2}'), true),
+    ]
 ];

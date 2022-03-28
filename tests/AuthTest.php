@@ -2,10 +2,12 @@
 
 namespace App\Tests;
 
+use App\Jobs\SendMailJob;
 use App\Mails\ForgotPasswordMail;
 use App\Tests\Support\AuthTestTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\User;
 
@@ -157,6 +159,12 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(Response::HTTP_NO_CONTENT);
+
+        Queue::assertPushed(SendMailJob::class, function (SendMailJob $job) {
+            $job->handle();
+
+            return true;
+        });
 
         $this->assertDatabaseMissing('users', [
             'email' => 'fidel.kutch@example.com',
