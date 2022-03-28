@@ -2,9 +2,9 @@
 
 namespace App\Tests\Support;
 
+use App\Support\HttpRequestService;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Support\Arr;
-use RonasIT\Support\Services\HttpRequestService;
 
 trait MockHttpRequestServiceTrait
 {
@@ -42,7 +42,7 @@ trait MockHttpRequestServiceTrait
         return new GuzzleResponse(
             $response['status_code'],
             $responseData['headers'],
-            json_encode($responseData['content'])
+            is_array($responseData['content']) ? json_encode($responseData['content']) : $responseData['content']
         );
     }
 }

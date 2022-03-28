@@ -48,5 +48,12 @@ return [
         'uprn_field_id' => (int) env('SIMPRO_UPRN_FIELD_ID', 2),
         'job_initial_status_id' => (int) env('SIMPRO_JOB_INITIAL_STATUS_ID', 7),
         'job_type_codes_map' => json_decode(env('SIMPRO_JOB_TYPE_CODES_MAP', '{"SORJ": 4, "GASE": 4, "GSERV": 2, "default": 2}'), true),
+    ],
+
+    'riverside' => [
+        'api_url' => env('RIVERSIDE_API_URL', 'https://oh.services.riverside.org.uk/test.openaccess/webservice.p'),
+        'user_name' => env('RIVERSIDE_USER_NAME', 'fake_riverside_user_name'),
+        'password' => env('RIVERSIDE_PASSWORD', 'fake_riverside_password'),
+        'secret' => env('RIVERSIDE_SECRET', 'fake_riverside_secret'),
     ]
 ];

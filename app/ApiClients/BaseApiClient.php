@@ -4,8 +4,8 @@ namespace App\ApiClients;
 
 use App\Exceptions\ApiClientHttpException;
 use App\Services\RequestLogService;
+use App\Support\HttpRequestService;
 use Psr\Http\Message\ResponseInterface;
-use RonasIT\Support\Services\HttpRequestService;
 use Symfony\Component\HttpFoundation\Response;
 
 abstract class BaseApiClient
@@ -23,7 +23,8 @@ abstract class BaseApiClient
         $this->requestLogService = app(RequestLogService::class);
     }
 
-    protected function rawRequest(string $method, string $action, array $data = [], array $headers = [], int $expectedStatusCode = Response::HTTP_OK): ResponseInterface
+    /** @param array|string $data */
+    protected function rawRequest(string $method, string $action, $data, array $headers = [], int $expectedStatusCode = Response::HTTP_OK): ResponseInterface
     {
         $url = $this->getUrl($action);
 
@@ -41,7 +42,7 @@ abstract class BaseApiClient
             'destination' => $this->getRequestDestination(),
             'url' => $url,
             'method' => $method,
-            'request_body' => json_encode($requestData),
+            'request_body' => is_array($requestData) ? json_encode($requestData) : $requestData,
             'request_headers' => json_encode($headers),
             'response_status_code' => $response->getStatusCode(),
             'response_body' => (string) $response->getBody(),
