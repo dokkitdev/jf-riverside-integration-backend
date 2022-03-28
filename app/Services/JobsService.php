@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\SendJobToSimproJob;
@@ -54,11 +55,13 @@ class JobsService
     protected const SIMPRO_DUE_TIME_FORMAT = 'H:i';
 
     protected SimproApiClient $simproApiClient;
+    protected RiversideApiClient $riversideApiClient;
     protected array $jobTypeCodesMap;
 
     public function __construct()
     {
         $this->simproApiClient = app(SimproApiClient::class);
+        $this->riversideApiClient = app(RiversideApiClient::class);
         $this->jobTypeCodesMap = config('services.simpro.job_type_codes_map');
     }
 
@@ -99,7 +102,7 @@ class JobsService
 
     public function notifyRiversideAboutCreatedJob(string $jobOrderNo, Carbon $date)
     {
-
+        $this->riversideApiClient->notifyAboutCreatedJob($jobOrderNo, $date);
     }
 
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array
