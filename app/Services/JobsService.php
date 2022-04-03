@@ -57,12 +57,14 @@ class JobsService
     protected SimproApiClient $simproApiClient;
     protected RiversideApiClient $riversideApiClient;
     protected array $jobTypeCodesMap;
+    protected int $defaultJobTypeCodeId;
 
     public function __construct()
     {
         $this->simproApiClient = app(SimproApiClient::class);
         $this->riversideApiClient = app(RiversideApiClient::class);
         $this->jobTypeCodesMap = config('services.simpro.job_type_codes_map');
+        $this->defaultJobTypeCodeId = config('services.simpro.default_job_type_code_id');
     }
 
     public function initSendingToSimpro(array $dataFromRiverside)
@@ -109,13 +111,29 @@ class JobsService
     {
         list($responseTimeId, $dueDate, $dueTime) = $this->calculateSimproJobDatesAndPriority($dataFromRiverside['job']['initial_priority'], $now);
 
+        $typeCode = Arr::get($dataFromRiverside, 'job.jobs_type_code', '');
+
+        $typeCodeId = Arr::get(
+            $this->jobTypeCodesMap,
+            $typeCode,
+            $this->defaultJobTypeCodeId,
+        );
+
         $simproData = [
-            'Tags' => [
-                Arr::get($this->jobTypeCodesMap, Arr::get($dataFromRiverside, 'job.jobs_type_code', 'default'))
-            ],
             'ResponseTime' => $responseTimeId,
             'DueDate' => $dueDate,
             'DueTime' => $dueTime,
+            'Sections' => [
+                [
+                    'CostCenters' => [
+                        [
+                            'CostCenter' => $typeCodeId,
+                            'Description' => $typeCode,
+                            'Stage' => 'Pending',
+                        ]
+                    ]
+                ]
+            ]
         ];
 
         $description = $this->generateSimproDescription($dataFromRiverside);

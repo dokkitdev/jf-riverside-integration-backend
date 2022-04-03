@@ -47,7 +47,7 @@
             "destination": "simpro",
             "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/jobs\/",
             "method": "post",
-            "request_body": "{\"Tags\":[4],\"ResponseTime\":3,\"DueDate\":\"2018-11-11\",\"DueTime\":\"15:11\",\"Description\":\"test_job_type test_long_description test_sub_location_description\",\"Notes\":\"test_Access_info test_element_code test_element_description\",\"OrderNo\":\"test_job_no\",\"Name\":\"test_short_description\",\"Site\":1234,\"Type\":\"Service\",\"Stage\":\"Pending\",\"Customer\":83,\"Status\":7}",
+            "request_body": "{\"ResponseTime\":3,\"DueDate\":\"2018-11-11\",\"DueTime\":\"15:11\",\"Sections\":[{\"CostCenters\":[{\"CostCenter\":4,\"Description\":\"SORJ\",\"Stage\":\"Pending\"}]}],\"Description\":\"test_job_type test_long_description test_sub_location_description\",\"Notes\":\"test_Access_info test_element_code test_element_description\",\"OrderNo\":\"test_job_no\",\"Name\":\"test_short_description\",\"Site\":1234,\"Type\":\"Service\",\"Stage\":\"Pending\",\"Customer\":83,\"Status\":7}",
             "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
             "response_status_code": 201,
             "response_body": "[]",

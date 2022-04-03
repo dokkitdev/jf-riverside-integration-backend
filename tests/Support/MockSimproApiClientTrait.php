@@ -65,13 +65,23 @@ trait MockSimproApiClientTrait
                     'Customer' => 83,
                     'Status' => 7,
                     'OrderNo' => 'test_job_no',
-                    'Tags' => [4],
                     'Name' => 'test_short_description',
                     'Description' => 'test_job_type test_long_description test_sub_location_description',
                     'Notes' => 'test_Access_info test_element_code test_element_description',
                     'DueDate' => '2018-11-11',
                     'DueTime' => '15:11',
                     'ResponseTime' => 3,
+                    'Sections' => [
+                        [
+                            'CostCenters' => [
+                                [
+                                    'CostCenter' => 4,
+                                    'Description' => 'SORJ',
+                                    'Stage' => 'Pending',
+                                ]
+                            ]
+                        ]
+                    ]
                 ],
                 [
                     'Accept' => 'application/json',
