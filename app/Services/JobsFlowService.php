@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 use Exception;
 use Illuminate\Support\Carbon;
 
-class JobsService
+class JobsFlowService
 {
     protected const RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP = [
         'EML' => 'Email',

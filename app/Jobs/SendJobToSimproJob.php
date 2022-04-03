@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\JobsService;
+use App\Services\JobsFlowService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -24,7 +24,7 @@ class SendJobToSimproJob implements ShouldQueue
 
     public function handle()
     {
-        app(JobsService::class)->sendJobToSimpro($this->dataFromRiverside);
+        app(JobsFlowService::class)->sendJobToSimpro($this->dataFromRiverside);
     }
 
     public function getDataFromRiverside(): array

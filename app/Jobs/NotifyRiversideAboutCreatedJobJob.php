@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\JobsService;
+use App\Services\JobsFlowService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -27,7 +27,7 @@ class NotifyRiversideAboutCreatedJobJob implements ShouldQueue
 
     public function handle()
     {
-        app(JobsService::class)->notifyRiversideAboutCreatedJob($this->jobOrderNo, $this->date);
+        app(JobsFlowService::class)->notifyRiversideAboutCreatedJob($this->jobOrderNo, $this->date);
     }
 
     public function getJobOrderNo(): string
