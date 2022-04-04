@@ -6,6 +6,7 @@ use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\SendJobToSimproJob;
+use App\Models\JobOperation;
 use Illuminate\Support\Arr;
 use Exception;
 use Illuminate\Support\Carbon;
@@ -54,6 +55,8 @@ class JobsFlowService
     protected const SIMPRO_DUE_DATE_FORMAT = 'Y-m-d';
     protected const SIMPRO_DUE_TIME_FORMAT = 'H:i';
 
+    protected JobService $jobService;
+    protected JobOperationService $jobOperationService;
     protected SimproApiClient $simproApiClient;
     protected RiversideApiClient $riversideApiClient;
     protected array $jobTypeCodesMap;
@@ -61,6 +64,8 @@ class JobsFlowService
 
     public function __construct()
     {
+        $this->jobService = app(JobService::class);
+        $this->jobOperationService = app(JobOperationService::class);
         $this->simproApiClient = app(SimproApiClient::class);
         $this->riversideApiClient = app(RiversideApiClient::class);
         $this->jobTypeCodesMap = config('services.simpro.job_type_codes_map');
@@ -69,20 +74,30 @@ class JobsFlowService
 
     public function initSendingToSimpro(array $dataFromRiverside)
     {
-        dispatch(new SendJobToSimproJob($dataFromRiverside));
-    }
-
-    public function sendJobToSimpro(array $dataFromRiverside): void
-    {
         //TODO: remove this check after actual XML format is defined
         if (
             !Arr::has($dataFromRiverside, 'location.place_ref') ||
             !Arr::has($dataFromRiverside, 'location.address1') ||
+            !Arr::has($dataFromRiverside, 'job.job_no') ||
             !Arr::has($dataFromRiverside, 'job.initial_priority')
         ) {
             throw new Exception('Not all required fields are filled');
         }
 
+        $job = $this->jobService->create([
+            'order_no' => $dataFromRiverside['job']['job_no']
+        ]);
+
+        $this->jobOperationService->create([
+            'job_id' => $job['id'],
+            'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
+        ]);
+
+        dispatch(new SendJobToSimproJob($job['id'], $dataFromRiverside));
+    }
+
+    public function sendJobToSimpro(int $jobId, array $dataFromRiverside): void
+    {
         $now = Carbon::now();
 
         $siteUprn = $dataFromRiverside['location']['place_ref'];
@@ -97,14 +112,30 @@ class JobsFlowService
             $siteId = $this->simproApiClient->postSite($siteUprn, $siteData);
         }
 
-        $this->simproApiClient->postJob($siteId, $jobData);
+        $simproJobId = $this->simproApiClient->postJob($siteId, $jobData);
 
-        dispatch(new NotifyRiversideAboutCreatedJobJob($jobData['OrderNo'], $now));
+        $this->jobService->update($jobId, [
+            'simpro_job_id' => $simproJobId
+        ]);
+
+        $this->jobOperationService->create([
+            'job_id' => $jobId,
+            'operation' => JobOperation::OPERATION_CREATE_JOB_IN_SIMPRO,
+        ]);
+
+        dispatch(new NotifyRiversideAboutCreatedJobJob($jobId, $now));
     }
 
-    public function notifyRiversideAboutCreatedJob(string $jobOrderNo, Carbon $date)
+    public function notifyRiversideAboutCreatedJob(int $jobId, Carbon $date)
     {
-        $this->riversideApiClient->notifyAboutCreatedJob($jobOrderNo, $date);
+        $job = $this->jobService->find($jobId);
+
+        $this->riversideApiClient->notifyAboutCreatedJob($job['order_no'], $date);
+
+        $this->jobOperationService->create([
+            'job_id' => $jobId,
+            'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CRATED_JOB,
+        ]);
     }
 
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array

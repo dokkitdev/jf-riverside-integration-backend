@@ -13,10 +13,12 @@ class SendJobToSimproJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected int $jobId;
     protected array $dataFromRiverside;
 
-    public function __construct(array $dataFromRiverside)
+    public function __construct(int $jobId, array $dataFromRiverside)
     {
+        $this->jobId = $jobId;
         $this->dataFromRiverside = $dataFromRiverside;
 
         $this->onQueue('send_job_to_simpro');
@@ -24,7 +26,12 @@ class SendJobToSimproJob implements ShouldQueue
 
     public function handle()
     {
-        app(JobsFlowService::class)->sendJobToSimpro($this->dataFromRiverside);
+        app(JobsFlowService::class)->sendJobToSimpro($this->jobId, $this->dataFromRiverside);
+    }
+
+    public function getJobId(): int
+    {
+        return $this->jobId;
     }
 
     public function getDataFromRiverside(): array
