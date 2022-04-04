@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\SimproController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,4 +50,6 @@ Route::group(['middleware' => 'guest'], function () {
     Route::get('/status', ['uses' => StatusController::class . '@status']);
 
     Route::post('/jobs', ['uses' => JobController::class . '@create']);
+
+    Route::post('/simpro-webhook', ['uses' => SimproController::class . '@webhook']);
 });

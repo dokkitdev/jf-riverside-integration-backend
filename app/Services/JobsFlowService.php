@@ -138,6 +138,11 @@ class JobsFlowService
         ]);
     }
 
+    public function processSimproWebhook(array $simproWebhookData)
+    {
+
+    }
+
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array
     {
         list($responseTimeId, $dueDate, $dueTime) = $this->calculateSimproJobDatesAndPriority($dataFromRiverside['job']['initial_priority'], $now);
