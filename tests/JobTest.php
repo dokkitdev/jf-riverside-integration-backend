@@ -40,7 +40,7 @@ class JobTest extends TestCase
         $this->assertCount(1, Queue::pushedJobs()[SendJobToSimproJob::class]);
 
         Queue::assertPushed(SendJobToSimproJob::class, function (SendJobToSimproJob $job) {
-            $this->assertEquals(2, $job->getJobId());
+            $this->assertEquals(3, $job->getJobId());
             $this->assertEqualsFixture('create_job__data_from_riverside.json', $job->getDataFromRiverside());
 
             return true;
@@ -196,5 +196,42 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__error_in_response_body__request_logs_state.json', self::$originRequestLogs);
         $this->assertNoChanges('jobs', self::$originJobs);
         $this->assertNoChanges('job_operations', self::$originJobOperations);
+    }
+
+    public function testSimproWebhookIncorrectSignature()
+    {
+        list ($data,) = $this->getJsonFixture('webhook_job.stage.complete__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => 'incorrect_signature',
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__incorrect_signature__request_logs_state.json', self::$originRequestLogs);
+    }
+
+    public function testSimproWebhookIncorrectNoSignatureHeader()
+    {
+        list ($data,) = $this->getJsonFixture('webhook_job.stage.complete__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__no_signature_header__request_logs_state.json', self::$originRequestLogs);
+    }
+
+    public function testSimproWebhookJobCompletedJobExistsInLocalDb()
+    {
+        list ($data, $signature) = $this->getJsonFixture('webhook_job.stage.complete__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => $signature,
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__job_exists_in_local_db__request_logs_state.json', self::$originRequestLogs);
     }
 }
