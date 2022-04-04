@@ -92,7 +92,9 @@ trait MockSimproApiClientTrait
             'response' => [
                 'status_code' => $statusCode,
                 'fixture' => [
-                    'content' => [],
+                    'content' => [
+                        'ID' => 9999
+                    ],
                     'headers' => [],
                 ],
             ],
