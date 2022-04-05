@@ -266,4 +266,34 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__job_not_exists_in_local_db__request_logs_state.json', self::$originRequestLogs);
         $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
+
+    public function testProcessingSimproWebhookJobCompleted()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.stage.complete__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobCompletedJob(2))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.stage.complete__job_operations_logs_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobCompletedNoCostCenters()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.stage.complete__no_cost_centers__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobCompletedJob(2))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__no_cost_centers__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.stage.complete__job_operations_logs_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobCompletedNoSections()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.stage.complete__no_sections__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobCompletedJob(2))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__no_sections__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.stage.complete__job_operations_logs_state.json', self::$originJobOperations);
+    }
 }
