@@ -9,7 +9,7 @@ class SimproController extends Controller
 {
     public function webhook(SimproWebhookRequest $request, JobsFlowService $service)
     {
-        $service->processSimproWebhook($request->all());
+        $service->initSimproWebhookProcessing($request->all());
 
         return response(null);
     }
