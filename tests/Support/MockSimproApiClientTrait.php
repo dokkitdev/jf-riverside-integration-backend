@@ -55,10 +55,10 @@ trait MockSimproApiClientTrait
     protected function postJob(int $siteId, int $statusCode = Response::HTTP_CREATED)
     {
         return [
-            'type' => 'post',
-            'arguments' => [
-                'https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/',
-                [
+            'request' => [
+                'type' => 'post',
+                'url' => 'https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/',
+                'data' => [
                     'Site' => $siteId,
                     'Type' => 'Service',
                     'Stage' => 'Pending',
@@ -83,7 +83,7 @@ trait MockSimproApiClientTrait
                         ]
                     ]
                 ],
-                [
+                'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer fake_simpro_token',
@@ -91,12 +91,10 @@ trait MockSimproApiClientTrait
             ],
             'response' => [
                 'status_code' => $statusCode,
-                'fixture' => [
-                    'content' => [
-                        'ID' => 9999
-                    ],
-                    'headers' => [],
+                'data' => [
+                    'ID' => 9999
                 ],
+                'headers' => [],
             ],
         ];
     }
@@ -104,10 +102,10 @@ trait MockSimproApiClientTrait
     protected function patchSite(int $statusCode = Response::HTTP_NO_CONTENT)
     {
         return [
-            'type' => 'patch',
-            'arguments' => [
-                'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/2345',
-                [
+            'request' => [
+                'type' => 'patch',
+                'url' => 'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/2345',
+                'data' => [
                     'Name' => 'test_address1',
                     'PrimaryContact' => [
                         'Email' => 'test_Contact_Details',
@@ -125,7 +123,7 @@ trait MockSimproApiClientTrait
                         83
                     ],
                 ],
-                [
+                'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer fake_simpro_token',
@@ -133,10 +131,8 @@ trait MockSimproApiClientTrait
             ],
             'response' => [
                 'status_code' => $statusCode,
-                'fixture' => [
-                    'content' => [],
-                    'headers' => [],
-                ],
+                'data' => [],
+                'headers' => [],
             ],
         ];
     }
@@ -144,13 +140,13 @@ trait MockSimproApiClientTrait
     protected function postSiteStage2PatchSiteCustomField(int $statusCode = Response::HTTP_NO_CONTENT)
     {
         return [
-            'type' => 'patch',
-            'arguments' => [
-                'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/1234/customFields/2',
-                [
+            'request' => [
+                'type' => 'patch',
+                'url' => 'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/1234/customFields/2',
+                'data' => [
                     'Value' => 'test_place_ref',
                 ],
-                [
+                'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer fake_simpro_token',
@@ -158,10 +154,8 @@ trait MockSimproApiClientTrait
             ],
             'response' => [
                 'status_code' => $statusCode,
-                'fixture' => [
-                    'content' => [],
-                    'headers' => [],
-                ],
+                'data' => [],
+                'headers' => [],
             ],
         ];
     }
@@ -169,10 +163,10 @@ trait MockSimproApiClientTrait
     protected function postSiteStage1PostSite(int $statusCode = Response::HTTP_CREATED)
     {
         return [
-            'type' => 'post',
-            'arguments' => [
-                'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/',
-                [
+            'request' => [
+                'type' => 'post',
+                'url' => 'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/',
+                'data' => [
                     'Name' => 'test_address1',
                     'PrimaryContact' => [
                         'Email' => 'test_Contact_Details',
@@ -190,7 +184,7 @@ trait MockSimproApiClientTrait
                         83
                     ],
                 ],
-                [
+                'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer fake_simpro_token',
@@ -198,12 +192,10 @@ trait MockSimproApiClientTrait
             ],
             'response' => [
                 'status_code' => $statusCode,
-                'fixture' => [
-                    'content' => [
-                        'ID' => 1234,
-                    ],
-                    'headers' => [],
+                'data' => [
+                    'ID' => 1234,
                 ],
+                'headers' => [],
             ],
         ];
     }
@@ -211,15 +203,15 @@ trait MockSimproApiClientTrait
     protected function findSiteIdByUprnSiteNotFound(int $statusCode = Response::HTTP_OK)
     {
         return [
-            'type' => 'get',
-            'arguments' => [
-                'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/',
-                [
+            'request' => [
+                'type' => 'get',
+                'url' => 'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/',
+                'data' => [
                     'CustomFields.Value' => 'test_place_ref',
                     'CustomFields.CustomField.ID' => 2,
                     'columns' => 'ID'
                 ],
-                [
+                'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer fake_simpro_token',
@@ -227,10 +219,8 @@ trait MockSimproApiClientTrait
             ],
             'response' => [
                 'status_code' => $statusCode,
-                'fixture' => [
-                    'content' => [],
-                    'headers' => [],
-                ],
+                'data' => [],
+                'headers' => [],
             ],
         ];
     }
@@ -238,15 +228,15 @@ trait MockSimproApiClientTrait
     protected function findSiteIdByUprnSiteExists(int $statusCode = Response::HTTP_OK)
     {
         return [
-            'type' => 'get',
-            'arguments' => [
-                'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/',
-                [
+            'request' => [
+                'type' => 'get',
+                'url' => 'https://gassure.simprocloud.com/api/v1.0/companies/0/sites/',
+                'data' => [
                     'CustomFields.Value' => 'test_place_ref',
                     'CustomFields.CustomField.ID' => 2,
                     'columns' => 'ID'
                 ],
-                [
+                'headers' => [
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer fake_simpro_token',
@@ -254,14 +244,12 @@ trait MockSimproApiClientTrait
             ],
             'response' => [
                 'status_code' => $statusCode,
-                'fixture' => [
-                    'content' => [
-                        [
-                            'ID' => 2345
-                        ]
-                    ],
-                    'headers' => [],
+                'data' => [
+                    [
+                        'ID' => 2345
+                    ]
                 ],
+                'headers' => [],
             ],
         ];
     }
