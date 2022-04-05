@@ -38,6 +38,30 @@ class RiversideApiClient extends BaseApiClient
         ]);
     }
 
+    public function sendSorData(string $jobOrderNo)
+    {
+        //TODO: implement after mapping is described
+    }
+
+    public function sendDairyEntry(string $jobOrderNo, string $descriptionNotes, string $entryDate, string $entryTime)
+    {
+        $this->makeRequest('riverside_request_xml.send_dairy_entry', [
+            'job_order_no' => $jobOrderNo,
+            'description_notes' => $descriptionNotes,
+            'entry_date' => $entryDate,
+            'entry_time' => Carbon::parse($entryTime)->format(self::TIME_FORMAT),
+        ]);
+    }
+
+    public function notifyAboutCompletedJob(string $jobOrderNo, Carbon $date)
+    {
+        $this->makeRequest('riverside_request_xml.notify_about_completed_job', [
+            'job_order_no' => $jobOrderNo,
+            'date' => $date->format(self::DATE_FORMAT),
+            'time' => $date->format(self::TIME_FORMAT),
+        ]);
+    }
+
     protected function getUrl(string $action): string
     {
         return $this->baseUrl;

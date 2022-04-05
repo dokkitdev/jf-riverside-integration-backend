@@ -162,7 +162,27 @@ class JobsFlowService
 
     public function processSimproWebhookJobCompleted(int $jobId)
     {
+        $job = $this->jobService->find($jobId);
 
+        $this->riversideApiClient->sendSorData($job['order_no']);
+
+        $workOrders = $this->simproApiClient->getWorkOrders($job['simpro_job_id']);
+
+        foreach ($workOrders as $workOrder) {
+            $this->riversideApiClient->sendDairyEntry(
+                $job['order_no'],
+                $workOrder['DescriptionNotes'],
+                $workOrder['WorkOrderDate'],
+                $workOrder['DateModified']
+            );
+        }
+
+        $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], Carbon::now());
+
+        $this->jobOperationService->create([
+            'job_id' => $job['id'],
+            'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_COMPLETED_JOB
+        ]);
     }
 
     protected function initProcessSimproWebhookJobCompleted(int $simproJobId)
