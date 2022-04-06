@@ -7,6 +7,7 @@ use App\ApiClients\SimproApiClient;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
+use App\Jobs\ProcessSimproWebhookJobStatusChangedJob;
 use App\Jobs\SendJobToSimproJob;
 use App\Models\JobOperation;
 use Illuminate\Support\Arr;
@@ -67,6 +68,9 @@ class JobsFlowService
     protected RiversideApiClient $riversideApiClient;
     protected array $jobTypeCodesMap;
     protected int $defaultJobTypeCodeId;
+    protected int $simproStatusIdAbandon;
+    protected int $simproStatusIdNoAccess;
+    protected string $simproStatusTextNoAccess;
 
     public function __construct()
     {
@@ -76,6 +80,9 @@ class JobsFlowService
         $this->riversideApiClient = app(RiversideApiClient::class);
         $this->jobTypeCodesMap = config('services.simpro.job_type_codes_map');
         $this->defaultJobTypeCodeId = config('services.simpro.default_job_type_code_id');
+        $this->simproStatusIdAbandon = config('services.simpro.status.abandon_id');
+        $this->simproStatusIdNoAccess = config('services.simpro.status.no_access_id');
+        $this->simproStatusTextNoAccess = config('services.simpro.status.no_access_text');
     }
 
     public function initSendingToSimpro(array $dataFromRiverside)
@@ -111,7 +118,10 @@ class JobsFlowService
                 $this->initProcessSimproWebhookJobCompleted($simproWebhookData['reference']['jobID']);
                 break;
             case self::SIMPRO_WEBHOOK_JOB_STATUS_CHANGED:
-                //TODO: implement
+                $this->initProcessSimproWebhookJobStatusChange(
+                    $simproWebhookData['reference']['jobID'],
+                    $simproWebhookData['reference']['statusID'],
+                );
                 break;
             case self::SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED:
                 //TODO: payload format might not be guessed. Check format after receiving test requests.
@@ -212,6 +222,16 @@ class JobsFlowService
         ]);
     }
 
+    public function processSimproWebhookJobStatusChanged(int $jobId, int $simproStatusId)
+    {
+        $job = $this->jobService->find($jobId);
+
+        $this->jobOperationService->create([
+            'job_id' => $jobId,
+            'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS
+        ]);
+    }
+
     protected function initProcessSimproWebhookJobCompleted(int $simproJobId)
     {
         $job = $this->jobService->findBy('simpro_job_id', $simproJobId);
@@ -237,6 +257,23 @@ class JobsFlowService
             ]);
 
             dispatch(new ProcessSimproWebhookJobScheduleCreatedJob($job['id'], $simproJobScheduleId));
+        }
+    }
+
+    protected function initProcessSimproWebhookJobStatusChange(int $simproJobId, int $simproStatusId)
+    {
+        $job = $this->jobService->findBy('simpro_job_id', $simproJobId);
+
+        if (
+            isset($job) &&
+            (($simproStatusId === $this->simproStatusIdNoAccess) || ($simproStatusId === $this->simproStatusIdAbandon))
+        ) {
+            $this->jobOperationService->create([
+                'job_id' => $job['id'],
+                'operation' => JobOperation::OPERATION_RECEIVE_WEBHOOK_JOB_STATUS_CHANGED
+            ]);
+
+            dispatch(new ProcessSimproWebhookJobStatusChangedJob($job['id'], $simproStatusId));
         }
     }
 

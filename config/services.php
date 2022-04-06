@@ -50,6 +50,11 @@ return [
         'job_type_codes_map' => json_decode(env('SIMPRO_JOB_TYPE_CODES_MAP', '{"SORJ": 4, "GASE": 4, "GSERV": 2}'), true),
         'default_job_type_code_id' => (int) env('SIMPRO_DEFAULT_JOB_TYPE_CODE', 2),
         'webhook_secret' => env('SIMPRO_WEBHOOK_SECRET', 'fake_secret'),
+        'status' => [
+            'abandon_id' => (int) env("SIMPRO_STATUS_ID_ABANDON", 34),
+            'no_access_id' => (int) env('SIMPRO_STATUS_IR_NO_ACCESS', 38),
+            'no_access_text' => env('SIMPRO_STATUS_TEXT_NO_ACCESS', 'Job - No Access'),
+        ],
     ],
 
     'riverside' => [
