@@ -5,6 +5,7 @@ namespace App\Services;
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
+use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\SendJobToSimproJob;
 use App\Models\JobOperation;
 use Illuminate\Support\Arr;
@@ -55,6 +56,10 @@ class JobsFlowService
     protected const SIMPRO_DUE_DATE_FORMAT = 'Y-m-d';
     protected const SIMPRO_DUE_TIME_FORMAT = 'H:i';
 
+    protected const SIMPRO_WEBHOOK_JOB_COMPLETED = 'job.stage.complete';
+    protected const SIMPRO_WEBHOOK_JOB_STATUS_CHANGED = 'job.status';
+    protected const SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED = 'job.schedule.created';
+
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
     protected SimproApiClient $simproApiClient;
@@ -94,6 +99,23 @@ class JobsFlowService
         ]);
 
         dispatch(new SendJobToSimproJob($job['id'], $dataFromRiverside));
+    }
+
+    public function initSimproWebhookProcessing(array $simproWebhookData)
+    {
+        $type = $simproWebhookData['ID'];
+
+        switch ($type) {
+            case self::SIMPRO_WEBHOOK_JOB_COMPLETED:
+                $this->initProcessSimproWebhookJobCompleted($simproWebhookData['reference']['jobID']);
+                break;
+            case self::SIMPRO_WEBHOOK_JOB_STATUS_CHANGED:
+            case self::SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED:
+                //TODO: implement
+                break;
+            default:
+                throw new Exception('Unknown Simpro webhook');
+        }
     }
 
     public function sendJobToSimpro(int $jobId, array $dataFromRiverside): void
@@ -136,6 +158,45 @@ class JobsFlowService
             'job_id' => $jobId,
             'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CRATED_JOB,
         ]);
+    }
+
+    public function processSimproWebhookJobCompleted(int $jobId)
+    {
+        $job = $this->jobService->find($jobId);
+
+        $this->riversideApiClient->sendSorData($job['order_no']);
+
+        $workOrders = $this->simproApiClient->getWorkOrders($job['simpro_job_id']);
+
+        foreach ($workOrders as $workOrder) {
+            $this->riversideApiClient->sendDairyEntry(
+                $job['order_no'],
+                $workOrder['DescriptionNotes'],
+                $workOrder['WorkOrderDate'],
+                $workOrder['DateModified']
+            );
+        }
+
+        $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], Carbon::now());
+
+        $this->jobOperationService->create([
+            'job_id' => $job['id'],
+            'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_COMPLETED_JOB
+        ]);
+    }
+
+    protected function initProcessSimproWebhookJobCompleted(int $simproJobId)
+    {
+        $job = $this->jobService->findBy('simpro_job_id', $simproJobId);
+
+        if (isset($job)) {
+            $this->jobOperationService->create([
+                'job_id' => $job['id'],
+                'operation' => JobOperation::OPERATION_RECEIVE_WEBHOOK_JOB_COMPLETE
+            ]);
+
+            dispatch(new ProcessSimproWebhookJobCompletedJob($job['id']));
+        }
     }
 
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array

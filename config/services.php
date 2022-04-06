@@ -48,7 +48,8 @@ return [
         'uprn_field_id' => (int) env('SIMPRO_UPRN_FIELD_ID', 2),
         'job_initial_status_id' => (int) env('SIMPRO_JOB_INITIAL_STATUS_ID', 7),
         'job_type_codes_map' => json_decode(env('SIMPRO_JOB_TYPE_CODES_MAP', '{"SORJ": 4, "GASE": 4, "GSERV": 2}'), true),
-        'default_job_type_code_id' => (int) env('SIMPRO_DEFAULT_JOB_TYPE_CODE', 2)
+        'default_job_type_code_id' => (int) env('SIMPRO_DEFAULT_JOB_TYPE_CODE', 2),
+        'webhook_secret' => env('SIMPRO_WEBHOOK_SECRET', 'fake_secret'),
     ],
 
     'riverside' => [

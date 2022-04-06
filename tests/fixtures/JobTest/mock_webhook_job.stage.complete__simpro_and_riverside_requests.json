@@ -1,0 +1,320 @@
+[
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {
+          "ID": 7891
+        },
+        {
+          "ID": 7892
+        },
+        {
+          "ID": 7893
+        }
+      ],
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7891/costCenters/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {
+          "ID": 6781
+        },
+        {
+          "ID": 6782
+        }
+      ],
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7891/costCenters/6781/workOrders/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [],
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7891/costCenters/6782/workOrders/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {
+          "ID": 5671
+        }
+      ],
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7891/costCenters/6782/workOrders/5671",
+      "data": {},
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": {
+        "DescriptionNotes": "description_notes_1",
+        "WorkOrderDate": "2001-01-01",
+        "DateModified": "2001-01-01T01:01:01+01:00"
+      },
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7892/costCenters/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {
+          "ID": 6783
+        },
+        {
+          "ID": 6784
+        }
+      ],
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7892/costCenters/6783/workOrders/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {
+          "ID": 5672
+        },
+        {
+          "ID": 5673
+        }
+      ],
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7892/costCenters/6783/workOrders/5672",
+      "data": {},
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": {
+        "DescriptionNotes": "description_notes_2",
+        "WorkOrderDate": "2001-01-02",
+        "DateModified": "2001-01-02T02:02:02+02:00"
+      },
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7892/costCenters/6783/workOrders/5673",
+      "data": {},
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": {
+        "DescriptionNotes": "description_notes_3",
+        "WorkOrderDate": "2001-01-03",
+        "DateModified": "2001-01-03T03:03:03+03:00"
+      },
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7892/costCenters/6784/workOrders/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [],
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7893/costCenters/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [],
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "mock_webhook_job.stage.complete__riverside_send_dairy_entry_1__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "<?xml version=\"1.0\"?><test></test>",
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "mock_webhook_job.stage.complete__riverside_send_dairy_entry_2__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "<?xml version=\"1.0\"?><test></test>",
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "mock_webhook_job.stage.complete__riverside_send_dairy_entry_3__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "<?xml version=\"1.0\"?><test></test>",
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "mock_webhook_job.stage.complete__riverside_notify_about_completed_job__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "<?xml version=\"1.0\"?><test></test>",
+      "headers": []
+    }
+  }
+]

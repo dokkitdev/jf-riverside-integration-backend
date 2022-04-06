@@ -84,6 +84,57 @@ class SimproApiClient extends BaseApiClient
         return $response['ID'];
     }
 
+    public function getWorkOrders(int $simproJobId)
+    {
+        $workOrders = [];
+
+        $jobSectionIds = $this->getJobSectionIds($simproJobId);
+
+        foreach ($jobSectionIds as $jobSectionId) {
+            $jobSectionCostCenterIds = $this->getJobSectionCostCenterIds($simproJobId, $jobSectionId);
+
+            foreach ($jobSectionCostCenterIds as $jobSectionCostCenterId) {
+                $workOrderIds = $this->getJobSectionCostCenterWorkOrderIds($simproJobId, $jobSectionId, $jobSectionCostCenterId);
+
+                foreach ($workOrderIds as $workOrderId) {
+                    $workOrders[] = $this->makeRequest(
+                        'get',
+                        "/jobs/{$simproJobId}/sections/{$jobSectionId}/costCenters/{$jobSectionCostCenterId}/workOrders/{$workOrderId}"
+                    );
+                }
+            }
+        }
+
+        return $workOrders;
+    }
+
+    protected function getJobSectionCostCenterWorkOrderIds(int $simproJobId, int $simproJobSectionId, int $simproJobSectionCostCenterId): array
+    {
+        $workOrders = $this->makeRequest('get', "/jobs/{$simproJobId}/sections/{$simproJobSectionId}/costCenters/{$simproJobSectionCostCenterId}/workOrders/", [
+            'columns' => 'ID'
+        ]);
+
+        return Arr::pluck($workOrders, 'ID');
+    }
+
+    protected function getJobSectionCostCenterIds(int $simproJobId, int $simproJobSectionId): array
+    {
+        $costCenters = $this->makeRequest('get', "/jobs/{$simproJobId}/sections/{$simproJobSectionId}/costCenters/", [
+            'columns' => 'ID'
+        ]);
+
+        return Arr::pluck($costCenters, 'ID');
+    }
+
+    protected function getJobSectionIds(int $simproJobId): array
+    {
+        $sections = $this->makeRequest('get', "/jobs/{$simproJobId}/sections/", [
+            'columns' => 'ID'
+        ]);
+
+        return Arr::pluck($sections, 'ID');
+    }
+
     protected function getUrl(string $action): string
     {
         return "{$this->baseUrl}/api/v1.0/companies/{$this->companyId}{$action}";

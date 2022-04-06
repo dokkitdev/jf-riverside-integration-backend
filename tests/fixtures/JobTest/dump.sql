@@ -1,5 +1,6 @@
 INSERT INTO jobs (id, order_no, simpro_job_id, created_at, updated_at) VALUES
-  (1, 'test_job_no', null, '2018-10-10 10:10:10', '2018-10-10 10:10:10');
+  (1, 'test_job_no', null, '2018-10-10 10:10:10', '2018-10-10 10:10:10'),
+  (2, 'job_for_webhooks', 7777, '2018-10-10 10:10:10', '2018-10-10 10:10:10');
 
 INSERT INTO job_operations (id, job_id, operation, created_at, updated_at) VALUES
   (1, 1, 'receive_data_from_riverside', '2018-10-10 10:10:10', '2018-10-10 10:10:10');

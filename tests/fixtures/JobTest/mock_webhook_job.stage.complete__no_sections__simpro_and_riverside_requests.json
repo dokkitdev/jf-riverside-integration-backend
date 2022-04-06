@@ -1,0 +1,38 @@
+[
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [],
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "mock_webhook_job.stage.complete__riverside_notify_about_completed_job__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "<?xml version=\"1.0\"?><test></test>",
+      "headers": []
+    }
+  }
+]

@@ -10,7 +10,7 @@ trait MockHttpRequestServiceTrait
 {
     protected function mockHttpRequestService(array $requestsChain = []): void
     {
-        $methods = array_unique(Arr::pluck($requestsChain, 'type'));
+        $methods = array_unique(Arr::pluck($requestsChain, 'request.type'));
         $methods[] = 'getResponse';
 
         $mock = $this
@@ -18,13 +18,17 @@ trait MockHttpRequestServiceTrait
             ->onlyMethods($methods)
             ->getMock();
 
-        foreach ($requestsChain as $index => $request) {
-            $response = $this->makeResponse($request['response']);
+        foreach ($requestsChain as $index => $call) {
+            $response = $this->makeResponse($call['response']);
+
+            $requestData = is_string($call['request']['data']) && file_exists($this->getFixturePath($call['request']['data']))
+                ? $this->getFixture($call['request']['data'])
+                : $call['request']['data'];
 
             $mock
                 ->expects($this->at($index * 2))
-                ->method($request['type'])
-                ->with(...$request['arguments']);
+                ->method($call['request']['type'])
+                ->with($call['request']['url'], $requestData, $call['request']['headers']);
 
             $mock
                 ->expects($this->at(($index * 2) + 1))
@@ -37,12 +41,16 @@ trait MockHttpRequestServiceTrait
 
     protected function makeResponse(array $response): GuzzleResponse
     {
-        $responseData = is_array($response['fixture']) ? $response['fixture'] : $this->getJsonFixture($response['fixture']);
+        if (is_array($response['data'])) {
+            $response['data'] = json_encode($response['data']);
+        } elseif (!empty($response['data']) && file_exists($this->getFixturePath($response['data']))) {
+            $response['data'] = $this->getFixture($response['data']);
+        }
 
         return new GuzzleResponse(
             $response['status_code'],
-            $responseData['headers'],
-            is_array($responseData['content']) ? json_encode($responseData['content']) : $responseData['content']
+            $response['headers'],
+            $response['data']
         );
     }
 }
