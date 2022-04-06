@@ -194,6 +194,22 @@ class JobsFlowService
 
     public function processSimproWebhookJobScheduleCreated(int $jobId, int $simproJobScheduleId)
     {
+        $job = $this->jobService->find($jobId);
+
+        $this->riversideApiClient->cancelAppointment($job['order_no']);
+
+        $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
+
+        $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+
+        $this->jobService->update($jobId, [
+            'is_appointment_sent' => true
+        ]);
+
+        $this->jobOperationService->create([
+            'job_id' => $jobId,
+            'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CREATED_SCHEDULE
+        ]);
     }
 
     protected function initProcessSimproWebhookJobCompleted(int $simproJobId)

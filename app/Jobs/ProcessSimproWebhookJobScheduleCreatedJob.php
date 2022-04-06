@@ -34,16 +34,6 @@ class ProcessSimproWebhookJobScheduleCreatedJob implements ShouldQueue
         return $this->jobId;
     }
 
-    public function getSimproJobSectionId(): int
-    {
-        return $this->simproJobSectionId;
-    }
-
-    public function getSimproJobCostCenterId(): int
-    {
-        return $this->simproJobCostCenterId;
-    }
-
     public function getSimproJobScheduleId(): int
     {
         return $this->simproJobScheduleId;

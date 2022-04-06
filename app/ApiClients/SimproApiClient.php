@@ -108,6 +108,11 @@ class SimproApiClient extends BaseApiClient
         return $workOrders;
     }
 
+    public function getSchedule(int $simproScheduleId)
+    {
+        return $this->makeRequest('get', "/schedules/{$simproScheduleId}");
+    }
+
     protected function getJobSectionCostCenterWorkOrderIds(int $simproJobId, int $simproJobSectionId, int $simproJobSectionCostCenterId): array
     {
         $workOrders = $this->makeRequest('get', "/jobs/{$simproJobId}/sections/{$simproJobSectionId}/costCenters/{$simproJobSectionCostCenterId}/workOrders/", [
