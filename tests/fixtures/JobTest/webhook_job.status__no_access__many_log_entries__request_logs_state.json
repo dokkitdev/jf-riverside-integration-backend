@@ -1,0 +1,32 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 2,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/logs\/jobs\/",
+            "method": "get",
+            "request_body": "{\"JobID\":7777,\"Message\":\"Job status set to Job - No Access\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "[{\"any\":\"data\"},{\"any\":\"data\"},{\"any\":\"data\"},{\"any\":\"data\"},{\"any\":\"data\"}]",
+            "response_headers": "[]"
+        },
+        {
+            "id": 3,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "riverside",
+            "url": "https:\/\/oh.services.riverside.org.uk\/test.openaccess\/webservice.p",
+            "method": "post",
+            "request_body": "<?xml version=\"1.0\" ?>\n<message>\n    <Header>\n        <Security username=\"fake_riverside_user_name\" password=\"fake_riverside_password\" \/>\n    <\/Header>\n    <Body>\n        <Request request_type=\"createstageextcont\">\n            <Parameters attribute=\"secret\" attribute_value=\"fake_riverside_secret\" \/>\n            <Parameters attribute=\"job_no\" attribute_value=\"job_for_webhooks\" \/>\n            <Parameters attribute=\"memo\" attribute_value=\"No Access 3\" \/>\n            <Parameters attribute=\"stage\" attribute_value=\"273\" \/>\n            <Parameters attribute=\"notes\" attribute_value=\"\" \/>\n            <Parameters attribute=\"date\" attribute_value=\"11\/11\/2018\" \/>\n            <Parameters attribute=\"time\" attribute_value=\"11:11:11\" \/>\n        <\/Request>\n    <\/Body>\n<\/message>",
+            "request_headers": "{\"Accept\":\"application\\\/xml\",\"Content-Type\":\"application\\\/xml\"}",
+            "response_status_code": 200,
+            "response_body": "<?xml version=\"1.0\"?><test><\/test>",
+            "response_headers": "[]"
+        }
+    ],
+    "deleted": []
+}
