@@ -1,0 +1,10 @@
+[
+  {
+    "ID": "job.schedule.created",
+    "reference": {
+      "jobID": 7777,
+      "scheduleID": 4321
+    }
+  },
+  "7bc6e5c85d7319e52185e084627955cc331e80f2"
+]

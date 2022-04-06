@@ -5,6 +5,7 @@ namespace App\Tests;
 use App\Exceptions\ApiClientHttpException;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\ProcessSimproWebhookJobCompletedJob;
+use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
 use App\Jobs\SendJobToSimproJob;
 use App\Tests\Support\MockRiversideApiClientTrait;
 use App\Tests\Support\MockSimproApiClientTrait;
@@ -239,6 +240,7 @@ class JobTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
+        $this->assertCount(1, Queue::pushedJobs());
         $this->assertCount(1, Queue::pushedJobs()[ProcessSimproWebhookJobCompletedJob::class]);
 
         Queue::assertPushed(ProcessSimproWebhookJobCompletedJob::class, function (ProcessSimproWebhookJobCompletedJob $job) {
@@ -264,6 +266,46 @@ class JobTest extends TestCase
         Queue::assertNothingPushed();
 
         $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__job_not_exists_in_local_db__request_logs_state.json', self::$originRequestLogs);
+        $this->assertNoChanges('job_operations', self::$originJobOperations);
+    }
+
+    public function testSimproWebhookJobScheduleCreatedJobExistsInLocalDb()
+    {
+        list ($data, $signature) = $this->getJsonFixture('webhook_job.schedule.created__job_exists_in_local_db__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => $signature,
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertCount(1, Queue::pushedJobs());
+        $this->assertCount(1, Queue::pushedJobs()[ProcessSimproWebhookJobScheduleCreatedJob::class]);
+
+        Queue::assertPushed(ProcessSimproWebhookJobScheduleCreatedJob::class, function (ProcessSimproWebhookJobScheduleCreatedJob $job) {
+            $this->assertEquals(2, $job->getJobId());
+            $this->assertEquals(4321, $job->getSimproJobScheduleId());
+
+            return true;
+        });
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.schedule.created__job_exists_in_local_db__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.schedule.created__job_exists_in_local_db__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testSimproWebhookJobScheduleCreatedJobNotExistsInLocalDb()
+    {
+        list ($data, $signature) = $this->getJsonFixture('webhook_job.schedule.created__job_not_exists_in_local_db__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => $signature,
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        Queue::assertNothingPushed();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.schedule.created__job_not_exists_in_local_db__request_logs_state.json', self::$originRequestLogs);
         $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
@@ -295,5 +337,16 @@ class JobTest extends TestCase
 
         $this->assertChangesEqualsFixture('request_logs', 'webhook_job.stage.complete__no_sections__request_logs_state.json', self::$originRequestLogs);
         $this->assertChangesEqualsFixture('job_operations', 'webhook_job.stage.complete__job_operations_logs_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobScheduleCreated()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.schedule.created__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobScheduleCreatedJob(2, 4321))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.schedule.complete__no_sections__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'webhook_job.schedule.complete__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.schedule.complete__job_operations_state.json', self::$originJobOperations);
     }
 }
