@@ -41,7 +41,7 @@ class JobTest extends TestCase
         $this->assertCount(1, Queue::pushedJobs()[SendJobToSimproJob::class]);
 
         Queue::assertPushed(SendJobToSimproJob::class, function (SendJobToSimproJob $job) {
-            $this->assertEquals(3, $job->getJobId());
+            $this->assertEquals(4, $job->getJobId());
             $this->assertEqualsFixture('create_job__data_from_riverside.json', $job->getDataFromRiverside());
 
             return true;
