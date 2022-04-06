@@ -6,6 +6,7 @@ use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\ProcessSimproWebhookJobCompletedJob;
+use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
 use App\Jobs\SendJobToSimproJob;
 use App\Models\JobOperation;
 use Illuminate\Support\Arr;
@@ -110,8 +111,14 @@ class JobsFlowService
                 $this->initProcessSimproWebhookJobCompleted($simproWebhookData['reference']['jobID']);
                 break;
             case self::SIMPRO_WEBHOOK_JOB_STATUS_CHANGED:
-            case self::SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED:
                 //TODO: implement
+                break;
+            case self::SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED:
+                //TODO: payload format might not be guessed. Check format after receiving test requests.
+                $this->initProcessSimproWebhookScheduleCreated(
+                    $simproWebhookData['reference']['jobID'],
+                    $simproWebhookData['reference']['scheduleID'],
+                );
                 break;
             default:
                 throw new Exception('Unknown Simpro webhook');
@@ -185,6 +192,10 @@ class JobsFlowService
         ]);
     }
 
+    public function processSimproWebhookJobScheduleCreated(int $jobId, int $simproJobScheduleId)
+    {
+    }
+
     protected function initProcessSimproWebhookJobCompleted(int $simproJobId)
     {
         $job = $this->jobService->findBy('simpro_job_id', $simproJobId);
@@ -196,6 +207,20 @@ class JobsFlowService
             ]);
 
             dispatch(new ProcessSimproWebhookJobCompletedJob($job['id']));
+        }
+    }
+
+    protected function initProcessSimproWebhookScheduleCreated(int $simproJobId, int $simproJobScheduleId)
+    {
+        $job = $this->jobService->findBy('simpro_job_id', $simproJobId);
+
+        if (isset($job)) {
+            $this->jobOperationService->create([
+                'job_id' => $job['id'],
+                'operation' => JobOperation::OPERATION_RECEIVE_WEBHOOK_JOB_SCHEDULE_CREATED
+            ]);
+
+            dispatch(new ProcessSimproWebhookJobScheduleCreatedJob($job['id'], $simproJobScheduleId));
         }
     }
 
