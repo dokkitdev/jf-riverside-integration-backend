@@ -9,6 +9,7 @@ use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
 use App\Jobs\ProcessSimproWebhookJobStatusChangedJob;
 use App\Jobs\SendJobToSimproJob;
+use App\Models\Job;
 use App\Models\JobOperation;
 use Illuminate\Support\Arr;
 use Exception;
@@ -226,10 +227,41 @@ class JobsFlowService
     {
         $job = $this->jobService->find($jobId);
 
+        switch ($simproStatusId) {
+            case $this->simproStatusIdAbandon:
+                $this->processAbandonStatus($job);
+                break;
+            case $this->simproStatusIdNoAccess:
+                $this->processNoAccessStatus($job);
+                break;
+            default:
+                throw new Exception('Unknown Simpro status ID');
+        }
+
         $this->jobOperationService->create([
             'job_id' => $jobId,
             'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS
         ]);
+    }
+
+    protected function processAbandonStatus(Job $job)
+    {
+        if ($job['is_appointment_sent']) {
+            $this->riversideApiClient->cancelAppointment($job['order_no']);
+
+            $this->jobService->update($job['id'], [
+                'is_appointment_sent' => false
+            ]);
+        }
+
+        $this->riversideApiClient->notifyAboutAbandonStatus($job['order_no'], Carbon::now());
+    }
+
+    protected function processNoAccessStatus(Job $job)
+    {
+        $attemptsCount = $this->simproApiClient->getStatusAttemptsCount($job['simpro_job_id'], $this->simproStatusTextNoAccess);
+
+        $this->riversideApiClient->notifyAboutNoAccessStatus($job['order_no'], $attemptsCount, Carbon::now());
     }
 
     protected function initProcessSimproWebhookJobCompleted(int $simproJobId)
