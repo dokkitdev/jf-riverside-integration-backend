@@ -71,7 +71,7 @@ class SimproApiClient extends BaseApiClient
         $this->makeRequest('patch', "/sites/{$siteId}", $data, [], Response::HTTP_NO_CONTENT);
     }
 
-    public function postJob(int $siteId, array $data): void
+    public function postJob(int $siteId, array $data): int
     {
         $data['Site'] = $siteId;
         $data['Type'] = self::JOB_TYPE;
@@ -79,7 +79,9 @@ class SimproApiClient extends BaseApiClient
         $data['Customer'] = $this->customerId;
         $data['Status'] = $this->jobInitialStatusId;
 
-        $this->makeRequest('post', "/jobs/", $data, [], Response::HTTP_CREATED);
+        $response = $this->makeRequest('post', "/jobs/", $data, [], Response::HTTP_CREATED);
+
+        return $response['ID'];
     }
 
     protected function getUrl(string $action): string

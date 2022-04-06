@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\JobsService;
+use App\Services\JobsFlowService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -14,12 +14,12 @@ class NotifyRiversideAboutCreatedJobJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected string $jobOrderNo;
+    protected int $jobId;
     protected Carbon $date;
 
-    public function __construct(string $jobOrderNo, Carbon $date)
+    public function __construct(int $jobId, Carbon $date)
     {
-        $this->jobOrderNo = $jobOrderNo;
+        $this->jobId = $jobId;
         $this->date = $date;
 
         $this->onQueue('send_job_to_simpro');
@@ -27,12 +27,12 @@ class NotifyRiversideAboutCreatedJobJob implements ShouldQueue
 
     public function handle()
     {
-        app(JobsService::class)->notifyRiversideAboutCreatedJob($this->jobOrderNo, $this->date);
+        app(JobsFlowService::class)->notifyRiversideAboutCreatedJob($this->jobId, $this->date);
     }
 
-    public function getJobOrderNo(): string
+    public function getJobId(): string
     {
-        return $this->jobOrderNo;
+        return $this->jobId;
     }
 
     public function getDate(): Carbon

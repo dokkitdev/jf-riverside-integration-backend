@@ -1,6 +1,6 @@
 {
   "job": {
-    "job_no": "test_job_no",
+    "job_no": "new_job_no",
     "jobs_type_code": "SORJ",
     "short_description": "test_short_description",
     "long_description": "test_long_description",
