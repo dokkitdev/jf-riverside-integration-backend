@@ -12,6 +12,7 @@ class Job extends Model
     protected $fillable = [
         'order_no',
         'simpro_job_id',
+        'is_appointment_sent',
     ];
 
     public function operations()

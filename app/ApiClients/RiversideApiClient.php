@@ -62,6 +62,22 @@ class RiversideApiClient extends BaseApiClient
         ]);
     }
 
+    public function cancelAppointment(string $jobOrderNo)
+    {
+        $this->makeRequest('riverside_request_xml.appointment_cancel', [
+            'job_order_no' => $jobOrderNo,
+        ]);
+    }
+
+    public function sendAppointment(string $jobOrderNo, string $scheduleDate, string $scheduleStartTime)
+    {
+        $this->makeRequest('riverside_request_xml.appointment_send', [
+            'job_order_no' => $jobOrderNo,
+            'schedule_date' => $scheduleDate,
+            'schedule_start_time' => $scheduleStartTime,
+        ]);
+    }
+
     protected function getUrl(string $action): string
     {
         return $this->baseUrl;
