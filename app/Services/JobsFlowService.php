@@ -125,7 +125,6 @@ class JobsFlowService
                 );
                 break;
             case self::SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED:
-                //TODO: payload format might not be guessed. Check format after receiving test requests.
                 $this->initProcessSimproWebhookScheduleCreated(
                     $simproWebhookData['reference']['jobID'],
                     $simproWebhookData['reference']['scheduleID'],

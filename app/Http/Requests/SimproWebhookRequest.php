@@ -21,9 +21,9 @@ class SimproWebhookRequest extends Request
         return [
             'ID' => 'required|string',
             'reference' => 'required|array',
-            'reference.jobID' => 'integer', //TODO: add required_without
-            'reference.statusID' => 'integer',
-            //TODO: No documentation in Simpro site. Add remained rules after receiving corresponding requests.
+            'reference.jobID' => 'required|integer',
+            'reference.statusID' => 'required_if:ID,job.status|integer',
+            'reference.scheduleID' => 'required_if:ID,job.schedule.created|integer',
         ];
     }
 
