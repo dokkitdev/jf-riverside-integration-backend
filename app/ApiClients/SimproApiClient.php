@@ -113,6 +113,16 @@ class SimproApiClient extends BaseApiClient
         return $this->makeRequest('get', "/schedules/{$simproScheduleId}");
     }
 
+    public function getStatusAttemptsCount(int $simproJobId, string $statusText): int
+    {
+        $logEntries = $this->makeRequest('get', '/logs/jobs/', [
+            'JobID' => $simproJobId,
+            'Message' => "Job status set to {$statusText}",
+        ]);
+
+        return count($logEntries);
+    }
+
     protected function getJobSectionCostCenterWorkOrderIds(int $simproJobId, int $simproJobSectionId, int $simproJobSectionCostCenterId): array
     {
         $workOrders = $this->makeRequest('get', "/jobs/{$simproJobId}/sections/{$simproJobSectionId}/costCenters/{$simproJobSectionCostCenterId}/workOrders/", [

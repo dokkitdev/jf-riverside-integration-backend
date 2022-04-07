@@ -6,6 +6,7 @@ use App\Exceptions\ApiClientHttpException;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
+use App\Jobs\ProcessSimproWebhookJobStatusChangedJob;
 use App\Jobs\SendJobToSimproJob;
 use App\Tests\Support\MockRiversideApiClientTrait;
 use App\Tests\Support\MockSimproApiClientTrait;
@@ -309,6 +310,86 @@ class JobTest extends TestCase
         $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
+    public function testSimproWebhookJobStatusChangedStatusIdAbandon()
+    {
+        list ($data, $signature) = $this->getJsonFixture('webhook_job.status__status_id_abandon__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => $signature,
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertCount(1, Queue::pushedJobs());
+        $this->assertCount(1, Queue::pushedJobs()[ProcessSimproWebhookJobStatusChangedJob::class]);
+
+        Queue::assertPushed(ProcessSimproWebhookJobStatusChangedJob::class, function (ProcessSimproWebhookJobStatusChangedJob $job) {
+            $this->assertEquals(2, $job->getJobId());
+            $this->assertEquals(34, $job->getSimproStatusId());
+
+            return true;
+        });
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__status_id_abandon__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.status__status_id_abandon__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testSimproWebhookJobStatusChangedStatusIdNoAccess()
+    {
+        list ($data, $signature) = $this->getJsonFixture('webhook_job.status__status_id_no_access__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => $signature,
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertCount(1, Queue::pushedJobs());
+        $this->assertCount(1, Queue::pushedJobs()[ProcessSimproWebhookJobStatusChangedJob::class]);
+
+        Queue::assertPushed(ProcessSimproWebhookJobStatusChangedJob::class, function (ProcessSimproWebhookJobStatusChangedJob $job) {
+            $this->assertEquals(2, $job->getJobId());
+            $this->assertEquals(38, $job->getSimproStatusId());
+
+            return true;
+        });
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__status_id_no_access__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.status__status_id_no_access__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testSimproWebhookJobStatusChangedJobNotExistsInLocalDb()
+    {
+        list ($data, $signature) = $this->getJsonFixture('webhook_job.status__job_not_exists_in_local_db__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => $signature,
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        Queue::assertNothingPushed();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__job_not_exists_in_local_db__request_logs_state.json', self::$originRequestLogs);
+        $this->assertNoChanges('job_operations', self::$originJobOperations);
+    }
+
+    public function testSimproWebhookJobStatusChangedStatusIdSkipProcessing()
+    {
+        list ($data, $signature) = $this->getJsonFixture('webhook_job.status__status_id_skip_processing__request.json');
+
+        $response = $this->json('post', '/simpro-webhook', $data, [
+            'x-response-signature' => $signature,
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        Queue::assertNothingPushed();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__status_id_skip_processing__request_logs_state.json', self::$originRequestLogs);
+        $this->assertNoChanges('job_operations', self::$originJobOperations);
+    }
+
     public function testProcessingSimproWebhookJobCompleted()
     {
         $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.stage.complete__simpro_and_riverside_requests.json'));
@@ -348,5 +429,49 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'webhook_job.schedule.complete__no_sections__request_logs_state.json', self::$originRequestLogs);
         $this->assertChangesEqualsFixture('jobs', 'webhook_job.schedule.complete__jobs_state.json', self::$originJobs);
         $this->assertChangesEqualsFixture('job_operations', 'webhook_job.schedule.complete__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobStatusChangedStatusAbandonAppointmentNotSent()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.status__abandon__appointment_not_sent__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobStatusChangedJob(2, 34))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__abandon__appointment_not_sent__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'webhook_job.status__abandon__appointment_not_sent__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.status__abandon__appointment_not_sent__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobStatusChangedStatusAbandonAppointmentSent()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.status__abandon__appointment_sent__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobStatusChangedJob(3, 34))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__abandon__appointment_sent__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'webhook_job.status__abandon__appointment_sent__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.status__abandon__appointment_sent__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobStatusChangedStatusNoAccess()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.status__no_access__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobStatusChangedJob(2, 38))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__no_access__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'webhook_job.status__no_access__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.status__no_access__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobStatusChangedStatusNoAccessManyLogEntries()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.status__no_access__many_log_entries__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobStatusChangedJob(2, 38))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__no_access__many_log_entries__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'webhook_job.status__no_access__many_log_entries__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.status__no_access__many_log_entries__job_operations_state.json', self::$originJobOperations);
     }
 }

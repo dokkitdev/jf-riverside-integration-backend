@@ -1,0 +1,10 @@
+[
+  {
+    "ID": "job.status",
+    "reference": {
+      "jobID": 7777,
+      "statusID": 34
+    }
+  },
+  "7c0af21471fd9db20fc896e819a143d81ec9030d"
+]

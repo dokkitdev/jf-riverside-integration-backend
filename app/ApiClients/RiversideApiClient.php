@@ -78,6 +78,28 @@ class RiversideApiClient extends BaseApiClient
         ]);
     }
 
+    public function notifyAboutAbandonStatus(string $jobOrderNo, Carbon $date)
+    {
+        $this->makeRequest('riverside_request_xml.notify_about_status_abandon', [
+            'job_order_no' => $jobOrderNo,
+            'date' => $date->format(self::DATE_FORMAT),
+            'time' => $date->format(self::TIME_FORMAT),
+        ]);
+    }
+
+    public function notifyAboutNoAccessStatus(string $jobOrderNo, int $attemptsCount, Carbon $date)
+    {
+        $attemptsCount = ($attemptsCount > 3) ? 3 : $attemptsCount;
+
+        $this->makeRequest('riverside_request_xml.notify_about_status_no_access', [
+            'job_order_no' => $jobOrderNo,
+            'memo' => "No Access {$attemptsCount}",
+            'stage' => "27{$attemptsCount}",
+            'date' => $date->format(self::DATE_FORMAT),
+            'time' => $date->format(self::TIME_FORMAT),
+        ]);
+    }
+
     protected function getUrl(string $action): string
     {
         return $this->baseUrl;
