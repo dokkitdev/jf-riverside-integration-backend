@@ -7,7 +7,7 @@
         long_description="test_long_description"
         sub_location_description="test_sub_location_description"
         job_type="test_job_type"
-        Access_info="test_Access_info"
+        access_info="test_access_info"
         initial_priority="0"
     />
     <SOR

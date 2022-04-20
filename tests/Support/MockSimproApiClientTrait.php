@@ -67,7 +67,7 @@ trait MockSimproApiClientTrait
                     'OrderNo' => 'test_job_no',
                     'Name' => 'test_short_description',
                     'Description' => 'test_job_type test_long_description test_sub_location_description',
-                    'Notes' => 'test_Access_info test_element_code test_element_description',
+                    'Notes' => 'test_access_info test_element_code test_element_description',
                     'DueDate' => '2018-11-11',
                     'DueTime' => '15:11',
                     'ResponseTime' => 3,
