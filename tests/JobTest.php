@@ -69,6 +69,29 @@ class JobTest extends TestCase
         $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
+    public function testCreateCheckValidation()
+    {
+        $response = $this->xml('post', '/jobs', 'create_job__check_validation__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        $response->assertJson([
+            'message' => 'The given data was invalid.',
+            'errors' => [
+                'location.place_ref' => ['The location.place ref field is required.'],
+                'location.address1' => ['The location.address1 field is required.'],
+                'job.job_no' => ['The job.job no field is required.'],
+                'job.initial_priority' => ['The selected job.initial priority is invalid.'],
+            ]
+        ]);
+
+        Queue::assertNothingPushed();
+
+        $this->assertChangesEqualsFixture('request_logs', 'create_job__check_validation__request_logs_state.json', self::$originRequestLogs);
+        $this->assertNoChanges('jobs', self::$originJobs);
+        $this->assertNoChanges('job_operations', self::$originJobOperations);
+    }
+
     public function testSendJobToSimproNewSite()
     {
         $this->mockSendJobToSimproNewSite();
