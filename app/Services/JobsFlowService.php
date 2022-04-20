@@ -310,7 +310,7 @@ class JobsFlowService
     {
         list($responseTimeId, $dueDate, $dueTime) = $this->calculateSimproJobDatesAndPriority($dataFromRiverside['job']['initial_priority'], $now);
 
-        $typeCode = Arr::get($dataFromRiverside, 'job.jobs_type_code', '');
+        $typeCode = Arr::get($dataFromRiverside, 'job.job_type_code', '');
 
         $typeCodeId = Arr::get(
             $this->jobTypeCodesMap,
