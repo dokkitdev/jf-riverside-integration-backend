@@ -95,10 +95,11 @@ abstract class TestCase extends BaseTestCase
         return $result;
     }
 
-    protected function getDataSet(string $table, array $where = []): Collection
+    protected function getDataSet(string $table, string $orderField = 'id', array $where = []): Collection
     {
         return DB::table($table)
             ->where($where)
+            ->orderBy($orderField)
             ->get()
             ->map(function ($record) {
                 return (array) $record;
