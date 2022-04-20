@@ -17,6 +17,14 @@ use Illuminate\Support\Carbon;
 
 class JobsFlowService
 {
+    const RIVERSIDE_PRIORITIES = [
+        self::RIVERSIDE_PRIORITY_4_HRS,
+        self::RIVERSIDE_PRIORITY_12_HRS,
+        self::RIVERSIDE_PRIORITY_5_DAYS,
+        self::RIVERSIDE_PRIORITY_20_DAYS,
+        self::RIVERSIDE_PRIORITY_56_DAYS,
+    ];
+
     protected const RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP = [
         'EML' => 'Email',
         'MBL' => 'CellPhone',
@@ -88,16 +96,6 @@ class JobsFlowService
 
     public function initSendingToSimpro(array $dataFromRiverside)
     {
-        //TODO: remove this check after actual XML format is defined
-        if (
-            !Arr::has($dataFromRiverside, 'location.place_ref') ||
-            !Arr::has($dataFromRiverside, 'location.address1') ||
-            !Arr::has($dataFromRiverside, 'job.job_no') ||
-            !Arr::has($dataFromRiverside, 'job.initial_priority')
-        ) {
-            throw new Exception('Not all required fields are filled');
-        }
-
         $job = $this->jobService->create([
             'order_no' => $dataFromRiverside['job']['job_no']
         ]);
@@ -387,7 +385,6 @@ class JobsFlowService
 
     protected function calculateSimproJobDatesAndPriority(int $riversidePriority, Carbon $now): array
     {
-        //TODO: Don't forget to add request validation to accept requests with values from the map only
         $responseTimeId = self::RIVERSIDE_PRIORITY_TO_SIMPRO_RESPONSE_TIME_MAP[$riversidePriority];
 
         $dueDate = $now
