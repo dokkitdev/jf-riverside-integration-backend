@@ -49,7 +49,9 @@ Route::group(['middleware' => 'guest'], function () {
 
     Route::get('/status', ['uses' => StatusController::class . '@status']);
 
-    Route::post('/jobs', ['uses' => JobController::class . '@create']);
+    Route::group(['middleware' => 'log_request'], function () {
+        Route::post('/jobs', ['uses' => JobController::class . '@create']);
 
-    Route::post('/simpro-webhook', ['uses' => SimproController::class . '@webhook']);
+        Route::post('/simpro-webhook', ['uses' => SimproController::class . '@webhook']);
+    });
 });
