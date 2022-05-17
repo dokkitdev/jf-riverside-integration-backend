@@ -7,7 +7,7 @@
         <Request request_type="creatediaryextcont">
             <Parameters attribute="secret" attribute_value="fake_riverside_secret" />
             <Parameters attribute="reference" attribute_value="job_for_webhooks" />
-            <Parameters attribute="text" attribute_value="description_notes_1" />
+            <Parameters attribute="text" attribute_value="12345678901234567890123456789012345678901234567890123456789012345678901234567890" />
             <Parameters attribute="reference_type" attribute_value="RJ" />
             <Parameters attribute="entry_status" attribute_value="N" />
             <Parameters attribute="entry_type" attribute_value="MISC" />

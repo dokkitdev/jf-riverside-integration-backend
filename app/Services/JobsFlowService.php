@@ -188,7 +188,7 @@ class JobsFlowService
         foreach ($workOrders as $workOrder) {
             $this->riversideApiClient->sendDairyEntry(
                 $job['order_no'],
-                $workOrder['DescriptionNotes'],
+                substr(strip_tags($workOrder['DescriptionNotes']), 0, 80),
                 $workOrder['WorkOrderDate'],
                 $workOrder['DateModified']
             );
