@@ -20,14 +20,6 @@
     "address3": "test_address3",
     "post_code": "test_post_code"
   },
-  "occupants": {
-    "person_title": "test_Person_Title",
-    "person_forenames": "test_Person_Forenames",
-    "person_surname": "test_Person_Surname"
-  },
-  "contact": {
-    "contact_type": "EML",
-    "contact_details": "test_Contact_Details",
-    "priority": "3"
-  }
+  "occupants": null,
+  "contact": null
 }
