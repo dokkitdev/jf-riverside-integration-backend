@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 abstract class XmlRequest extends Request
 {
-    abstract protected function convertXmlPayloadToArray(SimpleXMLElement $element): array;
+    abstract protected function convertXmlPayloadToArray(SimpleXMLElement $xml): array;
 
     public function validateResolved()
     {
