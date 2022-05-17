@@ -9,8 +9,12 @@ class JobController extends Controller
 {
     public function create(CreateJobRequest $request, JobsFlowService $service)
     {
-        $service->initSendingToSimpro($request->all());
+        $workOrderNo = $service->initSendingToSimpro($request->all());
 
-        return response(null);
+        return response([
+            'IsSuccess' => true,
+            'WorkOrderNo' => $workOrderNo,
+            'DiagnosticMessage' => '',
+        ]);
     }
 }
