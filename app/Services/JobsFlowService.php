@@ -310,7 +310,7 @@ class JobsFlowService
 
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array
     {
-        list($responseTimeId, $dueDate, $dueTime) = $this->calculateSimproJobDatesAndPriority($dataFromRiverside['job']['initial_priority'], $now);
+        list($responseTimeId, $dueDate, $dueTime) = $this->calculateSimproJobDatesAndPriority($dataFromRiverside['job']['latest_priority'], $now);
 
         $typeCode = Arr::get($dataFromRiverside, 'job.job_type_code', '');
 
