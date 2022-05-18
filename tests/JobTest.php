@@ -38,7 +38,7 @@ class JobTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
-        $this->assertEquals('', $response->getContent());
+        $this->assertEqualsFixture('create_job__response.json', $response->json());
 
         $this->assertCount(1, Queue::pushedJobs()[SendJobToSimproJob::class]);
 

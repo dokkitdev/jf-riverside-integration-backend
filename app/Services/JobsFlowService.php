@@ -94,7 +94,7 @@ class JobsFlowService
         $this->simproStatusTextNoAccess = config('services.simpro.status.no_access_text');
     }
 
-    public function initSendingToSimpro(array $dataFromRiverside)
+    public function initSendingToSimpro(array $dataFromRiverside): string
     {
         $job = $this->jobService->create([
             'order_no' => $dataFromRiverside['job']['job_no']
@@ -106,6 +106,8 @@ class JobsFlowService
         ]);
 
         dispatch(new SendJobToSimproJob($job['id'], $dataFromRiverside));
+
+        return $dataFromRiverside['job']['job_no'];
     }
 
     public function initSimproWebhookProcessing(array $simproWebhookData)

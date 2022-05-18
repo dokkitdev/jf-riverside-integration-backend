@@ -22,18 +22,18 @@ class CreateJobRequest extends XmlRequest
 
     protected function convertXmlPayloadToArray(SimpleXMLElement $xml): array
     {
-        if (!isset($xml->Jobs->Job)) {
+        if (!isset($xml->contractor->contracts->contract->jobs->job)) {
             return [];
         }
 
-        $jobXml = $xml->Jobs->Job;
+        $jobXml = $xml->contractor->contracts->contract->jobs->job;
 
         return [
             'job' => $this->convertXmlAttributesToArray($jobXml),
-            'sor' => isset($jobXml->SORs->SOR) ? $this->convertXmlAttributesToArray($jobXml->SORs->SOR) : null,
-            'location' => isset($jobXml->Location) ? $this->convertXmlAttributesToArray($jobXml->Location) : null,
-            'occupants' => isset($jobXml->Location->Occupants->Occupant) ? $this->convertXmlAttributesToArray($jobXml->Location->Occupants->Occupant) : null,
-            'contact' => isset($jobXml->Location->Occupants->Occupant->Contacts->Contact) ? $this->convertXmlAttributesToArray($jobXml->Location->Occupants->Occupant->Contacts->Contact) : null,
+            'sor' => isset($jobXml->sors->sor) ? $this->convertXmlAttributesToArray($jobXml->sors->sor) : null,
+            'location' => isset($jobXml->location) ? $this->convertXmlAttributesToArray($jobXml->location) : null,
+            'occupants' => null,
+            'contact' => null,
         ];
     }
 }
