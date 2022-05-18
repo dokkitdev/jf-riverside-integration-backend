@@ -12,7 +12,7 @@
             "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[57],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"fb53f7d7c270b3ad7b3566e2f09193f8c77e959e\"]}",
             "response_status_code": 200,
             "response_body": "",
-            "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"],\"x-ratelimit-limit\":[60],\"x-ratelimit-remaining\":[59]}"
+            "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"]}"
         }
     ],
     "deleted": []

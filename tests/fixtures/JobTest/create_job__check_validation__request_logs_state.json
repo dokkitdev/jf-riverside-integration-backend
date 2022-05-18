@@ -12,7 +12,7 @@
             "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"text\\\/html,application\\\/xhtml+xml,application\\\/xml;q=0.9,*\\\/*;q=0.8\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"header-name\":[\"HEADER_VALUE\"],\"content-type\":[\"application\\\/x-www-form-urlencoded\"]}",
             "response_status_code": 422,
             "response_body": "{\"message\":\"The given data was invalid.\",\"errors\":{\"location.place_ref\":[\"The location.place ref field is required.\"],\"location.address1\":[\"The location.address1 field is required.\"],\"job.job_no\":[\"The job.job no field is required.\"],\"job.initial_priority\":[\"The selected job.initial priority is invalid.\"]}}",
-            "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"application\\\/json\"],\"x-ratelimit-limit\":[60],\"x-ratelimit-remaining\":[59]}"
+            "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"application\\\/json\"]}"
         }
     ],
     "deleted": []
