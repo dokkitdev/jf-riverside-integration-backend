@@ -81,7 +81,7 @@ class JobTest extends TestCase
                 'location.place_ref' => ['The location.place ref field is required.'],
                 'location.address1' => ['The location.address1 field is required.'],
                 'job.job_no' => ['The job.job no field is required.'],
-                'job.initial_priority' => ['The selected job.initial priority is invalid.'],
+                'job.latest_priority' => ['The selected job.latest priority is invalid.'],
             ]
         ]);
 

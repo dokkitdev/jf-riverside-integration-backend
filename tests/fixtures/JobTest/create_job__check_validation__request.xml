@@ -11,7 +11,7 @@
                         sub_location_description="test_sub_location_description"
                         job_type="test_job_type"
                         access_info="test_access_info"
-                        initial_priority="7"
+                        latest_priority="7"
                     >
                         <location
                             address2="test_address2"

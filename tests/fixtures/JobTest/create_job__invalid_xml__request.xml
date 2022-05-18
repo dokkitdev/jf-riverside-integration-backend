@@ -12,7 +12,7 @@
                         sub_location_description="test_sub_location_description"
                         job_type="test_job_type"
                         access_info="test_access_info"
-                        initial_priority="0"
+                        latest_priority="0"
                     >
                         <location
                             address1="test_address1"

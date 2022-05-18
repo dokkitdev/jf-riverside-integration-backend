@@ -16,7 +16,7 @@ class CreateJobRequest extends XmlRequest
             'location.place_ref' => 'required|string',
             'location.address1' => 'required|string',
             'job.job_no' => 'required|string',
-            'job.initial_priority' => "required|integer|in:{$availablePriorities}",
+            'job.latest_priority' => "required|integer|in:{$availablePriorities}",
         ];
     }
 
