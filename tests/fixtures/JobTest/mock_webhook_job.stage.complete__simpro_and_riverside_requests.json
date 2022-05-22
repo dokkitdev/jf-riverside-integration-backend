@@ -2,9 +2,9 @@
   {
     "request": {
       "type": "get",
-      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777",
       "data": {
-        "columns": "ID"
+        "display": "all"
       },
       "headers": {
         "Accept": "application/json",
@@ -14,47 +14,40 @@
     },
     "response": {
       "status_code": 200,
-      "data": [
-        {
-          "ID": 7891
-        },
-        {
-          "ID": 7892
-        },
-        {
-          "ID": 7893
-        }
-      ],
+      "data": {
+        "Sections": [
+          {
+            "ID": 7891,
+            "CostCenters": [
+              {
+                "ID": 6781
+              },
+              {
+                "ID": 6782
+              }
+            ]
+          },
+          {
+            "ID": 7892,
+            "CostCenters": [
+              {
+                "ID": 6783
+              },
+              {
+                "ID": 6784
+              }
+            ]
+          },
+          {
+            "ID": 7893,
+            "CostCenters": []
+          }
+        ]
+      },
       "headers": []
     }
   },
 
-  {
-    "request": {
-      "type": "get",
-      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7891/costCenters/",
-      "data": {
-        "columns": "ID"
-      },
-      "headers": {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": "Bearer fake_simpro_token"
-      }
-    },
-    "response": {
-      "status_code": 200,
-      "data": [
-        {
-          "ID": 6781
-        },
-        {
-          "ID": 6782
-        }
-      ],
-      "headers": []
-    }
-  },
   {
     "request": {
       "type": "get",
@@ -115,33 +108,6 @@
         "WorkOrderDate": "2001-01-01",
         "DateModified": "2001-01-01T01:01:01+01:00"
       },
-      "headers": []
-    }
-  },
-
-  {
-    "request": {
-      "type": "get",
-      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7892/costCenters/",
-      "data": {
-        "columns": "ID"
-      },
-      "headers": {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": "Bearer fake_simpro_token"
-      }
-    },
-    "response": {
-      "status_code": 200,
-      "data": [
-        {
-          "ID": 6783
-        },
-        {
-          "ID": 6784
-        }
-      ],
       "headers": []
     }
   },
@@ -217,26 +183,6 @@
     "request": {
       "type": "get",
       "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7892/costCenters/6784/workOrders/",
-      "data": {
-        "columns": "ID"
-      },
-      "headers": {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": "Bearer fake_simpro_token"
-      }
-    },
-    "response": {
-      "status_code": 200,
-      "data": [],
-      "headers": []
-    }
-  },
-
-  {
-    "request": {
-      "type": "get",
-      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7893/costCenters/",
       "data": {
         "columns": "ID"
       },
