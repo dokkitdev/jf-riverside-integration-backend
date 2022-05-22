@@ -181,9 +181,17 @@ class JobsFlowService
     {
         $job = $this->jobService->find($jobId);
 
-        $this->riversideApiClient->sendSorData($job['order_no']);
+        $simproJob = $this->simproApiClient->getJob($job['simpro_job_id']);
 
-        $workOrders = $this->simproApiClient->getWorkOrders($job['simpro_job_id']);
+        $workOrders = [];
+
+        foreach ($simproJob['Sections'] as $section) {
+            foreach ($section['CostCenters'] as $costCenter) {
+                $workOrders = array_merge($workOrders, $this->simproApiClient->getWorkOrders($job['simpro_job_id'], $section['ID'], $costCenter['ID']));
+            }
+        }
+
+        $this->riversideApiClient->sendSorData($job['order_no']);
 
         foreach ($workOrders as $workOrder) {
             $this->riversideApiClient->sendDairyEntry(
