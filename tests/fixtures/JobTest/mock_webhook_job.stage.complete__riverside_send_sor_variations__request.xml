@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<message>
+    <Header>
+        <Security username="fake_riverside_user_name" password="fake_riverside_password" />
+    </Header>
+    <Body>
+        <Request request_type="varyjobextcont">
+            <Parameters attribute="secret" attribute_value="fake_riverside_secret" />
+            <Parameters attribute="job_no" attribute_value="job_for_webhooks" />
+
+                            <Parameters attribute="elementCode_1" attribute_value="part_no_1.1.1" />
+                <Parameters attribute="qty_1" attribute_value="111" />
+                            <Parameters attribute="elementCode_2" attribute_value="part_no_1.1.2" />
+                <Parameters attribute="qty_2" attribute_value="112" />
+                            <Parameters attribute="elementCode_3" attribute_value="part_no_1.3.1" />
+                <Parameters attribute="qty_3" attribute_value="131" />
+                            <Parameters attribute="elementCode_4" attribute_value="part_no_1.3.2" />
+                <Parameters attribute="qty_4" attribute_value="132" />
+                            <Parameters attribute="elementCode_5" attribute_value="part_no_1.3.3" />
+                <Parameters attribute="qty_5" attribute_value="133" />
+                            <Parameters attribute="elementCode_6" attribute_value="part_no_4.1.1" />
+                <Parameters attribute="qty_6" attribute_value="411" />
+                            <Parameters attribute="elementCode_7" attribute_value="part_no_4.3.1" />
+                <Parameters attribute="qty_7" attribute_value="431" />
+                    </Request>
+    </Body>
+</message>

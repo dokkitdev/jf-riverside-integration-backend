@@ -385,6 +385,23 @@
     "request": {
       "type": "post",
       "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "mock_webhook_job.stage.complete__riverside_send_sor_variations__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "<?xml version=\"1.0\"?><test></test>",
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
       "data": "mock_webhook_job.stage.complete__riverside_send_dairy_entry_1__request.xml",
       "headers": {
         "Accept": "application/xml",
