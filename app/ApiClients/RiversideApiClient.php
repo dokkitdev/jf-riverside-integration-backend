@@ -38,9 +38,12 @@ class RiversideApiClient extends BaseApiClient
         ]);
     }
 
-    public function sendSorData(string $jobOrderNo)
+    public function sendSorVariations(string $jobOrderNo, array $sorElements)
     {
-        //TODO: implement after mapping is described
+        $this->makeRequest('riverside_request_xml.send_sor_variations', [
+            'job_order_no' => $jobOrderNo,
+            'sor_elements' => $sorElements
+        ]);
     }
 
     public function sendDairyEntry(string $jobOrderNo, string $descriptionNotes, string $entryDate, string $entryTime)

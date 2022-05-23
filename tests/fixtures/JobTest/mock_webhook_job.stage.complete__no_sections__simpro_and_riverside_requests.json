@@ -2,9 +2,9 @@
   {
     "request": {
       "type": "get",
-      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777",
       "data": {
-        "columns": "ID"
+        "display": "all"
       },
       "headers": {
         "Accept": "application/json",
@@ -14,7 +14,9 @@
     },
     "response": {
       "status_code": 200,
-      "data": [],
+      "data": {
+        "Sections": []
+      },
       "headers": []
     }
   },

@@ -80,6 +80,7 @@ class JobsFlowService
     protected int $simproStatusIdAbandon;
     protected int $simproStatusIdNoAccess;
     protected string $simproStatusTextNoAccess;
+    protected string $simproSorVariationsCostCenterName;
 
     public function __construct()
     {
@@ -92,6 +93,7 @@ class JobsFlowService
         $this->simproStatusIdAbandon = config('services.simpro.status.abandon_id');
         $this->simproStatusIdNoAccess = config('services.simpro.status.no_access_id');
         $this->simproStatusTextNoAccess = config('services.simpro.status.no_access_text');
+        $this->simproSorVariationsCostCenterName = config('services.simpro.sor_variations.cost_center_name');
     }
 
     public function initSendingToSimpro(array $dataFromRiverside): string
@@ -181,14 +183,36 @@ class JobsFlowService
     {
         $job = $this->jobService->find($jobId);
 
-        $this->riversideApiClient->sendSorData($job['order_no']);
+        $simproJob = $this->simproApiClient->getJob($job['simpro_job_id']);
 
-        $workOrders = $this->simproApiClient->getWorkOrders($job['simpro_job_id']);
+        $workOrders = [];
+        $sorElements = [];
+
+        foreach ($simproJob['Sections'] as $section) {
+            foreach ($section['CostCenters'] as $costCenter) {
+                if ($costCenter['Name'] === $this->simproSorVariationsCostCenterName) {
+                    foreach ($costCenter['Items']['Catalogs'] as $catalog) {
+                        if (Arr::has($catalog, 'Catalog.PartNo') && Arr::has($catalog, 'Total.Qty')) {
+                            $sorElements[] = [
+                                'element_code' => Arr::get($catalog, 'Catalog.PartNo'),
+                                'qty' => Arr::get($catalog, 'Total.Qty')
+                            ];
+                        }
+                    }
+                }
+
+                $workOrders = array_merge($workOrders, $this->simproApiClient->getWorkOrders($job['simpro_job_id'], $section['ID'], $costCenter['ID']));
+            }
+        }
+
+        if (!empty($sorElements)) {
+            $this->riversideApiClient->sendSorVariations($job['order_no'], $sorElements);
+        }
 
         foreach ($workOrders as $workOrder) {
             $this->riversideApiClient->sendDairyEntry(
                 $job['order_no'],
-                $workOrder['DescriptionNotes'],
+                substr(strip_tags($workOrder['DescriptionNotes']), 0, 80),
                 $workOrder['WorkOrderDate'],
                 $workOrder['DateModified']
             );
