@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Role;
-use RonasIT\Support\Repositories\BaseRepository;
 
 /**
  * @property  Role $model
