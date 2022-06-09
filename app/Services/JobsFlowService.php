@@ -100,7 +100,8 @@ class JobsFlowService
     {
         foreach ($jobsFromRiverside as $jobDataFromRiverside) {
             $job = $this->jobService->create([
-                'order_no' => $jobDataFromRiverside['job_no']
+                'order_no' => $jobDataFromRiverside['job_no'],
+                'request_log_id' => RequestLogService::getCurrentRequestId(),
             ]);
 
             $this->jobOperationService->create([
