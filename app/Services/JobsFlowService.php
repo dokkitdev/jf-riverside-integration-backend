@@ -96,20 +96,22 @@ class JobsFlowService
         $this->simproSorVariationsCostCenterName = config('services.simpro.sor_variations.cost_center_name');
     }
 
-    public function initSendingToSimpro(array $dataFromRiverside): string
+    public function initSendingToSimpro(array $jobsFromRiverside): array
     {
-        $job = $this->jobService->create([
-            'order_no' => $dataFromRiverside['job']['job_no']
-        ]);
+        foreach ($jobsFromRiverside as $jobDataFromRiverside) {
+            $job = $this->jobService->create([
+                'order_no' => $jobDataFromRiverside['job_no']
+            ]);
 
-        $this->jobOperationService->create([
-            'job_id' => $job['id'],
-            'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
-        ]);
+            $this->jobOperationService->create([
+                'job_id' => $job['id'],
+                'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
+            ]);
 
-        dispatch(new SendJobToSimproJob($job['id'], $dataFromRiverside));
+            dispatch(new SendJobToSimproJob($job['id'], $jobDataFromRiverside));
+        }
 
-        return $dataFromRiverside['job']['job_no'];
+        return Arr::pluck($jobsFromRiverside, 'job_no');
     }
 
     public function initSimproWebhookProcessing(array $simproWebhookData)
@@ -334,9 +336,9 @@ class JobsFlowService
 
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array
     {
-        list($responseTimeId, $dueDate, $dueTime) = $this->calculateSimproJobDatesAndPriority($dataFromRiverside['job']['latest_priority'], $now);
+        list($responseTimeId, $dueDate, $dueTime) = $this->calculateSimproJobDatesAndPriority($dataFromRiverside['latest_priority'], $now);
 
-        $typeCode = Arr::get($dataFromRiverside, 'job.job_type_code', '');
+        $typeCode = Arr::get($dataFromRiverside, 'job_type_code', '');
 
         $typeCodeId = Arr::get(
             $this->jobTypeCodesMap,
@@ -371,8 +373,8 @@ class JobsFlowService
             $simproData['Notes'] = $notes;
         }
 
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'OrderNo', 'job.job_no');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Name', 'job.short_description');
+        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'OrderNo', 'job_no');
+        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Name', 'short_description');
 
         return $simproData;
     }
@@ -380,14 +382,19 @@ class JobsFlowService
     protected function generateSimproNotes(array $dataFromRiverside)
     {
         $notes = [];
-        if (!empty($dataFromRiverside['job']['access_info'])) {
-            $notes[] = $dataFromRiverside['job']['access_info'];
+
+        if (!empty($dataFromRiverside['access_info'])) {
+            $notes[] = $dataFromRiverside['access_info'];
         }
-        if (!empty($dataFromRiverside['sor']['element_code'])) {
-            $notes[] = $dataFromRiverside['sor']['element_code'];
-        }
-        if (!empty($dataFromRiverside['sor']['element_description'])) {
-            $notes[] = $dataFromRiverside['sor']['element_description'];
+
+        foreach ($dataFromRiverside['sors'] as $sor) {
+            if (!empty($sor['element_code'])) {
+                $notes[] = $sor['element_code'];
+            }
+
+            if (!empty($sor['element_description'])) {
+                $notes[] = $sor['element_description'];
+            }
         }
 
         return empty($notes) ? null : implode(' ', $notes);
@@ -396,14 +403,14 @@ class JobsFlowService
     protected function generateSimproDescription(array $dataFromRiverside): ?string
     {
         $description = [];
-        if (!empty($dataFromRiverside['job']['job_type'])) {
-            $description[] = $dataFromRiverside['job']['job_type'];
+        if (!empty($dataFromRiverside['job_type'])) {
+            $description[] = $dataFromRiverside['job_type'];
         }
-        if (!empty($dataFromRiverside['job']['long_description'])) {
-            $description[] = $dataFromRiverside['job']['long_description'];
+        if (!empty($dataFromRiverside['long_description'])) {
+            $description[] = $dataFromRiverside['long_description'];
         }
-        if (!empty($dataFromRiverside['job']['sub_location_description'])) {
-            $description[] = $dataFromRiverside['job']['sub_location_description'];
+        if (!empty($dataFromRiverside['sub_location_description'])) {
+            $description[] = $dataFromRiverside['sub_location_description'];
         }
 
         return empty($description) ? null : implode(' ', $description);
