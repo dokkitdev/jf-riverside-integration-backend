@@ -58,6 +58,21 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('job_operations', 'create_job__job_operations_state.json', self::$originJobOperations);
     }
 
+    public function testCreateAllJobsAlreadyExist()
+    {
+        $response = $this->xml('post', '/jobs', 'create_job__all_jobs_already_exist__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertEqualsFixture('create_job__all_jobs_already_exist__response.json', $response->json());
+
+        Queue::assertNothingPushed();
+
+        $this->assertChangesEqualsFixture('request_logs', 'create_job__all_jobs_already_exist__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'create_job__all_jobs_already_exist__jobs_state.json', self::$originJobs);
+        $this->assertNoChanges('job_operations', self::$originJobOperations);
+    }
+
     public function testCreateInvalidXml()
     {
         $response = $this->xml('post', '/jobs', 'create_job__invalid_xml__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);

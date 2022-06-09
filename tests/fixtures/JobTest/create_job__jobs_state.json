@@ -1,5 +1,10 @@
 {
-    "updated": [],
+    "updated": [
+        {
+            "id": 1,
+            "updated_at": "2018-11-11 11:11:11"
+        }
+    ],
     "created": [
         {
             "id": 4,
@@ -11,7 +16,7 @@
             "request_log_id": 2
         },
         {
-            "id": 5,
+            "id": 6,
             "order_no": "new_job_no_1_1_2",
             "simpro_job_id": null,
             "created_at": "2018-11-11 11:11:11",
@@ -20,7 +25,7 @@
             "request_log_id": 2
         },
         {
-            "id": 6,
+            "id": 7,
             "order_no": "new_job_no_1_2_1",
             "simpro_job_id": null,
             "created_at": "2018-11-11 11:11:11",
@@ -29,7 +34,7 @@
             "request_log_id": 2
         },
         {
-            "id": 7,
+            "id": 8,
             "order_no": "new_job_no_1_2_2",
             "simpro_job_id": null,
             "created_at": "2018-11-11 11:11:11",
@@ -38,7 +43,7 @@
             "request_log_id": 2
         },
         {
-            "id": 8,
+            "id": 9,
             "order_no": "new_job_no_7_1_1",
             "simpro_job_id": null,
             "created_at": "2018-11-11 11:11:11",
@@ -47,7 +52,7 @@
             "request_log_id": 2
         },
         {
-            "id": 9,
+            "id": 10,
             "order_no": "new_job_no_7_1_2",
             "simpro_job_id": null,
             "created_at": "2018-11-11 11:11:11",
@@ -56,7 +61,7 @@
             "request_log_id": 2
         },
         {
-            "id": 10,
+            "id": 11,
             "order_no": "new_job_no_8_1_1",
             "simpro_job_id": null,
             "created_at": "2018-11-11 11:11:11",
