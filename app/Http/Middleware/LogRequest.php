@@ -13,14 +13,19 @@ class LogRequest
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        $requestLogService = app(RequestLogService::class);
 
-        app(RequestLogService::class)->create([
+        $requestLog = $requestLogService->create([
             'destination' => RequestLog::DESTINATION_SELF,
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'request_body' => $request->getContent(),
             'request_headers' => json_encode($request->headers->all()),
+        ]);
+
+        $response = $next($request);
+
+        $requestLogService->update($requestLog['id'], [
             'response_status_code' => $response->getStatusCode(),
             'response_body' => $response->getContent(),
             'response_headers' => json_encode(Arr::except($response->headers->all(), 'date')),
