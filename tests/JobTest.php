@@ -40,11 +40,15 @@ class JobTest extends TestCase
 
         $this->assertEqualsFixture('create_job__response.json', $response->json());
 
-        $this->assertCount(1, Queue::pushedJobs()[SendJobToSimproJob::class]);
+        $this->assertCount(7, Queue::pushedJobs()[SendJobToSimproJob::class]);
 
-        Queue::assertPushed(SendJobToSimproJob::class, function (SendJobToSimproJob $job) {
-            $this->assertEquals(4, $job->getJobId());
-            $this->assertEqualsFixture('create_job__data_from_riverside.json', $job->getDataFromRiverside());
+        $expectedQueueJobsData = $this->getJsonFixture('create_job__queue_jobs_data.json');
+
+        Queue::assertPushed(SendJobToSimproJob::class, function (SendJobToSimproJob $job) use (&$expectedQueueJobsData) {
+            $expectedData = array_shift($expectedQueueJobsData);
+
+            $this->assertEquals($expectedData['job_id'], $job->getJobId());
+            $this->assertEquals($expectedData['data_from_riverside'], $job->getDataFromRiverside());
 
             return true;
         });
@@ -75,15 +79,7 @@ class JobTest extends TestCase
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $response->assertJson([
-            'message' => 'The given data was invalid.',
-            'errors' => [
-                'location.place_ref' => ['The location.place ref field is required.'],
-                'location.address1' => ['The location.address1 field is required.'],
-                'job.job_no' => ['The job.job no field is required.'],
-                'job.latest_priority' => ['The selected job.latest priority is invalid.'],
-            ]
-        ]);
+        $this->assertEqualsFixture('create_job__check_validation__response.json', $response->json());
 
         Queue::assertNothingPushed();
 

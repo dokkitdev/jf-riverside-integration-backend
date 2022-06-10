@@ -1,18 +1,18 @@
 {
-  "job": {
-    "job_no": "test_job_no",
-    "job_type_code": "SORJ",
-    "short_description": "test_short_description",
-    "long_description": "test_long_description",
-    "sub_location_description": "test_sub_location_description",
-    "job_type": "test_job_type",
-    "access_info": "test_access_info",
-    "latest_priority": "0"
-  },
-  "sor": {
-    "element_code": "test_element_code",
-    "element_description": "test_element_description"
-  },
+  "job_no": "test_job_no",
+  "job_type_code": "SORJ",
+  "short_description": "test_short_description",
+  "long_description": "test_long_description",
+  "sub_location_description": "test_sub_location_description",
+  "job_type": "test_job_type",
+  "access_info": "test_access_info",
+  "latest_priority": "0",
+  "sors": [
+    {
+      "element_code": "test_element_code",
+      "element_description": "test_element_description"
+    }
+  ],
   "location": {
     "place_ref": "test_place_ref",
     "address1": "test_address1",

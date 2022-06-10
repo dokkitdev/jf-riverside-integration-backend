@@ -13,27 +13,49 @@ class CreateJobRequest extends XmlRequest
         $availablePriorities = implode(',', JobsFlowService::RIVERSIDE_PRIORITIES);
 
         return [
-            'location.place_ref' => 'required|string',
-            'location.address1' => 'required|string',
-            'job.job_no' => 'required|string',
-            'job.latest_priority' => "required|integer|in:{$availablePriorities}",
+            'jobs' => 'array|present|min:1',
+            'jobs.*.location.place_ref' => 'required|string',
+            'jobs.*.location.address1' => 'required|string',
+            'jobs.*.job_no' => 'required|string',
+            'jobs.*.latest_priority' => "required|integer|in:{$availablePriorities}",
         ];
     }
 
     protected function convertXmlPayloadToArray(SimpleXMLElement $xml): array
     {
-        if (!isset($xml->contractor->contracts->contract->jobs->job)) {
-            return [];
+        $result = [
+            'jobs' => []
+        ];
+
+        foreach ($xml->contractor as $contractor) {
+            if (!isset($contractor->contracts->contract)) {
+                continue;
+            }
+
+            foreach ($contractor->contracts->contract as $contract) {
+                if (!isset($contract->jobs->job)) {
+                    continue;
+                }
+
+                foreach ($contract->jobs->job as $job) {
+                    $jobData = $this->convertXmlAttributesToArray($job) + [
+                        'location' => isset($job->location) ? $this->convertXmlAttributesToArray($job->location) : null,
+                        'occupants' => null,
+                        'contact' => null,
+                        'sors' => [],
+                    ];
+
+                    if (isset($job->sors->sor)) {
+                        foreach ($job->sors->sor as $sor) {
+                            $jobData['sors'][] = $this->convertXmlAttributesToArray($sor);
+                        }
+                    }
+
+                    $result['jobs'][] = $jobData;
+                }
+            }
         }
 
-        $jobXml = $xml->contractor->contracts->contract->jobs->job;
-
-        return [
-            'job' => $this->convertXmlAttributesToArray($jobXml),
-            'sor' => isset($jobXml->sors->sor) ? $this->convertXmlAttributesToArray($jobXml->sors->sor) : null,
-            'location' => isset($jobXml->location) ? $this->convertXmlAttributesToArray($jobXml->location) : null,
-            'occupants' => null,
-            'contact' => null,
-        ];
+        return $result;
     }
 }
