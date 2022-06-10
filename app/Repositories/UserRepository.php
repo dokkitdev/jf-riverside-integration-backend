@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\User;
 use Carbon\Carbon;
-use RonasIT\Support\Repositories\BaseRepository;
 
 /**
  * @property  User $model

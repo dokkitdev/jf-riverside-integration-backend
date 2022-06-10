@@ -99,16 +99,22 @@ class JobsFlowService
     public function initSendingToSimpro(array $jobsFromRiverside): array
     {
         foreach ($jobsFromRiverside as $jobDataFromRiverside) {
-            $job = $this->jobService->create([
-                'order_no' => $jobDataFromRiverside['job_no']
-            ]);
+            $currentRequestLogId = RequestLogService::getCurrentRequestId();
 
-            $this->jobOperationService->create([
-                'job_id' => $job['id'],
-                'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
-            ]);
+            $job = $this->jobService->upsert([
+                'order_no' => $jobDataFromRiverside['job_no'],
+            ], [
+                'request_log_id' => $currentRequestLogId,
+            ], []);
 
-            dispatch(new SendJobToSimproJob($job['id'], $jobDataFromRiverside));
+            if ($job['request_log_id'] === $currentRequestLogId) {
+                $this->jobOperationService->create([
+                    'job_id' => $job['id'],
+                    'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
+                ]);
+
+                dispatch(new SendJobToSimproJob($job['id'], $jobDataFromRiverside));
+            }
         }
 
         return Arr::pluck($jobsFromRiverside, 'job_no');

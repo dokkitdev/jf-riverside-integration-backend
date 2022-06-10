@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Setting;
 use Illuminate\Pagination\LengthAwarePaginator;
-use RonasIT\Support\Repositories\BaseRepository;
 
 /**
  * @property  Setting $model

@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\JobOperation;
-use RonasIT\Support\Repositories\BaseRepository;
 
 /**
  * @property JobOperation $model

@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\RequestLog;
-use RonasIT\Support\Repositories\BaseRepository;
 
 /**
  * @property RequestLog $model
