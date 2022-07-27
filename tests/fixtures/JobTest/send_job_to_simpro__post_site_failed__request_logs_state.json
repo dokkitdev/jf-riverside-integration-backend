@@ -21,7 +21,7 @@
             "destination": "simpro",
             "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/",
             "method": "post",
-            "request_body": "{\"PrimaryContact\":{\"Email\":\"test_Contact_Details\",\"PreferredNotificationMethod\":\"Telephone\",\"GivenName\":\"test_Person_Forenames\",\"FamilyName\":\"test_Person_Surname\"},\"Name\":\"test_address1\",\"Address\":{\"Address\":\"test_address1\",\"City\":\"test_address2\",\"State\":\"test_address3\",\"PostalCode\":\"test_post_code\"},\"Customers\":[83]}",
+            "request_body": "{\"PrimaryContact\":{\"Email\":\"test_Contact_Details\",\"PreferredNotificationMethod\":\"Telephone\",\"Title\":\"test_Person_Title\",\"GivenName\":\"test_Person_Forenames\",\"FamilyName\":\"test_Person_Surname\"},\"Name\":\"test_address1\",\"Address\":{\"Address\":\"test_address1\",\"City\":\"test_address2\",\"State\":\"test_address3\",\"PostalCode\":\"test_post_code\"},\"Customers\":[83]}",
             "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
             "response_status_code": 500,
             "response_body": "{\"ID\":1234}",
