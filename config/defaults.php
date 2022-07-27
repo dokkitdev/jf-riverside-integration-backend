@@ -13,5 +13,9 @@ return [
     |
     */
 
-    'password_hash_lifetime' => env('PASSWORD_HASH_LIFETIME', 1)
+    'password_hash_lifetime' => env('PASSWORD_HASH_LIFETIME', 1),
+
+    'update_sites_info' => [
+        'time' => env('UPDATE_SITES_INFO_TIME', '00:00'),
+    ],
 ];

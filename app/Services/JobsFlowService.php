@@ -9,6 +9,7 @@ use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
 use App\Jobs\ProcessSimproWebhookJobStatusChangedJob;
 use App\Jobs\SendJobToSimproJob;
+use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
 use Illuminate\Support\Arr;
@@ -273,6 +274,22 @@ class JobsFlowService
             'job_id' => $jobId,
             'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS
         ]);
+    }
+
+    public function initUpdateSitesInfo(Carbon $dateTime)
+    {
+        $dateTime = ($dateTime->hour >= 12) ? $dateTime->clone()->addDay() : $dateTime;
+
+        $jobs = $this->jobService->getByList($this->simproApiClient->getJobIdsWithScheduleOnDate($dateTime), 'simpro_job_id');
+
+        foreach ($jobs as $job) {
+            dispatch(new UpdateSiteInfoJob($job['id']));
+        }
+    }
+
+    public function updateSiteInfo(int $jobId)
+    {
+
     }
 
     protected function processAbandonStatus(Job $job)
