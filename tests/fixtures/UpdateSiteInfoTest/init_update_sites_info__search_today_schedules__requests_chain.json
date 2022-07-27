@@ -1,0 +1,117 @@
+[
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/schedules/",
+      "data": {
+        "Date": "2018-11-11",
+        "type": "job",
+        "columns": "Reference",
+        "pageSize": 250,
+        "page": 1
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {"Reference": "999-999"},
+        {"Reference": "101-999"},
+        {"Reference": "998-999"},
+        {"Reference": "101-999"}
+      ],
+      "headers": {
+        "any": "headers"
+      }
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/schedules/",
+      "data": {
+        "Date": "2018-11-11",
+        "type": "job",
+        "columns": "Reference",
+        "pageSize": 250,
+        "page": 2
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {"Reference": "997-999"},
+        {"Reference": "996-999"},
+        {"Reference": "995-999"},
+        {"Reference": "101-999"}
+      ],
+      "headers": {
+        "any": "headers"
+      }
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/schedules/",
+      "data": {
+        "Date": "2018-11-11",
+        "type": "job",
+        "columns": "Reference",
+        "pageSize": 250,
+        "page": 3
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {"Reference": "103-999"},
+        {"Reference": "994-999"},
+        {"Reference": "104-999"},
+        {"Reference": "101-999"}
+      ],
+      "headers": {
+        "any": "headers"
+      }
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/schedules/",
+      "data": {
+        "Date": "2018-11-11",
+        "type": "job",
+        "columns": "Reference",
+        "pageSize": 250,
+        "page": 4
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [],
+      "headers": {
+        "any": "headers"
+      }
+    }
+  }
+]
