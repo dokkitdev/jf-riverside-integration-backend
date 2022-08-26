@@ -97,4 +97,26 @@ class UpdateSiteInfoTest extends TestCase
 
         Queue::assertNothingPushed();
     }
+
+    public function testUpdateSiteInfoSuccess()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('update_ste_info__success__requests_chain.json'));
+
+        (new UpdateSiteInfoJob(2))->handle();
+
+        $this->assertChangesEqualsFixture('job_operations', 'update_ste_info__success__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('request_logs', 'update_ste_info__success__request_logs_state.json', self::$originRequestLogs);
+    }
+
+    public function testUpdateSiteInfoError()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('update_ste_info__error__requests_chain.json'));
+
+        try {
+            (new UpdateSiteInfoJob(2))->handle();
+        } catch (ApiClientHttpException $exception) {}
+
+        $this->assertNoChanges('job_operations', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('request_logs', 'update_ste_info__error__request_logs_state.json', self::$originRequestLogs);
+    }
 }

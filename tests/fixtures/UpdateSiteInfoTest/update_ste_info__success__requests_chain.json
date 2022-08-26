@@ -1,0 +1,78 @@
+[
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/101",
+      "data": {
+        "display": "all"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": {
+        "Site": {
+          "ID": 1111
+        }
+      },
+      "headers": {
+        "any": "headers"
+      }
+    }
+  },
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "update_ste_info__success__riverside_getjobsextcont_request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "update_ste_info__success__riverside_getjobsextcont_response.xml",
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "patch",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/sites/1111",
+      "data": {
+        "Customers": [83],
+        "Name": "4 DUNURE COURT",
+        "Address": {
+          "Address": "4 DUNURE COURT",
+          "City": "PENNYBURN",
+          "State": "KILWINNING",
+          "PostalCode": "KA13 6SF"
+        },
+        "PrimaryContact": {
+          "Title": "Mr",
+          "GivenName": "Bugs",
+          "FamilyName": "Bunny"
+        }
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 204,
+      "data": {
+        "any": "data"
+      },
+      "headers": {
+        "any": "headers"
+      }
+    }
+  }
+]
