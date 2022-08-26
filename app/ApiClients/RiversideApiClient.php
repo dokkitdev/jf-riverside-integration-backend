@@ -29,6 +29,13 @@ class RiversideApiClient extends BaseApiClient
         $this->secret = config('services.riverside.secret');
     }
 
+    public function getJob(string $jobOrderNo): SimpleXMLElement
+    {
+        return $this->makeRequest('riverside_request_xml.get_job', [
+            'job_order_no' => $jobOrderNo,
+        ]);
+    }
+
     public function notifyAboutCreatedJob(string $jobOrderNo, Carbon $date)
     {
         $this->makeRequest('riverside_request_xml.notify_about_created_job', [
@@ -121,7 +128,7 @@ class RiversideApiClient extends BaseApiClient
         return RequestLog::DESTINATION_RIVERSIDE;
     }
 
-    protected function makeRequest(string $view, array $data = []): void
+    protected function makeRequest(string $view, array $data = []): SimpleXMLElement
     {
         $data['user_name'] = $this->userName;
         $data['password'] = $this->password;
@@ -131,17 +138,16 @@ class RiversideApiClient extends BaseApiClient
 
         $response = $this->rawRequest('post', '', $renderedXML);
 
-        $this->checkResponseXmlForErrors($response);
+        return $this->parseResponse($response);
     }
 
-    protected function checkResponseXmlForErrors(ResponseInterface $response): void
+    protected function parseResponse(ResponseInterface $response): SimpleXMLElement
     {
         $responseContent = (string) $response->getBody();
 
         try {
             $xml = new SimpleXMLElement($responseContent);
 
-            //TODO: make sure that "ErrorDetails" field not exists in successful responses
             $isFailed = isset($xml->ErrorDetails);
         } catch (Exception $exception) {
             $isFailed = true;
@@ -150,5 +156,7 @@ class RiversideApiClient extends BaseApiClient
         if ($isFailed) {
             throw new ApiClientHttpException($this->getUrl(''), $response->getStatusCode(), $responseContent);
         }
+
+        return $xml;
     }
 }

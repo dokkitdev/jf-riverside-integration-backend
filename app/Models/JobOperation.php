@@ -22,6 +22,8 @@ class JobOperation extends Model
     const OPERATION_RECEIVE_WEBHOOK_JOB_STATUS_CHANGED = 'receive_webhook_job_status_changed';
     const OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS = 'notify_riverside_about_changed_job_status';
 
+    const OPERATION_UPDATE_SITE_INFO = 'update_site_info';
+
     protected $fillable = [
         'job_id',
         'operation'

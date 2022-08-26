@@ -1,12 +1,15 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use App\Support\Traits\MigrationTrait;
 
 class JobOperationsTableAddNewOperationsToEnum extends Migration
 {
+    use MigrationTrait;
+
     public function up()
     {
-        $this->changeEnum([
+        $this->changeEnum('job_operations', 'operation', [
             'receive_data_from_riverside',
             'create_job_in_simpro',
             'notify_riverside_about_created_job',
@@ -24,7 +27,7 @@ class JobOperationsTableAddNewOperationsToEnum extends Migration
 
     public function down()
     {
-        $this->changeEnum([
+        $this->changeEnum('job_operations', 'operation',[
             'receive_data_from_riverside',
             'create_job_in_simpro',
             'notify_riverside_about_created_job',
@@ -32,16 +35,5 @@ class JobOperationsTableAddNewOperationsToEnum extends Migration
             'receive_webhook_job_complete',
             'notify_riverside_about_completed_job',
         ]);
-    }
-
-    protected function changeEnum($types)
-    {
-        DB::statement("ALTER TABLE job_operations DROP CONSTRAINT job_operations_operation_check");
-
-        $result = join(', ', array_map(function($value) {
-            return sprintf("'%s'::character varying", $value);
-        }, $types));
-
-        DB::statement("ALTER TABLE job_operations add CONSTRAINT job_operations_operation_check CHECK ((operation)::text = ANY ((ARRAY[$result])::text[]))");
     }
 }

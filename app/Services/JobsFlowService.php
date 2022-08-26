@@ -15,6 +15,7 @@ use App\Models\JobOperation;
 use Illuminate\Support\Arr;
 use Exception;
 use Illuminate\Support\Carbon;
+use SimpleXMLElement;
 
 class JobsFlowService
 {
@@ -289,7 +290,47 @@ class JobsFlowService
 
     public function updateSiteInfo(int $jobId)
     {
+        $job = $this->jobService->find($jobId);
 
+        $simproJobDetails = $this->simproApiClient->getJob($job['simpro_job_id']);
+        $riversideJobDetails = $this->riversideApiClient->getJob($job['order_no']);
+
+        $this->simproApiClient->patchSite(
+            $simproJobDetails['Site']['ID'],
+            $this->convertJobDetailsToSimproSiteData($riversideJobDetails)
+        );
+
+        $this->jobOperationService->create([
+            'job_id' => $job['id'],
+            'operation' => JobOperation::OPERATION_UPDATE_SITE_INFO,
+        ]);
+    }
+
+    protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): array
+    {
+        if (!isset($jobDetails->Jobs->Job->Location->Occupants->Occupant)) {
+            throw new Exception('Incorrect "getjobsextcont" response format');
+        }
+
+        $location = $jobDetails->Jobs->Job->Location;
+        $occupant = $jobDetails->Jobs->Job->Location->Occupants->Occupant;
+
+        //TODO: add after it is implemented on Riverside side:
+        //  PrimaryContact.Email, PrimaryContact.CellPhone, PrimaryContact.WorkPhone, PrimaryContact.PreferredNotificationMethod
+        return [
+            'Name' => $location['address1'],
+            'Address' => [
+                'Address' => $location['address1'],
+                'City' => $location['address2'],
+                'State' => $location['address3'],
+                'PostalCode' => $location['post_code'],
+            ],
+            'PrimaryContact' => [
+                'Title' => $occupant['Person_Title'],
+                'GivenName' => $occupant['Person_Forenames'],
+                'FamilyName' => $occupant['Person_Surname'],
+            ],
+        ];
     }
 
     protected function processAbandonStatus(Job $job)
