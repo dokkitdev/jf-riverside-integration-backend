@@ -462,7 +462,7 @@ class JobsFlowService
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.City', 'location.address2');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.State', 'location.address3');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.PostalCode', 'location.post_code');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.Title', 'occupants.test_Person_Title');
+        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.Title', 'occupants.person_title');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.GivenName', 'occupants.person_forenames');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.FamilyName', 'occupants.person_surname');
 

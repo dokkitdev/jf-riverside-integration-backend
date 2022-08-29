@@ -112,6 +112,7 @@ trait MockSimproApiClientTrait
                         'PreferredNotificationMethod' => 'Telephone',
                         'GivenName' => 'test_Person_Forenames',
                         'FamilyName' => 'test_Person_Surname',
+                        'Title' => 'test_Person_Title'
                     ],
                     'Address' => [
                         'Address' => 'test_address1',
@@ -173,6 +174,7 @@ trait MockSimproApiClientTrait
                         'PreferredNotificationMethod' => 'Telephone',
                         'GivenName' => 'test_Person_Forenames',
                         'FamilyName' => 'test_Person_Surname',
+                        'Title' => 'test_Person_Title'
                     ],
                     'Address' => [
                         'Address' => 'test_address1',
