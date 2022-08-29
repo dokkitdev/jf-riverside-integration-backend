@@ -5,12 +5,14 @@ namespace App\ApiClients;
 use App\Exceptions\TooManySitesFoundException;
 use App\Models\RequestLog;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
 class SimproApiClient extends BaseApiClient
 {
     protected const JOB_TYPE = 'Service';
     protected const JOB_INITIAL_STAGE = 'Pending';
+    protected const SIMPRO_API_MAX_PAGE_SIZE = 250;
 
     protected string $baseUrl;
     protected string $token;
@@ -46,6 +48,31 @@ class SimproApiClient extends BaseApiClient
         }
 
         return Arr::get(Arr::first($response), 'ID');
+    }
+
+    public function getJobIdsWithScheduleOnDate(Carbon $date): array
+    {
+        $jobIds = [];
+
+        $page = 1;
+
+        do {
+            $schedules = $this->makeRequest('get', '/schedules/', [
+                'Date' => $date->format('Y-m-d'),
+                'type' => 'job',
+                'columns' => 'Reference',
+                'pageSize' => self::SIMPRO_API_MAX_PAGE_SIZE,
+                'page' => $page,
+            ]);
+
+            foreach ($schedules as $schedule) {
+                $jobIds[] = explode('-', $schedule['Reference'])[0];
+            }
+
+            $page++;
+        } while (!empty($schedules));
+
+        return array_unique($jobIds);
     }
 
     public function postSite(string $uprn, array $data): int

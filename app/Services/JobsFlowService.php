@@ -9,11 +9,13 @@ use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
 use App\Jobs\ProcessSimproWebhookJobStatusChangedJob;
 use App\Jobs\SendJobToSimproJob;
+use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
 use Illuminate\Support\Arr;
 use Exception;
 use Illuminate\Support\Carbon;
+use SimpleXMLElement;
 
 class JobsFlowService
 {
@@ -273,6 +275,62 @@ class JobsFlowService
             'job_id' => $jobId,
             'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS
         ]);
+    }
+
+    public function initUpdateSitesInfo(Carbon $dateTime)
+    {
+        $dateTime = ($dateTime->hour >= 12) ? $dateTime->clone()->addDay() : $dateTime;
+
+        $jobs = $this->jobService->getByList($this->simproApiClient->getJobIdsWithScheduleOnDate($dateTime), 'simpro_job_id');
+
+        foreach ($jobs as $job) {
+            dispatch(new UpdateSiteInfoJob($job['id']));
+        }
+    }
+
+    public function updateSiteInfo(int $jobId)
+    {
+        $job = $this->jobService->find($jobId);
+
+        $simproJobDetails = $this->simproApiClient->getJob($job['simpro_job_id']);
+        $riversideJobDetails = $this->riversideApiClient->getJob($job['order_no']);
+
+        $this->simproApiClient->patchSite(
+            $simproJobDetails['Site']['ID'],
+            $this->convertJobDetailsToSimproSiteData($riversideJobDetails)
+        );
+
+        $this->jobOperationService->create([
+            'job_id' => $job['id'],
+            'operation' => JobOperation::OPERATION_UPDATE_SITE_INFO,
+        ]);
+    }
+
+    protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): array
+    {
+        if (!isset($jobDetails->Jobs->Job->Location->Occupants->Occupant)) {
+            throw new Exception('Incorrect "getjobsextcont" response format');
+        }
+
+        $location = $jobDetails->Jobs->Job->Location;
+        $occupant = $jobDetails->Jobs->Job->Location->Occupants->Occupant;
+
+        //TODO: add after it is implemented on Riverside side:
+        //  PrimaryContact.Email, PrimaryContact.CellPhone, PrimaryContact.WorkPhone, PrimaryContact.PreferredNotificationMethod
+        return [
+            'Name' => $location['address1'],
+            'Address' => [
+                'Address' => $location['address1'],
+                'City' => $location['address2'],
+                'State' => $location['address3'],
+                'PostalCode' => $location['post_code'],
+            ],
+            'PrimaryContact' => [
+                'Title' => $occupant['Person_Title'],
+                'GivenName' => $occupant['Person_Forenames'],
+                'FamilyName' => $occupant['Person_Surname'],
+            ],
+        ];
     }
 
     protected function processAbandonStatus(Job $job)
