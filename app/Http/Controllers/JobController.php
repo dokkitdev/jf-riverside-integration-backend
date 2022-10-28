@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Dto\CreateJobResponseDto;
 use App\Http\Requests\Jobs\CreateJobRequest;
 use App\Services\JobsFlowService;
 
@@ -9,12 +10,8 @@ class JobController extends Controller
 {
     public function create(CreateJobRequest $request, JobsFlowService $service)
     {
-        $workOrderNo = $service->initSendingToSimpro($request->get('jobs'));
+        $simproJobId = $service->initSendingToSimpro($request->all());
 
-        return response([
-            'IsSuccess' => true,
-            'WorkOrderNo' => $workOrderNo,
-            'DiagnosticMessage' => '',
-        ]);
+        return response()->json(CreateJobResponseDto::makeSuccess($simproJobId)->toArray());
     }
 }
