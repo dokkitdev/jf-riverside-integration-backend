@@ -52,8 +52,9 @@ return [
         'webhook_secret' => env('SIMPRO_WEBHOOK_SECRET', 'fake_secret'),
         'status' => [
             'abandon_id' => (int) env("SIMPRO_STATUS_ID_ABANDON", 34),
-            'no_access_id' => (int) env('SIMPRO_STATUS_IR_NO_ACCESS', 38),
+            'no_access_id' => (int) env('SIMPRO_STATUS_ID_NO_ACCESS', 38),
             'no_access_text' => env('SIMPRO_STATUS_TEXT_NO_ACCESS', 'Job - No Access'),
+            'in_progress_id' => (int) env('SIMPRO_STATUS_ID_IN_PROGRESS', 10),
         ],
         'sor_variations' => [
             'cost_center_name' => env('SIMPRO_SOR_VARIATIONS_COST_CENTER_NAME', 'Service')

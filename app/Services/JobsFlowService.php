@@ -79,6 +79,7 @@ class JobsFlowService
     protected RiversideApiClient $riversideApiClient;
     protected array $jobTypeCodesMap;
     protected int $defaultJobTypeCodeId;
+    protected int $simproStatusIdInProgress;
     protected int $simproStatusIdAbandon;
     protected int $simproStatusIdNoAccess;
     protected string $simproStatusTextNoAccess;
@@ -92,6 +93,7 @@ class JobsFlowService
         $this->riversideApiClient = app(RiversideApiClient::class);
         $this->jobTypeCodesMap = config('services.simpro.job_type_codes_map');
         $this->defaultJobTypeCodeId = config('services.simpro.default_job_type_code_id');
+        $this->simproStatusIdInProgress = config('services.simpro.status.in_progress_id');
         $this->simproStatusIdAbandon = config('services.simpro.status.abandon_id');
         $this->simproStatusIdNoAccess = config('services.simpro.status.no_access_id');
         $this->simproStatusTextNoAccess = config('services.simpro.status.no_access_text');
@@ -262,6 +264,8 @@ class JobsFlowService
     {
         $job = $this->jobService->find($jobId);
 
+        $isKnownStatus = true;
+
         switch ($simproStatusId) {
             case $this->simproStatusIdAbandon:
                 $this->processAbandonStatus($job);
@@ -269,14 +273,19 @@ class JobsFlowService
             case $this->simproStatusIdNoAccess:
                 $this->processNoAccessStatus($job);
                 break;
+            case $this->simproStatusIdInProgress:
+                $this->processStatusInProgress($job);
+                break;
             default:
-                throw new Exception('Unknown Simpro status ID');
+                $isKnownStatus = false;
         }
 
-        $this->jobOperationService->create([
-            'job_id' => $jobId,
-            'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS
-        ]);
+        if ($isKnownStatus) {
+            $this->jobOperationService->create([
+                'job_id' => $jobId,
+                'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS
+            ]);
+        }
     }
 
     public function initUpdateSitesInfo(Carbon $dateTime)
@@ -355,6 +364,11 @@ class JobsFlowService
         $this->riversideApiClient->notifyAboutNoAccessStatus($job['order_no'], $attemptsCount, Carbon::now());
     }
 
+    protected function processStatusInProgress(Job $job)
+    {
+        $this->riversideApiClient->notifyAboutInProgressStatus($job['order_no'], Carbon::now());
+    }
+
     protected function initProcessSimproWebhookJobCompleted(int $simproJobId)
     {
         $job = $this->jobService->findBy('simpro_job_id', $simproJobId);
@@ -387,10 +401,7 @@ class JobsFlowService
     {
         $job = $this->jobService->findBy('simpro_job_id', $simproJobId);
 
-        if (
-            isset($job) &&
-            (($simproStatusId === $this->simproStatusIdNoAccess) || ($simproStatusId === $this->simproStatusIdAbandon))
-        ) {
+        if (isset($job)) {
             $this->jobOperationService->create([
                 'job_id' => $job['id'],
                 'operation' => JobOperation::OPERATION_RECEIVE_WEBHOOK_JOB_STATUS_CHANGED
