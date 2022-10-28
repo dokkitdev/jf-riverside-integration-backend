@@ -32,11 +32,11 @@ abstract class BaseApiClient
 
         $requestData = ($method === 'delete') ? $headers : $data;
 
-        $this->httpRequestService
+        $response = $this->httpRequestService
             ->set('http_errors', false)
-            ->$method($url, $requestData, $headers);
-
-        $response = $this->httpRequestService->getResponse();
+            ->set('verify', false)
+            ->$method($url, $requestData, $headers)
+            ->getResponse();
 
         $this->requestLogService->create([
             'destination' => $this->getRequestDestination(),
