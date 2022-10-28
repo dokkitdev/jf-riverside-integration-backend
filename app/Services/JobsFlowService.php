@@ -8,7 +8,6 @@ use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
 use App\Jobs\ProcessSimproWebhookJobStatusChangedJob;
-use App\Jobs\SendJobToSimproJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
@@ -100,28 +99,22 @@ class JobsFlowService
         $this->simproSorVariationsCostCenterName = config('services.simpro.sor_variations.cost_center_name');
     }
 
-    public function initSendingToSimpro(array $jobsFromRiverside): array
+    public function initSendingToSimpro(array $jobDataFromRiverside): int
     {
-        foreach ($jobsFromRiverside as $jobDataFromRiverside) {
-            $currentRequestLogId = RequestLogService::getCurrentRequestId();
+        $job = $this->jobService->create([
+            'order_no' => $jobDataFromRiverside['job_no'],
+        ]);
 
-            $job = $this->jobService->upsert([
-                'order_no' => $jobDataFromRiverside['job_no'],
-            ], [
-                'request_log_id' => $currentRequestLogId,
-            ], []);
+        $this->jobOperationService->create([
+            'job_id' => $job['id'],
+            'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
+        ]);
 
-            if ($job['request_log_id'] === $currentRequestLogId) {
-                $this->jobOperationService->create([
-                    'job_id' => $job['id'],
-                    'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
-                ]);
+        $simproJobId = $this->sendJobToSimpro($job['id'], $jobDataFromRiverside);
 
-                dispatch(new SendJobToSimproJob($job['id'], $jobDataFromRiverside));
-            }
-        }
+        dispatch(new NotifyRiversideAboutCreatedJobJob($job['id'], Carbon::now()));
 
-        return Arr::pluck($jobsFromRiverside, 'job_no');
+        return $simproJobId;
     }
 
     public function initSimproWebhookProcessing(array $simproWebhookData)
@@ -149,7 +142,7 @@ class JobsFlowService
         }
     }
 
-    public function sendJobToSimpro(int $jobId, array $dataFromRiverside): void
+    public function sendJobToSimpro(int $jobId, array $dataFromRiverside): int
     {
         $now = Carbon::now();
 
@@ -176,7 +169,7 @@ class JobsFlowService
             'operation' => JobOperation::OPERATION_CREATE_JOB_IN_SIMPRO,
         ]);
 
-        dispatch(new NotifyRiversideAboutCreatedJobJob($jobId, $now));
+        return $simproJobId;
     }
 
     public function notifyRiversideAboutCreatedJob(int $jobId, Carbon $date)

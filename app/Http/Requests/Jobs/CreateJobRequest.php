@@ -5,6 +5,7 @@ namespace App\Http\Requests\Jobs;
 use App\Http\Requests\XmlRequest;
 use App\Services\JobsFlowService;
 use SimpleXMLElement;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class CreateJobRequest extends XmlRequest
 {
@@ -13,19 +14,16 @@ class CreateJobRequest extends XmlRequest
         $availablePriorities = implode(',', JobsFlowService::RIVERSIDE_PRIORITIES);
 
         return [
-            'jobs' => 'array|present|min:1',
-            'jobs.*.location.place_ref' => 'required|string',
-            'jobs.*.location.address1' => 'required|string',
-            'jobs.*.job_no' => 'required|string',
-            'jobs.*.latest_priority' => "required|integer|in:{$availablePriorities}",
+            'location.place_ref' => 'required|string',
+            'location.address1' => 'required|string',
+            'job_no' => 'required|string|unique:jobs,order_no',
+            'latest_priority' => "required|integer|in:{$availablePriorities}",
         ];
     }
 
     protected function convertXmlPayloadToArray(SimpleXMLElement $xml): array
     {
-        $result = [
-            'jobs' => []
-        ];
+        $jobs = [];
 
         foreach ($xml->contractor as $contractor) {
             if (!isset($contractor->contracts->contract)) {
@@ -51,11 +49,15 @@ class CreateJobRequest extends XmlRequest
                         }
                     }
 
-                    $result['jobs'][] = $jobData;
+                    $jobs[] = $jobData;
                 }
             }
         }
 
-        return $result;
+        if (count($jobs) !== 1) {
+            throw new ConflictHttpException('Request must contain one job');
+        }
+
+        return $jobs[0];
     }
 }
