@@ -110,6 +110,17 @@ class RiversideApiClient extends BaseApiClient
         ]);
     }
 
+    public function notifyAboutInProgressStatus(string $jobOrderNo, Carbon $date)
+    {
+        $this->makeRequest('riverside_request_xml.notify_about_in_progress_status', [
+            'job_order_no' => $jobOrderNo,
+            'memo' => 'Work In Progress',
+            'stage' => '25',
+            'date' => $date->format(self::DATE_FORMAT),
+            'time' => $date->format(self::TIME_FORMAT),
+        ]);
+    }
+
     protected function getUrl(string $action): string
     {
         return $this->baseUrl;
