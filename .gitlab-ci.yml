@@ -1,6 +1,6 @@
 stages:
   - prepare
-  - tests
+#  - tests
   - push
   - deploy
 
@@ -39,37 +39,37 @@ php_dependencies:
     - docker
     - linux
 
-tests:
-  stage: tests
-  variables:
-    DB_CONNECTION: pgsql
-    DB_HOST: pgsql_test
-    POSTGRES_USER: forge
-    POSTGRES_DB: forge
-    POSTGRES_PASSWORD: ""
-    REDIS_HOST: "redis"
-    MAIL_DRIVER: log
-    FILESYSTEM_DRIVER: testing
-    APP_ENV: testing
-    APP_DEBUG: "true"
-    APP_LOG_LEVEL: debug
-    APP_URL: http://localhost
-    DATA_COLLECTOR_KEY: jfCusomterPortal
-    FAIL_EXPORT_JSON: "true"
-  image: ronasit/php-nginx:7.4
-  services:
-    - name: ronasit/postgres:12.5
-      alias: pgsql_test
-  script:
-    - composer install
-    - php artisan jwt:secret --env=testing
-    - php artisan key:generate --env=testing
-    - php vendor/bin/phpunit --stop-on-failure ./tests/
-  after_script:
-    - cat storage/logs/*.log || true
-  tags:
-    - docker
-    - linux
+#tests:
+#  stage: tests
+#  variables:
+#    DB_CONNECTION: pgsql
+#    DB_HOST: pgsql_test
+#    POSTGRES_USER: forge
+#    POSTGRES_DB: forge
+#    POSTGRES_PASSWORD: ""
+#    REDIS_HOST: "redis"
+#    MAIL_DRIVER: log
+#    FILESYSTEM_DRIVER: testing
+#    APP_ENV: testing
+#    APP_DEBUG: "true"
+#    APP_LOG_LEVEL: debug
+#    APP_URL: http://localhost
+#    DATA_COLLECTOR_KEY: jfCusomterPortal
+#    FAIL_EXPORT_JSON: "true"
+#  image: ronasit/php-nginx:7.4
+#  services:
+#    - name: ronasit/postgres:12.5
+#      alias: pgsql_test
+#  script:
+#    - composer install
+#    - php artisan jwt:secret --env=testing
+#    - php artisan key:generate --env=testing
+#    - php vendor/bin/phpunit --stop-on-failure ./tests/
+#  after_script:
+#    - cat storage/logs/*.log || true
+#  tags:
+#    - docker
+#    - linux
 
 deploy:
   extends: .deploy_ansible
