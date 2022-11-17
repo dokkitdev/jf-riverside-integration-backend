@@ -198,8 +198,14 @@ class JobsFlowService
                 if ($costCenter['Name'] === $this->simproSorVariationsCostCenterName) {
                     foreach ($costCenter['Items']['Prebuilds'] as $prebuild) {
                         if (Arr::has($prebuild, 'Prebuild.PartNo') && Arr::has($prebuild, 'Total.Qty')) {
+                            $elementCode = Arr::get($prebuild, 'Prebuild.PartNo');
+
+                            if (empty($elementCode)) {
+                                throw new Exception('Empty Part No');
+                            }
+
                             $sorElements[] = [
-                                'element_code' => Arr::get($prebuild, 'Prebuild.PartNo'),
+                                'element_code' => $elementCode,
                                 'qty' => Arr::get($prebuild, 'Total.Qty')
                             ];
                         }
