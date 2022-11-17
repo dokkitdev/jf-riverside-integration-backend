@@ -112,7 +112,7 @@ class JobsFlowService
 
         $simproJobId = $this->sendJobToSimpro($job['id'], $jobDataFromRiverside);
 
-        dispatch(new NotifyRiversideAboutCreatedJobJob($job['id'], Carbon::now()));
+//        dispatch(new NotifyRiversideAboutCreatedJobJob($job['id'], Carbon::now()));
 
         return $simproJobId;
     }
@@ -272,9 +272,9 @@ class JobsFlowService
             case $this->simproStatusIdNoAccess:
                 $this->processNoAccessStatus($job);
                 break;
-            case $this->simproStatusIdInProgress:
-                $this->processStatusInProgress($job);
-                break;
+//            case $this->simproStatusIdInProgress:
+//                $this->processStatusInProgress($job);
+//                break;
             default:
                 $isKnownStatus = false;
         }
