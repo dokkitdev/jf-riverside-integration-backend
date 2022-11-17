@@ -489,6 +489,18 @@ class JobsFlowService
             $description[] = $dataFromRiverside['sub_location_description'];
         }
 
+        $appointmentInfo = [];
+        if (!empty($dataFromRiverside['appointment_date'])) {
+            $appointmentInfo[] = $dataFromRiverside['appointment_date'];
+        }
+        if (!empty($dataFromRiverside['appointment_slot'])) {
+            $appointmentInfo[] = $dataFromRiverside['appointment_slot'];
+        }
+
+        if (!empty($appointmentInfo)) {
+            $description[] = 'Appointment Information: ' . implode(' ', $appointmentInfo);
+        }
+
         return empty($description) ? null : implode(' ', $description);
     }
 
