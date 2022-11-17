@@ -49,14 +49,18 @@ class CreateJobRequest extends Request
     {
         $jobs = [];
 
+        if (!isset($xml->contractor)) {
+            throw new CreateJobRequestException('Unexpected format');
+        }
+
         foreach ($xml->contractor as $contractor) {
             if (!isset($contractor->contracts->contract)) {
-                continue;
+                throw new CreateJobRequestException('Unexpected format');
             }
 
             foreach ($contractor->contracts->contract as $contract) {
                 if (!isset($contract->jobs->job)) {
-                    continue;
+                    throw new CreateJobRequestException('Unexpected format');
                 }
 
                 foreach ($contract->jobs->job as $job) {
