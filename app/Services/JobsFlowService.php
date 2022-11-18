@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
+use App\Exceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\ProcessSimproWebhookJobCompletedJob;
 use App\Jobs\ProcessSimproWebhookJobScheduleCreatedJob;
@@ -247,7 +248,11 @@ class JobsFlowService
 
         $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
 
-        $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+        try {
+            $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+        } catch (RiversideApiAppointmentLoggedPreviouslyException $exception) {
+            //just ignore
+        }
 
         $this->jobService->update($jobId, [
             'is_appointment_sent' => true
