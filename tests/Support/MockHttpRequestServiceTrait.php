@@ -21,14 +21,15 @@ trait MockHttpRequestServiceTrait
         foreach ($requestsChain as $index => $call) {
             $response = $this->makeResponse($call['response']);
 
-            $requestData = is_string($call['request']['data']) && file_exists($this->getFixturePath($call['request']['data']))
-                ? $this->getFixture($call['request']['data'])
-                : $call['request']['data'];
+            $requestData = $this->makeHttpRequestData($call['request']);
 
             $mock
                 ->expects($this->at($index * 2))
                 ->method($call['request']['type'])
-                ->with($call['request']['url'], $requestData, $call['request']['headers']);
+                ->with($call['request']['url'], $requestData, $call['request']['headers'])
+                ->willReturnCallback(function () use ($mock) {
+                    return $mock;
+                });
 
             $mock
                 ->expects($this->at(($index * 2) + 1))
@@ -37,6 +38,27 @@ trait MockHttpRequestServiceTrait
         }
 
         $this->app->instance(HttpRequestService::class, $mock);
+    }
+
+    protected function makeHttpRequestData(array $request)
+    {
+        if (is_string($request['data']) && file_exists($this->getFixturePath($request['data']))) {
+            if ($this->forceExportMode) {
+                return $this->callback(function ($actualData) use ($request) {
+                    if (is_array($actualData)) {
+                        $this->exportJson($request['data'], $actualData);
+                    } else {
+                        $this->exportContent($actualData, $request['data']);
+                    }
+
+                    return true;
+                });
+            } else {
+                return $this->getFixture($request['data']);
+            }
+        }
+
+        return $request['data'];
     }
 
     protected function makeResponse(array $response): GuzzleResponse

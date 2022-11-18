@@ -23,9 +23,9 @@
                 "ID": 6781,
                 "Name": "Service",
                 "Items": {
-                  "Catalogs": [
+                  "Prebuilds": [
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "part_no_1.1.1"
                       },
                       "Total": {
@@ -33,7 +33,7 @@
                       }
                     },
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "part_no_1.1.2"
                       },
                       "Total": {
@@ -47,9 +47,9 @@
                 "ID": 6782,
                 "Name": "Wrong Name",
                 "Items": {
-                  "Catalogs": [
+                  "Prebuilds": [
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "should_not_be_extracted"
                       },
                       "Total": {
@@ -63,9 +63,9 @@
                 "ID": 6783,
                 "Name": "Service",
                 "Items": {
-                  "Catalogs": [
+                  "Prebuilds": [
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "part_no_1.3.1"
                       },
                       "Total": {
@@ -73,7 +73,7 @@
                       }
                     },
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "part_no_1.3.2"
                       },
                       "Total": {
@@ -81,7 +81,7 @@
                       }
                     },
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "part_no_1.3.3"
                       },
                       "Total": {
@@ -106,7 +106,7 @@
                 "ID": 6784,
                 "Name": "Service",
                 "Items": {
-                  "Catalogs": []
+                  "Prebuilds": []
                 }
               }
             ]
@@ -119,9 +119,9 @@
                 "ID": 6785,
                 "Name": "Service",
                 "Items": {
-                  "Catalogs": [
+                  "Prebuilds": [
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "part_no_4.1.1"
                       },
                       "Total": {
@@ -136,9 +136,9 @@
                 "ID": 6786,
                 "Name": "Wrong Name 2",
                 "Items": {
-                  "Catalogs": [
+                  "Prebuilds": [
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "should_not_be_extracted"
                       },
                       "Total": {
@@ -153,9 +153,9 @@
                 "ID": 6787,
                 "Name": "Service",
                 "Items": {
-                  "Catalogs": [
+                  "Prebuilds": [
                     {
-                      "Catalog": {
+                      "Prebuild": {
                         "PartNo": "part_no_4.3.1"
                       },
                       "Total": {
