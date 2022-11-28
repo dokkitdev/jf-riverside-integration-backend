@@ -480,28 +480,28 @@ class JobsFlowService
     {
         $description = [];
         if (!empty($dataFromRiverside['job_type'])) {
-            $description[] = $dataFromRiverside['job_type'];
+            $description[] = "Job Type: {$dataFromRiverside['job_type']}";
         }
         if (!empty($dataFromRiverside['long_description'])) {
-            $description[] = $dataFromRiverside['long_description'];
+            $description[] = "Description: {$dataFromRiverside['long_description']}";
         }
         if (!empty($dataFromRiverside['sub_location_description'])) {
-            $description[] = $dataFromRiverside['sub_location_description'];
+            $description[] = "Sub Location: {$dataFromRiverside['sub_location_description']}";
         }
 
         $appointmentInfo = [];
         if (!empty($dataFromRiverside['appointment_date'])) {
             $appointmentInfo[] = $dataFromRiverside['appointment_date'];
         }
-        if (!empty($dataFromRiverside['appointment_slot'])) {
-            $appointmentInfo[] = $dataFromRiverside['appointment_slot'];
+        if (!empty($dataFromRiverside['appointmentment_slot'])) {
+            $appointmentInfo[] = $dataFromRiverside['appointmentment_slot'];
         }
 
         if (!empty($appointmentInfo)) {
             $description[] = 'Appointment Information: ' . implode(' ', $appointmentInfo);
         }
 
-        return empty($description) ? null : implode(' ', $description);
+        return empty($description) ? null : implode(', ', $description);
     }
 
     protected function calculateSimproJobDatesAndPriority(int $riversidePriority, Carbon $now): array
