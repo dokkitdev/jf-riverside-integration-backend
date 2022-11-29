@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use App\Resources\Resource;
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Collection;
@@ -123,6 +124,10 @@ abstract class TestCase extends BaseTestCase
 
     public function assertEqualsFixture(string $fixture, $data, bool $exportMode = false): void
     {
+        if ($data instanceof Resource) {
+            $data = (array) $data;
+        }
+
         if ($exportMode || $this->forceExportMode) {
             $this->exportJson($fixture, $data);
         }
