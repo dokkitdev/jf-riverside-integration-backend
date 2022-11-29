@@ -1,10 +1,11 @@
 [
   {
     "ID": "job.status",
+    "description": "Status of Job #7777 set to \"Job : Abandon job\"",
     "reference": {
       "jobID": 0,
       "statusID": 34
     }
   },
-  "fb53f7d7c270b3ad7b3566e2f09193f8c77e959e"
+  "fcdcbb23f3d93fdcb060944b822e951e4457d519"
 ]

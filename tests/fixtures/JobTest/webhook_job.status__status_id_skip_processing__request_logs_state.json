@@ -8,8 +8,8 @@
             "destination": "self",
             "url": "http:\/\/localhost\/simpro-webhook",
             "method": "POST",
-            "request_body": "{\"ID\":\"job.status\",\"reference\":{\"jobID\":7777,\"statusID\":0}}",
-            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[59],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"06cc7f16f64367dc88a70698978ed3d3485c3d49\"]}",
+            "request_body": "{\"ID\":\"job.status\",\"description\":\"Status of Job #7777 set to \\\"Unknown Status\\\"\",\"reference\":{\"jobID\":7777,\"statusID\":0}}",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[121],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"7c7516fef908af2e482899ff0ff080f2a0c4f374\"]}",
             "response_status_code": 200,
             "response_body": "",
             "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"]}"
