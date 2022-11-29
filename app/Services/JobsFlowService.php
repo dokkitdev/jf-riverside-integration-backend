@@ -12,6 +12,7 @@ use App\Jobs\SendJobToSimproJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
+use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
 use Exception;
 use Illuminate\Support\Carbon;
@@ -69,9 +70,15 @@ class JobsFlowService
     protected const SIMPRO_DUE_DATE_FORMAT = 'Y-m-d';
     protected const SIMPRO_DUE_TIME_FORMAT = 'H:i';
 
-    protected const SIMPRO_WEBHOOK_JOB_COMPLETED = 'job.stage.complete';
-    protected const SIMPRO_WEBHOOK_JOB_STATUS_CHANGED = 'job.status';
-    protected const SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED = 'job.schedule.created';
+    protected const SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED = 'job.stage.complete';
+    protected const SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED = 'job.status';
+    protected const SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED = 'job.schedule.created';
+
+    protected const SIMPRO_WEBHOOK_TYPES = [
+        self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED,
+        self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED,
+        self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED,
+    ];
 
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
@@ -122,24 +129,32 @@ class JobsFlowService
         return Arr::pluck($jobsFromRiverside, 'job_no');
     }
 
-    public function initSimproWebhookProcessing(array $simproWebhookData)
+    public function initSimproWebhookProcessing(SimproWebhookResource $simproWebhookResource)
     {
-        $type = $simproWebhookData['ID'];
+        if (!in_array($simproWebhookResource->type, self::SIMPRO_WEBHOOK_TYPES)) {
+            return;
+        }
 
-        switch ($type) {
-            case self::SIMPRO_WEBHOOK_JOB_COMPLETED:
-                $this->initProcessSimproWebhookJobCompleted($simproWebhookData['reference']['jobID']);
+        $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
+
+        if (is_null($job)) {
+            return;
+        }
+
+        switch ($simproWebhookResource->type) {
+            case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
+                $this->initProcessSimproWebhookJobCompleted($simproWebhookResource->jobId);
                 break;
-            case self::SIMPRO_WEBHOOK_JOB_STATUS_CHANGED:
+            case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
                 $this->initProcessSimproWebhookJobStatusChange(
-                    $simproWebhookData['reference']['jobID'],
-                    $simproWebhookData['reference']['statusID'],
+                    $simproWebhookResource->jobId,
+                    $simproWebhookResource->statusId,
                 );
                 break;
-            case self::SIMPRO_WEBHOOK_JOB_SCHEDULE_CREATED:
+            case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
                 $this->initProcessSimproWebhookScheduleCreated(
-                    $simproWebhookData['reference']['jobID'],
-                    $simproWebhookData['reference']['scheduleID'],
+                    $simproWebhookResource->jobId,
+                    $simproWebhookResource->scheduleId,
                 );
                 break;
             default:
