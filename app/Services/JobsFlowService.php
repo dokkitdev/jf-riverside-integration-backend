@@ -10,6 +10,9 @@ use App\Jobs\SendJobToSimproJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
+use App\Resources\JobOperations\JobOperationCreateResource;
+use App\Resources\JobOperations\JobOperationNotifyRiversideAboutCreatedJobResource;
+use App\Resources\JobOperations\JobOperationSendToSimproResource;
 use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
 use Exception;
@@ -108,12 +111,7 @@ class JobsFlowService
             ], []);
 
             if ($job['request_log_id'] === $currentRequestLogId) {
-                $this->jobOperationService->create([
-                    'job_id' => $job['id'],
-                    'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
-                    'details' => null,
-                    'status' => JobOperation::STATUS_SUCCESS,
-                ]);
+                $this->jobOperationService->create(new JobOperationCreateResource($job['id']));
 
                 dispatch(new SendJobToSimproJob($job['id'], $jobDataFromRiverside));
             }
@@ -197,14 +195,14 @@ class JobsFlowService
             'simpro_job_id' => $simproJobId
         ]);
 
-        $this->jobOperationService->create([
-            'job_id' => $jobId,
-            'operation' => JobOperation::OPERATION_CREATE_JOB_IN_SIMPRO,
-            'details' => null,
-            'status' => JobOperation::STATUS_SUCCESS,
-        ]);
+        $this->jobOperationService->create(new JobOperationSendToSimproResource($jobId, JobOperation::STATUS_SUCCESS));
 
         dispatch(new NotifyRiversideAboutCreatedJobJob($jobId, $now));
+    }
+
+    public function failedSendingToSimpro(int $jobId)
+    {
+        $this->jobOperationService->create(new JobOperationSendToSimproResource($jobId, JobOperation::STATUS_FAIL));
     }
 
     public function notifyRiversideAboutCreatedJob(int $jobId, Carbon $date)
@@ -213,12 +211,12 @@ class JobsFlowService
 
         $this->riversideApiClient->notifyAboutCreatedJob($job['order_no'], $date);
 
-        $this->jobOperationService->create([
-            'job_id' => $jobId,
-            'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CRATED_JOB,
-            'details' => null,
-            'status' => JobOperation::STATUS_SUCCESS,
-        ]);
+        $this->jobOperationService->create(new JobOperationNotifyRiversideAboutCreatedJobResource($jobId, JobOperation::STATUS_SUCCESS));
+    }
+
+    public function failedNotifyingRiversideAboutCreatedJob(int $jobId)
+    {
+        $this->jobOperationService->create(new JobOperationNotifyRiversideAboutCreatedJobResource($jobId, JobOperation::STATUS_FAIL));
     }
 
     public function processSimproWebhookJobCompleted(Job $job)

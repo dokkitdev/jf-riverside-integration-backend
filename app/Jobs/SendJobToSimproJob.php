@@ -29,6 +29,11 @@ class SendJobToSimproJob implements ShouldQueue
         app(JobsFlowService::class)->sendJobToSimpro($this->jobId, $this->dataFromRiverside);
     }
 
+    public function failed()
+    {
+        app(JobsFlowService::class)->failedSendingToSimpro($this->jobId);
+    }
+
     public function getJobId(): int
     {
         return $this->jobId;
