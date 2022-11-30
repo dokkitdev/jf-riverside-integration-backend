@@ -13,6 +13,8 @@ class JobOperation extends Model
     const OPERATION_SEND_TO_SIMPRO = 'send_to_simpro';
     const OPERATION_NOTIFY_RIVERSIDE_ABOUT_CREATED_JOB = 'notify_riverside_about_created_job';
 
+    const OPERATION_UPDATE_SITE_INFO = 'update_site_info';
+
     const OPERATION_RECEIVE_WEBHOOK_JOB_COMPLETE = 'receive_webhook_job_complete';
     const OPERATION_NOTIFY_RIVERSIDE_ABOUT_COMPLETED_JOB = 'notify_riverside_about_completed_job';
 
@@ -21,8 +23,6 @@ class JobOperation extends Model
 
     const OPERATION_RECEIVE_WEBHOOK_JOB_STATUS_CHANGED = 'receive_webhook_job_status_changed';
     const OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS = 'notify_riverside_about_changed_job_status';
-
-    const OPERATION_UPDATE_SITE_INFO = 'update_site_info';
 
     public const STATUS_SUCCESS = 'success';
     public const STATUS_FAIL = 'fail';

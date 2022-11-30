@@ -28,6 +28,11 @@ class UpdateSiteInfoJob implements ShouldQueue, ShouldBeUnique
         app(JobsFlowService::class)->updateSiteInfo($this->jobId);
     }
 
+    public function failed()
+    {
+        app(JobsFlowService::class)->failedUpdateSiteInfo($this->jobId);
+    }
+
     public function uniqueId(): string
     {
         return (string) $this->jobId;

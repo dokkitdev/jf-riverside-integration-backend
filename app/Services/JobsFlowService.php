@@ -13,6 +13,7 @@ use App\Models\JobOperation;
 use App\Resources\JobOperations\JobOperationCreateResource;
 use App\Resources\JobOperations\JobOperationNotifyRiversideAboutCreatedJobResource;
 use App\Resources\JobOperations\JobOperationSendToSimproResource;
+use App\Resources\JobOperations\JobOperationUpdateSiteInfoResource;
 use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
 use Exception;
@@ -311,12 +312,12 @@ class JobsFlowService
             $this->convertJobDetailsToSimproSiteData($riversideJobDetails)
         );
 
-        $this->jobOperationService->create([
-            'job_id' => $job['id'],
-            'operation' => JobOperation::OPERATION_UPDATE_SITE_INFO,
-            'details' => null,
-            'status' => JobOperation::STATUS_SUCCESS,
-        ]);
+        $this->jobOperationService->create(new JobOperationUpdateSiteInfoResource($jobId, JobOperation::STATUS_SUCCESS));
+    }
+
+    public function failedUpdateSiteInfo(int $jobId)
+    {
+        $this->jobOperationService->create(new JobOperationUpdateSiteInfoResource($jobId, JobOperation::STATUS_FAIL));
     }
 
     protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): array
