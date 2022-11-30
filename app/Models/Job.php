@@ -13,7 +13,6 @@ class Job extends Model
         'order_no',
         'simpro_job_id',
         'is_appointment_sent',
-        'request_log_id',
     ];
 
     public function operations()
