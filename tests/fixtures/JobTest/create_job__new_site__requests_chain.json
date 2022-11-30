@@ -81,7 +81,7 @@
                 "Status": 7,
                 "OrderNo": "test_new_job_no",
                 "Name": "test_short_description",
-                "Description": "test_job_type test_long_description test_sub_location_description Appointment Information: test_appointment_date test_appointment_slot",
+                "Description": "Job Type: test_job_type, Description: test_long_description, Sub Location: test_sub_location_description, Appointment Information: test_appointment_date test_appointment_slot",
                 "Notes": "test_access_info test_element_code test_element_description",
                 "DueDate": "2018-11-11",
                 "DueTime": "15:11",
