@@ -4,10 +4,6 @@
         <contracts>
             <contract>
                 <jobs>
-                </jobs>
-            </contract>
-            <contract>
-                <jobs>
                     <job
                             job_no="test_new_job_no"
                             job_type_code="SORJ"
@@ -36,22 +32,6 @@
                         </sors>
                     </job>
                 </jobs>
-            </contract>
-        </contracts>
-    </contractor>
-    <contractor></contractor>
-    <contractor>
-        <contracts></contracts>
-    </contractor>
-    <contractor>
-        <contracts>
-            <contract></contract>
-        </contracts>
-    </contractor>
-    <contractor>
-        <contracts>
-            <contract>
-                <jobs></jobs>
             </contract>
         </contracts>
     </contractor>
