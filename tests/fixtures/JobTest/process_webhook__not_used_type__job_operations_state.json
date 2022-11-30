@@ -1,0 +1,15 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 2,
+            "operation": "handle_webhook",
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "job_id": 2,
+            "details": "{\"webhook_type\":\"not.used.type\",\"webhook_description\":\"Not Used Type\",\"skip_reason\":\"not_used_type\"}",
+            "status": "skip"
+        }
+    ],
+    "deleted": []
+}

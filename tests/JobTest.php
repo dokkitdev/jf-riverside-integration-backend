@@ -425,16 +425,10 @@ class JobTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
-        $this->assertCount(1, Queue::pushedJobs());
-
-        Queue::assertPushed(ProcessSimproWebhookJob::class, function (ProcessSimproWebhookJob $job) {
-            $this->assertEqualsFixture('webhook_job.status__unknown_status__queue_job_data.json', $job->getSimproWebhookResource());
-
-            return true;
-        });
+        Queue::assertNothingPushed();
 
         $this->assertChangesEqualsFixture('request_logs', 'webhook_job.status__unknown_status__request_logs_state.json', self::$originRequestLogs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.status__unknown_status__job_operations_state.json', self::$originJobOperations);
     }
 
     public function testProcessingSimproWebhookJobCompleted()
@@ -552,5 +546,27 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.status__no_access__many_log_entries__request_logs_state.json', self::$originRequestLogs);
         $this->assertChangesEqualsFixture('jobs', 'process_webhook_job.status__no_access__many_log_entries__jobs_state.json', self::$originJobs);
         $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.status__no_access__many_log_entries__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobStatusChangedNotUsedStatus()
+    {
+        $webhookData = $this->getJsonFixture('process_webhook_job.status__not_used_status__webhook_data.json');
+        $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
+        (new ProcessSimproWebhookJob($webhookResource))->handle();
+
+        $this->assertNoChanges('request_logs', self::$originRequestLogs);
+        $this->assertNoChanges('jobs', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.status__not_used_status__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookNotUsedType()
+    {
+        $webhookData = $this->getJsonFixture('process_webhook__not_used_type__webhook_data.json');
+        $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
+        (new ProcessSimproWebhookJob($webhookResource))->handle();
+
+        $this->assertNoChanges('request_logs', self::$originRequestLogs);
+        $this->assertNoChanges('jobs', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'process_webhook__not_used_type__job_operations_state.json', self::$originJobOperations);
     }
 }
