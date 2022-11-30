@@ -28,6 +28,11 @@ class ProcessSimproWebhookJob implements ShouldQueue
         app(JobsFlowService::class)->processSimproWebhook($this->simproWebhookResource);
     }
 
+    public function failed()
+    {
+        app(JobsFlowService::class)->failedProcessingSimproWebhook($this->simproWebhookResource);
+    }
+
     public function getSimproWebhookResource(): SimproWebhookResource
     {
         return $this->simproWebhookResource;

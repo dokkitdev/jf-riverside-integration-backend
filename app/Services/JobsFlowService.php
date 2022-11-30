@@ -11,7 +11,10 @@ use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
 use App\Resources\JobOperations\JobOperationCreateResource;
+use App\Resources\JobOperations\JobOperationHandleWebhookFailResource;
+use App\Resources\JobOperations\JobOperationHandleWebhookSuccessResource;
 use App\Resources\JobOperations\JobOperationNotifyRiversideAboutCreatedJobResource;
+use App\Resources\JobOperations\JobOperationRegisterWebhookResource;
 use App\Resources\JobOperations\JobOperationSendToSimproResource;
 use App\Resources\JobOperations\JobOperationUpdateSiteInfoResource;
 use App\Resources\SimproApi\SimproWebhookResource;
@@ -85,6 +88,9 @@ class JobsFlowService
     protected const SIMPRO_JOB_STATUS_ABANDON = 'abandon';
     protected const SIMPRO_JOB_STATUS_NO_ACCESS = 'no_access';
 
+    protected const WEBHOOK_SKIP_REASON_NOT_USED_TYPE = 'not_used_type';
+    protected const WEBHOOK_SKIP_REASON_NOT_USED_STATUS = 'not_used_status';
+
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
     protected SimproApiClient $simproApiClient;
@@ -133,45 +139,49 @@ class JobsFlowService
             return;
         }
 
-        dispatch(new ProcessSimproWebhookJob($simproWebhookResource));
+        if (($simproWebhookResource->type === self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED) && !in_array($simproWebhookResource->statusId, $this->simproConfig['status_ids'])) {
+            $this->jobOperationService->create(new JobOperationRegisterWebhookResource($job['id'], $simproWebhookResource, self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS));
+        } else {
+            $this->jobOperationService->create(new JobOperationRegisterWebhookResource($job['id'], $simproWebhookResource));
+
+            dispatch(new ProcessSimproWebhookJob($simproWebhookResource));
+        }
     }
 
     public function processSimproWebhook(SimproWebhookResource $simproWebhookResource)
     {
         $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
+        $skipReason = null;
+
         switch ($simproWebhookResource->type) {
             case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
                 $this->processSimproWebhookJobCompleted($job);
-
-                $operation = JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_COMPLETED_JOB;
                 break;
             case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
                 $status = array_search($simproWebhookResource->statusId, $this->simproConfig['status_ids']);
 
                 if ($status === false) {
-                    return;
+                    $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS;
+                } else {
+                    $this->processSimproWebhookJobStatusChanged($job, $status);
                 }
-
-                $this->processSimproWebhookJobStatusChanged($job, $status);
-
-                $operation = JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CHANGED_JOB_STATUS;
                 break;
             case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
                 $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
-
-                $operation = JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CREATED_SCHEDULE;
                 break;
             default:
-                throw new Exception('Unknown Simpro webhook');
+                $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
         }
 
-        $this->jobOperationService->create([
-            'job_id' => $job['id'],
-            'operation' => $operation,
-            'details' => null,
-            'status' => JobOperation::STATUS_SUCCESS,
-        ]);
+        $this->jobOperationService->create(new JobOperationHandleWebhookSuccessResource($job['id'], $simproWebhookResource, $skipReason));
+    }
+
+    public function failedProcessingSimproWebhook(SimproWebhookResource $simproWebhookResource)
+    {
+        $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
+
+        $this->jobOperationService->create(new JobOperationHandleWebhookFailResource($job['id'], $simproWebhookResource));
     }
 
     public function sendJobToSimpro(int $jobId, array $dataFromRiverside): void
