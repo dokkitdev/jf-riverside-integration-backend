@@ -188,6 +188,13 @@ class JobTest extends TestCase
         Queue::assertNothingPushed();
     }
 
+    public function testSendJobToSimproFailed()
+    {
+        (new SendJobToSimproJob(1, []))->failed();
+
+        $this->assertChangesEqualsFixture('job_operations', 'send_job_to_simpro__failed__job_operations_state.json', self::$originJobOperations);
+    }
+
     public function testNotifyRiversideAboutCreatedJob()
     {
         $this->mockNotifyRiversideAboutCreatedJob(
@@ -233,6 +240,13 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__error_in_response_body__request_logs_state.json', self::$originRequestLogs);
         $this->assertNoChanges('jobs', self::$originJobs);
         $this->assertNoChanges('job_operations', self::$originJobOperations);
+    }
+
+    public function testNotifyRiversideAboutCreatedJobFailed()
+    {
+        (new NotifyRiversideAboutCreatedJobJob(1, Carbon::now()))->failed();
+
+        $this->assertChangesEqualsFixture('job_operations', 'notify_riverside_about_created_job__failed__job_operations_state.json', self::$originJobOperations);
     }
 
     public function testSimproWebhookIncorrectSignature()
