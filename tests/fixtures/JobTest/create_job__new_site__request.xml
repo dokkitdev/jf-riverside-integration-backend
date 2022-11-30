@@ -17,6 +17,8 @@
                             job_type="test_job_type"
                             access_info="test_access_info"
                             latest_priority="0"
+                            appointment_date="test_appointment_date"
+                            appointmentment_slot="test_appointment_slot"
                     >
                         <location
                                 address1="test_address1"
