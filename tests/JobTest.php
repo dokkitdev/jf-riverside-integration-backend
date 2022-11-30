@@ -342,6 +342,18 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.stage.complete__no_sections__job_operations_logs_state.json', self::$originJobOperations);
     }
 
+    public function testProcessingSimproWebhookJobCompletedEmptyPartNo()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.stage.complete__empty_part_no__requests_chain.json'));
+
+        $webhookData = $this->getJsonFixture('process_webhook_job.stage.complete__empty_part_no__webhook_data.json');
+        $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
+        (new ProcessSimproWebhookJob($webhookResource))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.stage.complete__empty_part_no__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.stage.complete__empty_part_no__job_operations_logs_state.json', self::$originJobOperations);
+    }
+
     public function testProcessingSimproWebhookJobScheduleCreatedAppointmentSent()
     {
         DB::table('jobs')->where('id', 2)->update(['is_appointment_sent' => true]);

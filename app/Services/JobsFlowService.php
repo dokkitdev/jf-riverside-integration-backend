@@ -88,6 +88,7 @@ class JobsFlowService
 
     protected const WEBHOOK_SKIP_REASON_NOT_USED_TYPE = 'not_used_type';
     protected const WEBHOOK_SKIP_REASON_NOT_USED_STATUS = 'not_used_status';
+    protected const WEBHOOK_SKIP_REASON_EMPTY_PART_NO = 'empty_part_no';
 
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
@@ -150,23 +151,16 @@ class JobsFlowService
     {
         $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
-        $skipReason = null;
-
         switch ($simproWebhookResource->type) {
             case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
-                $this->processSimproWebhookJobCompleted($job);
+                $skipReason = $this->processSimproWebhookJobCompleted($job);
                 break;
             case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
-                $status = array_search($simproWebhookResource->statusId, $this->simproConfig['status_ids']);
-
-                if ($status === false) {
-                    $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS;
-                } else {
-                    $this->processSimproWebhookJobStatusChanged($job, $status);
-                }
+                $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
                 break;
             case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
                 $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
+                $skipReason = null;
                 break;
             default:
                 $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
@@ -182,7 +176,7 @@ class JobsFlowService
         $this->jobOperationService->create(new JobOperationHandleWebhookFailResource($job['id'], $simproWebhookResource));
     }
 
-    public function processSimproWebhookJobCompleted(Job $job)
+    public function processSimproWebhookJobCompleted(Job $job): ?string
     {
         $simproJob = $this->simproApiClient->getJob($job['simpro_job_id']);
 
@@ -194,8 +188,14 @@ class JobsFlowService
                 if ($costCenter['Name'] === $this->simproConfig['sor_variations']['cost_center_name']) {
                     foreach ($costCenter['Items']['Prebuilds'] as $prebuild) {
                         if (Arr::has($prebuild, 'Prebuild.PartNo') && Arr::has($prebuild, 'Total.Qty')) {
+                            $elementCode = Arr::get($prebuild, 'Prebuild.PartNo');
+
+                            if (empty($elementCode)) {
+                                return self::WEBHOOK_SKIP_REASON_EMPTY_PART_NO;
+                            }
+
                             $sorElements[] = [
-                                'element_code' => Arr::get($prebuild, 'Prebuild.PartNo'),
+                                'element_code' => $elementCode,
                                 'qty' => Arr::get($prebuild, 'Total.Qty')
                             ];
                         }
@@ -220,6 +220,8 @@ class JobsFlowService
         }
 
         $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], Carbon::now());
+
+        return null;
     }
 
     public function processSimproWebhookJobScheduleCreated(Job $job, int $simproJobScheduleId)
@@ -237,8 +239,12 @@ class JobsFlowService
         ]);
     }
 
-    public function processSimproWebhookJobStatusChanged(Job $job, string $status)
+    public function processSimproWebhookJobStatusChanged(Job $job, int $simproStatusId): ?string
     {
+        $status = array_search($simproStatusId, $this->simproConfig['status_ids']);
+
+        $skipReason = null;
+
         switch ($status) {
             case self::SIMPRO_JOB_STATUS_ABANDON:
                 $this->processAbandonStatus($job);
@@ -247,8 +253,10 @@ class JobsFlowService
                 $this->processNoAccessStatus($job);
                 break;
             default:
-                //do nothing
+                $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS;
         }
+
+        return $skipReason;
     }
 
     public function initUpdateSitesInfo(Carbon $dateTime)
