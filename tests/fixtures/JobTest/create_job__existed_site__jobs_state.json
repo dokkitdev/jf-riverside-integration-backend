@@ -2,13 +2,13 @@
     "updated": [],
     "created": [
         {
-            "id": 2,
-            "operation": "create",
+            "id": 4,
+            "order_no": "test_new_job_no",
+            "simpro_job_id": "9999",
             "created_at": "2018-11-11 11:11:11",
             "updated_at": "2018-11-11 11:11:11",
-            "job_id": 1,
-            "details": null,
-            "status": "success"
+            "is_appointment_sent": false,
+            "request_log_id": null
         }
     ],
     "deleted": []

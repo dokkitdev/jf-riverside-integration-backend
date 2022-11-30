@@ -1,23 +1,5 @@
 {
-    "message": "The given data was invalid.",
-    "errors": {
-        "jobs.0.location.place_ref": [
-            "The jobs.0.location.place_ref field is required."
-        ],
-        "jobs.1.location.address1": [
-            "The jobs.1.location.address1 field is required."
-        ],
-        "jobs.2.location.address1": [
-            "The jobs.2.location.address1 field is required."
-        ],
-        "jobs.2.location.place_ref": [
-            "The jobs.2.location.place_ref field is required."
-        ],
-        "jobs.3.job_no": [
-            "The jobs.3.job_no field is required."
-        ],
-        "jobs.4.latest_priority": [
-            "The jobs.4.latest_priority field is required."
-        ]
-    }
+    "IsSuccess": false,
+    "WorkOrderNo": "",
+    "DiagnosticMessage": "{\"location.place_ref\":[\"The location.place ref field is required.\"],\"location.address1\":[\"The location.address1 field is required.\"],\"job_no\":[\"The job no has already been taken.\"],\"latest_priority\":[\"The latest priority must be an integer.\",\"The selected latest priority is invalid.\"]}"
 }
