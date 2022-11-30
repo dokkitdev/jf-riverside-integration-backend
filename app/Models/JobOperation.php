@@ -10,8 +10,6 @@ class JobOperation extends Model
     use ModelTrait;
 
     const OPERATION_CREATE = 'create';
-    const OPERATION_SEND_TO_SIMPRO = 'send_to_simpro';
-    const OPERATION_NOTIFY_RIVERSIDE_ABOUT_CREATED_JOB = 'notify_riverside_about_created_job';
 
     const OPERATION_UPDATE_SITE_INFO = 'update_site_info';
 

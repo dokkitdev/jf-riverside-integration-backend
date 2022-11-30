@@ -4,23 +4,21 @@ namespace App\Services;
 
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
-use App\Jobs\NotifyRiversideAboutCreatedJobJob;
+use App\Exceptions\CreateJobRequestException;
 use App\Jobs\ProcessSimproWebhookJob;
-use App\Jobs\SendJobToSimproJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
 use App\Resources\JobOperations\JobOperationCreateResource;
 use App\Resources\JobOperations\JobOperationHandleWebhookFailResource;
 use App\Resources\JobOperations\JobOperationHandleWebhookSuccessResource;
-use App\Resources\JobOperations\JobOperationNotifyRiversideAboutCreatedJobResource;
 use App\Resources\JobOperations\JobOperationRegisterWebhookResource;
-use App\Resources\JobOperations\JobOperationSendToSimproResource;
 use App\Resources\JobOperations\JobOperationUpdateSiteInfoResource;
 use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
 use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use SimpleXMLElement;
 
 class JobsFlowService
@@ -106,25 +104,25 @@ class JobsFlowService
         $this->simproConfig = config('services.simpro');
     }
 
-    public function initSendingToSimpro(array $jobsFromRiverside): array
+    public function createJob(array $jobDataFromRiverside): int
     {
-        foreach ($jobsFromRiverside as $jobDataFromRiverside) {
-            $currentRequestLogId = RequestLogService::getCurrentRequestId();
-
-            $job = $this->jobService->upsert([
+        return DB::transaction(function () use ($jobDataFromRiverside) {
+            $job = $this->jobService->create([
                 'order_no' => $jobDataFromRiverside['job_no'],
-            ], [
-                'request_log_id' => $currentRequestLogId,
-            ], []);
+            ]);
 
-            if ($job['request_log_id'] === $currentRequestLogId) {
-                $this->jobOperationService->create(new JobOperationCreateResource($job['id']));
+            try {
+                $simproJobId = $this->sendJobToSimpro($job['id'], $jobDataFromRiverside);
+            } catch (Exception $exception) {
+                report($exception);
 
-                dispatch(new SendJobToSimproJob($job['id'], $jobDataFromRiverside));
+                throw new CreateJobRequestException('Failed sending to Simpro');
             }
-        }
 
-        return Arr::pluck($jobsFromRiverside, 'job_no');
+            $this->jobOperationService->create(new JobOperationCreateResource($job['id']));
+
+            return $simproJobId;
+        });
     }
 
     public function initSimproWebhookProcessing(SimproWebhookResource $simproWebhookResource)
@@ -182,52 +180,6 @@ class JobsFlowService
         $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
         $this->jobOperationService->create(new JobOperationHandleWebhookFailResource($job['id'], $simproWebhookResource));
-    }
-
-    public function sendJobToSimpro(int $jobId, array $dataFromRiverside): void
-    {
-        $now = Carbon::now();
-
-        $siteUprn = $dataFromRiverside['location']['place_ref'];
-        $siteData = $this->convertDataFromRiversideToSimproSiteData($dataFromRiverside);
-        $jobData = $this->convertDataFromRiversideToSimproJobData($dataFromRiverside, $now);
-
-        $siteId = $this->simproApiClient->findSiteIdByUprn($siteUprn);
-
-        if (isset($siteId)) {
-            $this->simproApiClient->patchSite($siteId, $siteData);
-        } else {
-            $siteId = $this->simproApiClient->postSite($siteUprn, $siteData);
-        }
-
-        $simproJobId = $this->simproApiClient->postJob($siteId, $jobData);
-
-        $this->jobService->update($jobId, [
-            'simpro_job_id' => $simproJobId
-        ]);
-
-        $this->jobOperationService->create(new JobOperationSendToSimproResource($jobId, JobOperation::STATUS_SUCCESS));
-
-        dispatch(new NotifyRiversideAboutCreatedJobJob($jobId, $now));
-    }
-
-    public function failedSendingToSimpro(int $jobId)
-    {
-        $this->jobOperationService->create(new JobOperationSendToSimproResource($jobId, JobOperation::STATUS_FAIL));
-    }
-
-    public function notifyRiversideAboutCreatedJob(int $jobId, Carbon $date)
-    {
-        $job = $this->jobService->find($jobId);
-
-        $this->riversideApiClient->notifyAboutCreatedJob($job['order_no'], $date);
-
-        $this->jobOperationService->create(new JobOperationNotifyRiversideAboutCreatedJobResource($jobId, JobOperation::STATUS_SUCCESS));
-    }
-
-    public function failedNotifyingRiversideAboutCreatedJob(int $jobId)
-    {
-        $this->jobOperationService->create(new JobOperationNotifyRiversideAboutCreatedJobResource($jobId, JobOperation::STATUS_FAIL));
     }
 
     public function processSimproWebhookJobCompleted(Job $job)
@@ -328,6 +280,31 @@ class JobsFlowService
     public function failedUpdateSiteInfo(int $jobId)
     {
         $this->jobOperationService->create(new JobOperationUpdateSiteInfoResource($jobId, JobOperation::STATUS_FAIL));
+    }
+
+    protected function sendJobToSimpro(int $jobId, array $dataFromRiverside): int
+    {
+        $now = Carbon::now();
+
+        $siteUprn = $dataFromRiverside['location']['place_ref'];
+        $siteData = $this->convertDataFromRiversideToSimproSiteData($dataFromRiverside);
+        $jobData = $this->convertDataFromRiversideToSimproJobData($dataFromRiverside, $now);
+
+        $siteId = $this->simproApiClient->findSiteIdByUprn($siteUprn);
+
+        if (isset($siteId)) {
+            $this->simproApiClient->patchSite($siteId, $siteData);
+        } else {
+            $siteId = $this->simproApiClient->postSite($siteUprn, $siteData);
+        }
+
+        $simproJobId = $this->simproApiClient->postJob($siteId, $jobData);
+
+        $this->jobService->update($jobId, [
+            'simpro_job_id' => $simproJobId
+        ]);
+
+        return $simproJobId;
     }
 
     protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): array
