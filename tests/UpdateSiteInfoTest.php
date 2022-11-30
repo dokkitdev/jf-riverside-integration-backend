@@ -112,11 +112,15 @@ class UpdateSiteInfoTest extends TestCase
     {
         $this->mockHttpRequestService($this->getJsonFixture('update_ste_info__error__requests_chain.json'));
 
-        try {
-            (new UpdateSiteInfoJob(2))->handle();
-        } catch (ApiClientHttpException $exception) {}
+        $job = new UpdateSiteInfoJob(2);
 
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
+        try {
+            $job->handle();
+        } catch (ApiClientHttpException $exception) {
+            $job->failed();
+        }
+
+        $this->assertChangesEqualsFixture('job_operations', 'update_ste_info__error__job_operations_state.json', self::$originJobOperations);
         $this->assertChangesEqualsFixture('request_logs', 'update_ste_info__error__request_logs_state.json', self::$originRequestLogs);
     }
 }
