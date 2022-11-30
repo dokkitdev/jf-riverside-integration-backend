@@ -111,6 +111,8 @@ class JobsFlowService
                 $this->jobOperationService->create([
                     'job_id' => $job['id'],
                     'operation' => JobOperation::OPERATION_RECEIVE_DATA_FROM_RIVERSIDE,
+                    'details' => null,
+                    'status' => JobOperation::STATUS_SUCCESS,
                 ]);
 
                 dispatch(new SendJobToSimproJob($job['id'], $jobDataFromRiverside));
@@ -168,6 +170,8 @@ class JobsFlowService
         $this->jobOperationService->create([
             'job_id' => $job['id'],
             'operation' => $operation,
+            'details' => null,
+            'status' => JobOperation::STATUS_SUCCESS,
         ]);
     }
 
@@ -196,6 +200,8 @@ class JobsFlowService
         $this->jobOperationService->create([
             'job_id' => $jobId,
             'operation' => JobOperation::OPERATION_CREATE_JOB_IN_SIMPRO,
+            'details' => null,
+            'status' => JobOperation::STATUS_SUCCESS,
         ]);
 
         dispatch(new NotifyRiversideAboutCreatedJobJob($jobId, $now));
@@ -210,6 +216,8 @@ class JobsFlowService
         $this->jobOperationService->create([
             'job_id' => $jobId,
             'operation' => JobOperation::OPERATION_NOTIFY_RIVERSIDE_ABOUT_CRATED_JOB,
+            'details' => null,
+            'status' => JobOperation::STATUS_SUCCESS,
         ]);
     }
 
@@ -308,6 +316,8 @@ class JobsFlowService
         $this->jobOperationService->create([
             'job_id' => $job['id'],
             'operation' => JobOperation::OPERATION_UPDATE_SITE_INFO,
+            'details' => null,
+            'status' => JobOperation::STATUS_SUCCESS,
         ]);
     }
 

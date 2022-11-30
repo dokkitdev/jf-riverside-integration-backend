@@ -24,9 +24,15 @@ class JobOperation extends Model
 
     const OPERATION_UPDATE_SITE_INFO = 'update_site_info';
 
+    public const STATUS_SUCCESS = 'success';
+    public const STATUS_FAIL = 'fail';
+    public const STATUS_SKIP = 'skip';
+
     protected $fillable = [
         'job_id',
-        'operation'
+        'operation',
+        'details',
+        'status',
     ];
 
     public function job()
