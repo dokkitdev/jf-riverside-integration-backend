@@ -6,7 +6,9 @@
             "operation": "notify_riverside_about_changed_job_status",
             "created_at": "2018-11-11 11:11:11",
             "updated_at": "2018-11-11 11:11:11",
-            "job_id": 3
+            "job_id": 3,
+            "details": null,
+            "status": "success"
         }
     ],
     "deleted": []

@@ -6,7 +6,9 @@
             "operation": "update_site_info",
             "created_at": "2018-11-11 11:11:11",
             "updated_at": "2018-11-11 11:11:11",
-            "job_id": 2
+            "job_id": 2,
+            "details": null,
+            "status": "success"
         }
     ],
     "deleted": []
