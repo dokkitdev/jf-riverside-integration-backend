@@ -5,6 +5,7 @@ namespace App\Services;
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Exceptions\CreateJobRequestException;
+use App\Exceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Jobs\ProcessSimproWebhookJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
@@ -89,6 +90,7 @@ class JobsFlowService
     protected const WEBHOOK_SKIP_REASON_NOT_USED_TYPE = 'not_used_type';
     protected const WEBHOOK_SKIP_REASON_NOT_USED_STATUS = 'not_used_status';
     protected const WEBHOOK_SKIP_REASON_EMPTY_PART_NO = 'empty_part_no';
+    protected const WEBHOOK_SKIP_RIVERSIDE_ALREADY_HAS_APPOINTMENT = 'riverside_already_has_appointment';
 
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
@@ -159,8 +161,7 @@ class JobsFlowService
                 $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
                 break;
             case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
-                $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
-                $skipReason = null;
+                $skipReason = $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
                 break;
             default:
                 $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
@@ -224,7 +225,7 @@ class JobsFlowService
         return null;
     }
 
-    public function processSimproWebhookJobScheduleCreated(Job $job, int $simproJobScheduleId)
+    public function processSimproWebhookJobScheduleCreated(Job $job, int $simproJobScheduleId): ?string
     {
         if ($job['is_appointment_sent']) {
             $this->riversideApiClient->cancelAppointment($job['order_no']);
@@ -232,11 +233,18 @@ class JobsFlowService
 
         $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
 
-        $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+        try {
+            $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+            $skipReason = null;
+        } catch (RiversideApiAppointmentLoggedPreviouslyException $exception) {
+            $skipReason = self::WEBHOOK_SKIP_RIVERSIDE_ALREADY_HAS_APPOINTMENT;
+        }
 
         $this->jobService->update($job['id'], [
             'is_appointment_sent' => true
         ]);
+
+        return $skipReason;
     }
 
     public function processSimproWebhookJobStatusChanged(Job $job, int $simproStatusId): ?string

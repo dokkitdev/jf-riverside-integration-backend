@@ -383,6 +383,19 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.schedule.created__appointment_not_sent__job_operations_state.json', self::$originJobOperations);
     }
 
+    public function testProcessingSimproWebhookJobScheduleCreatedRiversideAlreadyHasAppointment()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.schedule.created__riverside_already_has_appointment__requests_chain.json'));
+
+        $webhookData = $this->getJsonFixture('process_webhook_job.schedule.created__riverside_already_has_appointment__webhook_data.json');
+        $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
+        (new ProcessSimproWebhookJob($webhookResource))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.schedule.created__riverside_already_has_appointment__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'process_webhook_job.schedule.created__riverside_already_has_appointment__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.schedule.created__riverside_already_has_appointment__job_operations_state.json', self::$originJobOperations);
+    }
+
     public function testProcessingSimproWebhookJobStatusChangedStatusAbandonAppointmentNotSent()
     {
         $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.status__abandon__appointment_not_sent__requests_chain.json'));
