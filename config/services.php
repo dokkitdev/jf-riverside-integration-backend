@@ -57,7 +57,8 @@ return [
         'no_access_status_text' => env('SIMPRO_STATUS_TEXT_NO_ACCESS', 'Job - No Access'),
         'sor_variations' => [
             'cost_center_name' => env('SIMPRO_SOR_VARIATIONS_COST_CENTER_NAME', 'Service')
-        ]
+        ],
+        "riverside_priority_to_simpro_response_time_map" => json_decode(env('RIVERSIDE_PRIORITY_TO_SIMPRO_RESPONSE_TIME_MAP', '{"0":3,"1":12,"2":9,"3":24,"5":22}'), true),
     ],
 
     'riverside' => [

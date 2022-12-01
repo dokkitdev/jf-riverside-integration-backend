@@ -50,14 +50,6 @@ class JobsFlowService
     protected const RIVERSIDE_PRIORITY_20_DAYS = 3;
     protected const RIVERSIDE_PRIORITY_56_DAYS = 5;
 
-    protected const RIVERSIDE_PRIORITY_TO_SIMPRO_RESPONSE_TIME_MAP = [
-        self::RIVERSIDE_PRIORITY_4_HRS => 3,
-        self::RIVERSIDE_PRIORITY_12_HRS => 12,
-        self::RIVERSIDE_PRIORITY_5_DAYS => 9,
-        self::RIVERSIDE_PRIORITY_20_DAYS => 24,
-        self::RIVERSIDE_PRIORITY_56_DAYS => 22,
-    ];
-
     protected const RIVERSIDE_PRIORITY_DAYS_COUNT = [
         self::RIVERSIDE_PRIORITY_4_HRS => 0,
         self::RIVERSIDE_PRIORITY_12_HRS => 0,
@@ -466,7 +458,7 @@ class JobsFlowService
 
     protected function calculateSimproJobDatesAndPriority(int $riversidePriority, Carbon $now): array
     {
-        $responseTimeId = self::RIVERSIDE_PRIORITY_TO_SIMPRO_RESPONSE_TIME_MAP[$riversidePriority];
+        $responseTimeId = $this->simproConfig['riverside_priority_to_simpro_response_time_map'][$riversidePriority];
 
         $dueDate = $now
             ->clone()
