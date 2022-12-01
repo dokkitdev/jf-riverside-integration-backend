@@ -4,10 +4,6 @@
         <contracts>
             <contract>
                 <jobs>
-                </jobs>
-            </contract>
-            <contract>
-                <jobs>
                     <job
                             job_no="test_new_job_no"
                             job_type_code="SORJ"
@@ -17,6 +13,8 @@
                             job_type="test_job_type"
                             access_info="test_access_info"
                             latest_priority="0"
+                            appointment_date="test_appointment_date"
+                            appointmentment_slot="test_appointment_slot"
                     >
                         <location
                                 address1="test_address1"
@@ -34,22 +32,6 @@
                         </sors>
                     </job>
                 </jobs>
-            </contract>
-        </contracts>
-    </contractor>
-    <contractor></contractor>
-    <contractor>
-        <contracts></contracts>
-    </contractor>
-    <contractor>
-        <contracts>
-            <contract></contract>
-        </contracts>
-    </contractor>
-    <contractor>
-        <contracts>
-            <contract>
-                <jobs></jobs>
             </contract>
         </contracts>
     </contractor>

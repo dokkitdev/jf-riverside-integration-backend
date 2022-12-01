@@ -3,8 +3,10 @@
 namespace App\ApiClients;
 
 use App\Exceptions\ApiClientHttpException;
+use App\Exceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Models\RequestLog;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Psr\Http\Message\ResponseInterface;
 use SimpleXMLElement;
 use Exception;
@@ -135,6 +137,10 @@ class RiversideApiClient extends BaseApiClient
     protected function parseResponse(ResponseInterface $response): SimpleXMLElement
     {
         $responseContent = (string) $response->getBody();
+
+        if (Str::contains(strtolower($responseContent), 'already has an appointment logged')) {
+            throw new RiversideApiAppointmentLoggedPreviouslyException();
+        }
 
         try {
             $xml = new SimpleXMLElement($responseContent);

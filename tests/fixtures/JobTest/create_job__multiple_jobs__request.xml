@@ -62,20 +62,4 @@
             </contract>
         </contracts>
     </contractor>
-    <contractor></contractor>
-    <contractor>
-        <contracts></contracts>
-    </contractor>
-    <contractor>
-        <contracts>
-            <contract></contract>
-        </contracts>
-    </contractor>
-    <contractor>
-        <contracts>
-            <contract>
-                <jobs></jobs>
-            </contract>
-        </contracts>
-    </contractor>
 </root>

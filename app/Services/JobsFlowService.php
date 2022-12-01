@@ -5,6 +5,7 @@ namespace App\Services;
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Exceptions\CreateJobRequestException;
+use App\Exceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Jobs\ProcessSimproWebhookJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
@@ -88,6 +89,8 @@ class JobsFlowService
 
     protected const WEBHOOK_SKIP_REASON_NOT_USED_TYPE = 'not_used_type';
     protected const WEBHOOK_SKIP_REASON_NOT_USED_STATUS = 'not_used_status';
+    protected const WEBHOOK_SKIP_REASON_EMPTY_PART_NO = 'empty_part_no';
+    protected const WEBHOOK_SKIP_RIVERSIDE_ALREADY_HAS_APPOINTMENT = 'riverside_already_has_appointment';
 
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
@@ -150,23 +153,15 @@ class JobsFlowService
     {
         $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
-        $skipReason = null;
-
         switch ($simproWebhookResource->type) {
             case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
-                $this->processSimproWebhookJobCompleted($job);
+                $skipReason = $this->processSimproWebhookJobCompleted($job);
                 break;
             case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
-                $status = array_search($simproWebhookResource->statusId, $this->simproConfig['status_ids']);
-
-                if ($status === false) {
-                    $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS;
-                } else {
-                    $this->processSimproWebhookJobStatusChanged($job, $status);
-                }
+                $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
                 break;
             case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
-                $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
+                $skipReason = $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
                 break;
             default:
                 $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
@@ -182,7 +177,7 @@ class JobsFlowService
         $this->jobOperationService->create(new JobOperationHandleWebhookFailResource($job['id'], $simproWebhookResource));
     }
 
-    public function processSimproWebhookJobCompleted(Job $job)
+    public function processSimproWebhookJobCompleted(Job $job): ?string
     {
         $simproJob = $this->simproApiClient->getJob($job['simpro_job_id']);
 
@@ -194,8 +189,14 @@ class JobsFlowService
                 if ($costCenter['Name'] === $this->simproConfig['sor_variations']['cost_center_name']) {
                     foreach ($costCenter['Items']['Prebuilds'] as $prebuild) {
                         if (Arr::has($prebuild, 'Prebuild.PartNo') && Arr::has($prebuild, 'Total.Qty')) {
+                            $elementCode = Arr::get($prebuild, 'Prebuild.PartNo');
+
+                            if (empty($elementCode)) {
+                                return self::WEBHOOK_SKIP_REASON_EMPTY_PART_NO;
+                            }
+
                             $sorElements[] = [
-                                'element_code' => Arr::get($prebuild, 'Prebuild.PartNo'),
+                                'element_code' => $elementCode,
                                 'qty' => Arr::get($prebuild, 'Total.Qty')
                             ];
                         }
@@ -220,9 +221,11 @@ class JobsFlowService
         }
 
         $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], Carbon::now());
+
+        return null;
     }
 
-    public function processSimproWebhookJobScheduleCreated(Job $job, int $simproJobScheduleId)
+    public function processSimproWebhookJobScheduleCreated(Job $job, int $simproJobScheduleId): ?string
     {
         if ($job['is_appointment_sent']) {
             $this->riversideApiClient->cancelAppointment($job['order_no']);
@@ -230,15 +233,26 @@ class JobsFlowService
 
         $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
 
-        $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+        try {
+            $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+            $skipReason = null;
+        } catch (RiversideApiAppointmentLoggedPreviouslyException $exception) {
+            $skipReason = self::WEBHOOK_SKIP_RIVERSIDE_ALREADY_HAS_APPOINTMENT;
+        }
 
         $this->jobService->update($job['id'], [
             'is_appointment_sent' => true
         ]);
+
+        return $skipReason;
     }
 
-    public function processSimproWebhookJobStatusChanged(Job $job, string $status)
+    public function processSimproWebhookJobStatusChanged(Job $job, int $simproStatusId): ?string
     {
+        $status = array_search($simproStatusId, $this->simproConfig['status_ids']);
+
+        $skipReason = null;
+
         switch ($status) {
             case self::SIMPRO_JOB_STATUS_ABANDON:
                 $this->processAbandonStatus($job);
@@ -247,8 +261,10 @@ class JobsFlowService
                 $this->processNoAccessStatus($job);
                 break;
             default:
-                //do nothing
+                $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS;
         }
+
+        return $skipReason;
     }
 
     public function initUpdateSitesInfo(Carbon $dateTime)
@@ -424,16 +440,28 @@ class JobsFlowService
     {
         $description = [];
         if (!empty($dataFromRiverside['job_type'])) {
-            $description[] = $dataFromRiverside['job_type'];
+            $description[] = "Job Type: {$dataFromRiverside['job_type']}";
         }
         if (!empty($dataFromRiverside['long_description'])) {
-            $description[] = $dataFromRiverside['long_description'];
+            $description[] = "Description: {$dataFromRiverside['long_description']}";
         }
         if (!empty($dataFromRiverside['sub_location_description'])) {
-            $description[] = $dataFromRiverside['sub_location_description'];
+            $description[] = "Sub Location: {$dataFromRiverside['sub_location_description']}";
         }
 
-        return empty($description) ? null : implode(' ', $description);
+        $appointmentInfo = [];
+        if (!empty($dataFromRiverside['appointment_date'])) {
+            $appointmentInfo[] = $dataFromRiverside['appointment_date'];
+        }
+        if (!empty($dataFromRiverside['appointmentment_slot'])) {
+            $appointmentInfo[] = $dataFromRiverside['appointmentment_slot'];
+        }
+
+        if (!empty($appointmentInfo)) {
+            $description[] = 'Appointment Information: ' . implode(' ', $appointmentInfo);
+        }
+
+        return empty($description) ? null : implode(', ', $description);
     }
 
     protected function calculateSimproJobDatesAndPriority(int $riversidePriority, Carbon $now): array
