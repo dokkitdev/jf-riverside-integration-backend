@@ -28,7 +28,7 @@ ssl: true
 # config for worker in supervisor
 supervisor_programs:
   - name: "worker"
-    command: php {{ remote_path }}/artisan queue:work --daemon --sleep=30 --delay=60 --tries=3 --queue=send_job_to_simpro
+    command: php {{ remote_path }}/artisan queue:work --daemon --sleep=30 --delay=60 --tries=3 --queue=temporarily_disabled
     state: present
     configuration: |
       process_name=%(program_name)s_%(process_num)02d

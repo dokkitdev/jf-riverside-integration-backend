@@ -201,11 +201,11 @@ class JobsFlowService
         foreach ($simproJob['Sections'] as $section) {
             foreach ($section['CostCenters'] as $costCenter) {
                 if ($costCenter['Name'] === $this->simproSorVariationsCostCenterName) {
-                    foreach ($costCenter['Items']['Catalogs'] as $catalog) {
-                        if (Arr::has($catalog, 'Catalog.PartNo') && Arr::has($catalog, 'Total.Qty')) {
+                    foreach ($costCenter['Items']['Prebuilds'] as $prebuild) {
+                        if (Arr::has($prebuild, 'Prebuild.PartNo') && Arr::has($prebuild, 'Total.Qty')) {
                             $sorElements[] = [
-                                'element_code' => Arr::get($catalog, 'Catalog.PartNo'),
-                                'qty' => Arr::get($catalog, 'Total.Qty')
+                                'element_code' => Arr::get($prebuild, 'Prebuild.PartNo'),
+                                'qty' => Arr::get($prebuild, 'Total.Qty')
                             ];
                         }
                     }
@@ -240,7 +240,9 @@ class JobsFlowService
     {
         $job = $this->jobService->find($jobId);
 
-        $this->riversideApiClient->cancelAppointment($job['order_no']);
+        if ($job['is_appointment_sent']) {
+            $this->riversideApiClient->cancelAppointment($job['order_no']);
+        }
 
         $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
 

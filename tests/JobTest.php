@@ -12,6 +12,7 @@ use App\Tests\Support\MockRiversideApiClientTrait;
 use App\Tests\Support\MockSimproApiClientTrait;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -454,15 +455,29 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('job_operations', 'webhook_job.stage.complete__job_operations_logs_state.json', self::$originJobOperations);
     }
 
-    public function testProcessingSimproWebhookJobScheduleCreated()
+    public function testProcessingSimproWebhookJobScheduleCreatedAppointmentSent()
     {
+        DB::table('jobs')->where('id', 2)->update(['is_appointment_sent' => true]);
+        $originJobs = $this->getDataSet('jobs');
+
         $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.schedule.created__simpro_and_riverside_requests.json'));
 
         (new ProcessSimproWebhookJobScheduleCreatedJob(2, 4321))->handle();
 
-        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.schedule.complete__no_sections__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'webhook_job.schedule.complete__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.schedule.complete__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.schedule.created__appointment_sent__request_logs_state.json', self::$originRequestLogs);
+        $this->assertNoChanges('jobs', $originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.schedule.created__appointment_sent__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testProcessingSimproWebhookJobScheduleCreatedAppointmentNotSent()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('mock_webhook_job.schedule.created__appointment_not_sent__simpro_and_riverside_requests.json'));
+
+        (new ProcessSimproWebhookJobScheduleCreatedJob(2, 4321))->handle();
+
+        $this->assertChangesEqualsFixture('request_logs', 'webhook_job.schedule.created__appointment_not_sent__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'webhook_job.schedule.created__appointment_not_sent__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'webhook_job.schedule.created__appointment_not_sent__job_operations_state.json', self::$originJobOperations);
     }
 
     public function testProcessingSimproWebhookJobStatusChangedStatusAbandonAppointmentNotSent()
