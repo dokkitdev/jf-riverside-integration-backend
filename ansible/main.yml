@@ -109,12 +109,39 @@ nginx_vhosts:
           rewrite  ^/metabase/(.*)  /$1 break;
           proxy_set_header   Host $host;
       }
+  - listen: "80"
+    server_name: "jfriversideintegration.co.uk"
+    # server_name_redirect: "www.example.com"
+    root: "{{ remote_path }}/public"
+    index: "index.php index.html index.htm"
+    filename: "jfriversideintegration.co.uk.conf"
+    extra_parameters: |
+      location / {
+          try_files $uri $uri/ /index.php?$query_string;
+      }
+      location ~ \.php$ {
+          fastcgi_pass unix:/var/run/php/php{{ php_version }}-fpm.sock;
+          fastcgi_index index.php;
+          fastcgi_read_timeout 300;
+          fastcgi_buffers 16 16k;
+          fastcgi_buffer_size 32k;
+          fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+          include fastcgi_params;
+      }
+      location /metabase/ {
+          proxy_pass http://localhost:3000;
+          rewrite  ^/metabase/(.*)  /$1 break;
+          proxy_set_header   Host $host;
+      }
 tls_mail: apetrosyan@ronasit.com
 remote_path: "/var/www/{{ app_name }}"
 app_key:
 app_host:
 app_name:
 environment_app:
+domains:
+  - "{{ app_host }}"
+  - "jfriversideintegration.co.uk"
 
 # Environment variables where each key-value pair will be stored in .env file dynamically.
 env:
