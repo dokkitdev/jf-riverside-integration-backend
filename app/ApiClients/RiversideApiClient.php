@@ -36,15 +36,6 @@ class RiversideApiClient extends BaseApiClient
         ]);
     }
 
-    public function notifyAboutCreatedJob(string $jobOrderNo, Carbon $date)
-    {
-        $this->makeRequest('riverside_request_xml.notify_about_created_job', [
-            'job_order_no' => $jobOrderNo,
-            'date' => $date->format(self::DATE_FORMAT),
-            'time' => $date->format(self::TIME_FORMAT),
-        ]);
-    }
-
     public function sendSorVariations(string $jobOrderNo, array $sorElements)
     {
         $this->makeRequest('riverside_request_xml.send_sor_variations', [

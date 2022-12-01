@@ -2,30 +2,52 @@
 
 namespace App\Http\Requests\Jobs;
 
-use App\Http\Requests\XmlRequest;
+use App\Exceptions\CreateJobRequestException;
+use App\Http\Requests\Request;
 use App\Services\JobsFlowService;
+use Illuminate\Validation\ValidationException;
 use SimpleXMLElement;
+use Exception;
 
-class CreateJobRequest extends XmlRequest
+class CreateJobRequest extends Request
 {
     public function rules(): array
     {
         $availablePriorities = implode(',', JobsFlowService::RIVERSIDE_PRIORITIES);
 
         return [
-            'jobs' => 'array|present|min:1',
-            'jobs.*.location.place_ref' => 'required|string',
-            'jobs.*.location.address1' => 'required|string',
-            'jobs.*.job_no' => 'required|string',
-            'jobs.*.latest_priority' => "required|integer|in:{$availablePriorities}",
+            'location.place_ref' => 'required|string',
+            'location.address1' => 'required|string',
+            'job_no' => 'required|string|unique:jobs,order_no',
+            'latest_priority' => "required|integer|in:{$availablePriorities}",
         ];
+    }
+
+    public function validateResolved()
+    {
+        try {
+            $this->parseXmlPayload();
+
+            parent::validateResolved();
+        } catch (ValidationException $exception) {
+            throw new CreateJobRequestException(json_encode($exception->errors()));
+        }
+    }
+
+    protected function parseXmlPayload()
+    {
+        try {
+            $xml = new SimpleXMLElement($this->getContent());
+        } catch (Exception $exception) {
+            throw new CreateJobRequestException("Can't parse XML payload");
+        }
+
+        $this->replace($this->convertXmlPayloadToArray($xml));
     }
 
     protected function convertXmlPayloadToArray(SimpleXMLElement $xml): array
     {
-        $result = [
-            'jobs' => []
-        ];
+        $jobs = [];
 
         foreach ($xml->contractor as $contractor) {
             if (!isset($contractor->contracts->contract)) {
@@ -39,11 +61,11 @@ class CreateJobRequest extends XmlRequest
 
                 foreach ($contract->jobs->job as $job) {
                     $jobData = $this->convertXmlAttributesToArray($job) + [
-                        'location' => isset($job->location) ? $this->convertXmlAttributesToArray($job->location) : null,
-                        'occupants' => null,
-                        'contact' => null,
-                        'sors' => [],
-                    ];
+                            'location' => isset($job->location) ? $this->convertXmlAttributesToArray($job->location) : null,
+                            'occupants' => null,
+                            'contact' => null,
+                            'sors' => [],
+                        ];
 
                     if (isset($job->sors->sor)) {
                         foreach ($job->sors->sor as $sor) {
@@ -51,9 +73,24 @@ class CreateJobRequest extends XmlRequest
                         }
                     }
 
-                    $result['jobs'][] = $jobData;
+                    $jobs[] = $jobData;
                 }
             }
+        }
+
+        if (count($jobs) !== 1) {
+            throw new CreateJobRequestException('Request must contain one job');
+        }
+
+        return $jobs[0];
+    }
+
+    protected function convertXmlAttributesToArray(SimpleXMLElement $xml): array
+    {
+        $result = [];
+
+        foreach ($xml->attributes() as $attribute => $value) {
+            $result[strtolower($attribute)] = (string) $value;
         }
 
         return $result;

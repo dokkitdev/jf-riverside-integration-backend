@@ -2,14 +2,10 @@
 
 namespace App\Tests;
 
-use App\Exceptions\ApiClientHttpException;
-use App\Jobs\NotifyRiversideAboutCreatedJobJob;
 use App\Jobs\ProcessSimproWebhookJob;
-use App\Jobs\SendJobToSimproJob;
 use App\Resources\SimproApi\SimproWebhookResource;
 use App\Tests\Support\MockRiversideApiClientTrait;
 use App\Tests\Support\MockSimproApiClientTrait;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -32,44 +28,52 @@ class JobTest extends TestCase
         self::$originJobOperations = self::$originJobOperations ?? $this->getDataSet('job_operations');
     }
 
-    public function testCreate()
+    public function testCreateWithNewSite()
     {
-        $response = $this->xml('post', '/jobs', 'create_job__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
+        $this->mockHttpRequestService($this->getJsonFixture('create_job__new_site__requests_chain.json'));
+
+        $response = $this->xml('post', '/jobs', 'create_job__new_site__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
 
         $response->assertStatus(Response::HTTP_OK);
 
-        $this->assertEqualsFixture('create_job__response.json', $response->json());
-
-        $this->assertCount(7, Queue::pushedJobs()[SendJobToSimproJob::class]);
-
-        $expectedQueueJobsData = $this->getJsonFixture('create_job__queue_jobs_data.json');
-
-        Queue::assertPushed(SendJobToSimproJob::class, function (SendJobToSimproJob $job) use (&$expectedQueueJobsData) {
-            $expectedData = array_shift($expectedQueueJobsData);
-
-            $this->assertEquals($expectedData['job_id'], $job->getJobId());
-            $this->assertEquals($expectedData['data_from_riverside'], $job->getDataFromRiverside());
-
-            return true;
-        });
-
-        $this->assertChangesEqualsFixture('request_logs', 'create_job__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'create_job__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'create_job__job_operations_state.json', self::$originJobOperations);
-    }
-
-    public function testCreateAllJobsAlreadyExist()
-    {
-        $response = $this->xml('post', '/jobs', 'create_job__all_jobs_already_exist__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
-
-        $response->assertStatus(Response::HTTP_OK);
-
-        $this->assertEqualsFixture('create_job__all_jobs_already_exist__response.json', $response->json());
+        $this->assertEqualsFixture('create_job__new_site__response.json', $response->json());
 
         Queue::assertNothingPushed();
 
-        $this->assertChangesEqualsFixture('request_logs', 'create_job__all_jobs_already_exist__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'create_job__all_jobs_already_exist__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('request_logs', 'create_job__new_site__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'create_job__new_site__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'create_job__new_site__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testCreateWithExistedSite()
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('create_job__existed_site__requests_chain.json'));
+
+        $response = $this->xml('post', '/jobs', 'create_job__existed_site__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertEqualsFixture('create_job__existed_site__response.json', $response->json());
+
+        Queue::assertNothingPushed();
+
+        $this->assertChangesEqualsFixture('request_logs', 'create_job__existed_site__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', 'create_job__existed_site__jobs_state.json', self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', 'create_job__existed_site__job_operations_state.json', self::$originJobOperations);
+    }
+
+    public function testCreateMultipleJobs()
+    {
+        $response = $this->xml('post', '/jobs', 'create_job__multiple_jobs__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+
+        $this->assertEqualsFixture('create_job__multiple_jobs__response.json', $response->json());
+
+        Queue::assertNothingPushed();
+
+        $this->assertChangesEqualsFixture('request_logs', 'create_job__multiple_jobs__request_logs_state.json', self::$originRequestLogs);
+        $this->assertNoChanges('jobs', self::$originJobs);
         $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
@@ -79,7 +83,7 @@ class JobTest extends TestCase
 
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
 
-        $response->assertJson(['error' => "Can't parse XML payload"]);
+        $this->assertEqualsFixture('create_job__invalid_xml__response.json', $response->json());
 
         Queue::assertNothingPushed();
 
@@ -92,7 +96,7 @@ class JobTest extends TestCase
     {
         $response = $this->xml('post', '/jobs', 'create_job__check_validation__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
 
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
 
         $this->assertEqualsFixture('create_job__check_validation__response.json', $response->json());
 
@@ -103,150 +107,21 @@ class JobTest extends TestCase
         $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
-    public function testSendJobToSimproNewSite()
+    public function testCreateSimproRequestFailed()
     {
-        $this->mockSendJobToSimproNewSite();
+        $this->mockHttpRequestService($this->getJsonFixture('create_job__simpro_request_failed__requests_chain.json'));
 
-        (new SendJobToSimproJob(1, $this->getJsonFixture('send_job_to_simpro__common__data_from_riverside.json')))->handle();
+        $response = $this->xml('post', '/jobs', 'create_job__simpro_request_failed__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
 
-        $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__new_site__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'send_job_to_simpro__common__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'send_job_to_simpro__common__job_operations_state.json', self::$originJobOperations);
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
 
-        $this->assertCount(1, Queue::pushedJobs()[NotifyRiversideAboutCreatedJobJob::class]);
-
-        Queue::assertPushed(NotifyRiversideAboutCreatedJobJob::class, function (NotifyRiversideAboutCreatedJobJob $job) {
-            $this->assertEquals(1, $job->getJobId());
-            $this->assertEquals(Carbon::parse('2018-11-11 11:11:11'), $job->getDate());
-
-            return true;
-        });
-    }
-
-    public function testSendJobToSimproSiteExists()
-    {
-        $this->mockSendJobToSimproSiteExists();
-
-        (new SendJobToSimproJob(1, $this->getJsonFixture('send_job_to_simpro__common__data_from_riverside.json')))->handle();
-
-        $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__site_exists__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'send_job_to_simpro__common__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'send_job_to_simpro__common__job_operations_state.json', self::$originJobOperations);
-
-        $this->assertCount(1, Queue::pushedJobs()[NotifyRiversideAboutCreatedJobJob::class]);
-
-        Queue::assertPushed(NotifyRiversideAboutCreatedJobJob::class, function (NotifyRiversideAboutCreatedJobJob $job) {
-            $this->assertEquals(1, $job->getJobId());
-            $this->assertEquals(Carbon::parse('2018-11-11 11:11:11'), $job->getDate());
-
-            return true;
-        });
-    }
-
-    public function testSendJobToSimproPostSiteFailed()
-    {
-        $this->mockSendJobToSimproPostSiteFailed();
-
-        try {
-            (new SendJobToSimproJob(1, $this->getJsonFixture('send_job_to_simpro__common__data_from_riverside.json')))->handle();
-        } catch (ApiClientHttpException $e) {}
-
-        $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__post_site_failed__request_logs_state.json', self::$originRequestLogs);
-        $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
+        $this->assertEqualsFixture('create_job__simpro_request_failed__response.json', $response->json());
 
         Queue::assertNothingPushed();
-    }
 
-    public function testSendJobToSimproFindSiteFailed()
-    {
-        $this->mockSendJobToSimproFindSiteFailed();
-
-        try {
-            (new SendJobToSimproJob(1, $this->getJsonFixture('send_job_to_simpro__common__data_from_riverside.json')))->handle();
-        } catch (ApiClientHttpException $e) {}
-
-        $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__find_site_failed__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('request_logs', 'create_job__simpro_request_failed__request_logs_state.json', self::$originRequestLogs);
         $this->assertNoChanges('jobs', self::$originJobs);
         $this->assertNoChanges('job_operations', self::$originJobOperations);
-
-        Queue::assertNothingPushed();
-    }
-
-    public function testSendJobToSimproPostJobFailed()
-    {
-        $this->mockSendJobToSimproPostJobFailed();
-
-        try {
-            (new SendJobToSimproJob(1, $this->getJsonFixture('send_job_to_simpro__common__data_from_riverside.json')))->handle();
-        } catch (ApiClientHttpException $e) {}
-
-        $this->assertChangesEqualsFixture('request_logs', 'send_job_to_simpro__post_job_failed__request_logs_state.json', self::$originRequestLogs);
-        $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
-
-        Queue::assertNothingPushed();
-    }
-
-    public function testSendJobToSimproFailed()
-    {
-        (new SendJobToSimproJob(1, []))->failed();
-
-        $this->assertChangesEqualsFixture('job_operations', 'send_job_to_simpro__failed__job_operations_state.json', self::$originJobOperations);
-    }
-
-    public function testNotifyRiversideAboutCreatedJob()
-    {
-        $this->mockNotifyRiversideAboutCreatedJob(
-            'mock_notify_riverside_about_create_job__request.xml',
-            'mock_notify_riverside_about_create_job__response__success.xml'
-        );
-
-        (new NotifyRiversideAboutCreatedJobJob(1, Carbon::now()))->handle();
-
-        $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__request_logs_state.json', self::$originRequestLogs);
-        $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'notify_riverside_about_created_job__job_operations_state.json', self::$originJobOperations);
-    }
-
-    public function testNotifyRiversideAboutCreatedJobHttpErrorCode()
-    {
-        $this->mockNotifyRiversideAboutCreatedJob(
-            'mock_notify_riverside_about_create_job__request.xml',
-            'mock_notify_riverside_about_create_job__response__success.xml',
-            Response::HTTP_INTERNAL_SERVER_ERROR
-        );
-
-        try {
-            (new NotifyRiversideAboutCreatedJobJob(1, Carbon::now()))->handle();
-        } catch (ApiClientHttpException $e) {}
-
-        $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__http_error_code__request_logs_state.json', self::$originRequestLogs);
-        $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
-    }
-
-    public function testNotifyRiversideAboutCreatedJobErrorInResponseBody()
-    {
-        $this->mockNotifyRiversideAboutCreatedJob(
-            'mock_notify_riverside_about_create_job__request.xml',
-            'mock_notify_riverside_about_create_job__response__failed.xml'
-        );
-
-        try {
-            (new NotifyRiversideAboutCreatedJobJob(1, Carbon::now()))->handle();
-        } catch (ApiClientHttpException $e) {}
-
-        $this->assertChangesEqualsFixture('request_logs', 'notify_riverside_about_created_job__error_in_response_body__request_logs_state.json', self::$originRequestLogs);
-        $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
-    }
-
-    public function testNotifyRiversideAboutCreatedJobFailed()
-    {
-        (new NotifyRiversideAboutCreatedJobJob(1, Carbon::now()))->failed();
-
-        $this->assertChangesEqualsFixture('job_operations', 'notify_riverside_about_created_job__failed__job_operations_state.json', self::$originJobOperations);
     }
 
     public function testSimproWebhookIncorrectSignature()
