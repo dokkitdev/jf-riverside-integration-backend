@@ -1,13 +1,5 @@
 {
     "updated": [],
-    "created": [
-        {
-            "id": 2,
-            "operation": "receive_webhook_job_complete",
-            "created_at": "2018-11-11 11:11:11",
-            "updated_at": "2018-11-11 11:11:11",
-            "job_id": 2
-        }
-    ],
+    "created": [],
     "deleted": []
 }

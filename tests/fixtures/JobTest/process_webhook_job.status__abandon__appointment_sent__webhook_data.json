@@ -1,0 +1,8 @@
+{
+  "ID": "job.status",
+  "description": "Status of Job #7778 set to \"Job : Abandon job\"",
+  "reference": {
+    "jobID": 7778,
+    "statusID": 34
+  }
+}

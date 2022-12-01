@@ -20,6 +20,7 @@ class SimproWebhookRequest extends Request
     {
         return [
             'ID' => 'required|string',
+            'description' => 'present|string',
             'reference' => 'required|array',
             'reference.jobID' => 'required|integer',
             'reference.statusID' => 'required_if:ID,job.status|integer',

@@ -8,8 +8,8 @@
             "destination": "self",
             "url": "http:\/\/localhost\/simpro-webhook",
             "method": "POST",
-            "request_body": "{\"ID\":\"job.status\",\"reference\":{\"jobID\":0,\"statusID\":34}}",
-            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[57],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"fb53f7d7c270b3ad7b3566e2f09193f8c77e959e\"]}",
+            "request_body": "{\"ID\":\"job.status\",\"description\":\"Status of Job #7777 set to \\\"Job : Abandon job\\\"\",\"reference\":{\"jobID\":0,\"statusID\":34}}",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[122],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"fcdcbb23f3d93fdcb060944b822e951e4457d519\"]}",
             "response_status_code": 200,
             "response_body": "",
             "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"]}"

@@ -1,10 +1,11 @@
 [
   {
     "ID": "job.schedule.created",
+    "description": "Job schedule #4321 has been created.",
     "reference": {
       "jobID": 7777,
       "scheduleID": 4321
     }
   },
-  "7bc6e5c85d7319e52185e084627955cc331e80f2"
+  "13435506a2e5aa0cd060a0ae6379f32b32cbdeba"
 ]

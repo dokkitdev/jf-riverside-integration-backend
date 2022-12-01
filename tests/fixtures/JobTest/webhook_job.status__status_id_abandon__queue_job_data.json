@@ -1,0 +1,7 @@
+{
+    "type": "job.status",
+    "description": "Status of Job #7777 set to \"Job : Abandon job\"",
+    "jobId": 7777,
+    "statusId": 34,
+    "scheduleId": null
+}

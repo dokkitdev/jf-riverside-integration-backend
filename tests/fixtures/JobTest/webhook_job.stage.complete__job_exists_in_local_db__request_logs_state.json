@@ -8,8 +8,8 @@
             "destination": "self",
             "url": "http:\/\/localhost\/simpro-webhook",
             "method": "POST",
-            "request_body": "{\"ID\":\"job.stage.complete\",\"reference\":{\"jobID\":7777}}",
-            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[54],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"4f86c83c80944e0e7873e6df5448817bd2f00c9d\"]}",
+            "request_body": "{\"ID\":\"job.stage.complete\",\"description\":\"Stage of Job #7777 has been moved from Pending to Complete\",\"reference\":{\"jobID\":7777}}",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[129],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"8ffd9276f46631cb7122328f819b22876a9d7417\"]}",
             "response_status_code": 200,
             "response_body": "",
             "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"]}"

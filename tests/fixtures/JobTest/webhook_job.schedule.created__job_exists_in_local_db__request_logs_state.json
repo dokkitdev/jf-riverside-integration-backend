@@ -8,8 +8,8 @@
             "destination": "self",
             "url": "http:\/\/localhost\/simpro-webhook",
             "method": "POST",
-            "request_body": "{\"ID\":\"job.schedule.created\",\"reference\":{\"jobID\":7777,\"scheduleID\":4321}}",
-            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[74],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"7bc6e5c85d7319e52185e084627955cc331e80f2\"]}",
+            "request_body": "{\"ID\":\"job.schedule.created\",\"description\":\"Job schedule #4321 has been created.\",\"reference\":{\"jobID\":7777,\"scheduleID\":4321}}",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[127],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"13435506a2e5aa0cd060a0ae6379f32b32cbdeba\"]}",
             "response_status_code": 200,
             "response_body": "",
             "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"]}"
