@@ -30,6 +30,11 @@ class NotifyRiversideAboutCreatedJobJob implements ShouldQueue
         app(JobsFlowService::class)->notifyRiversideAboutCreatedJob($this->jobId, $this->date);
     }
 
+    public function failed()
+    {
+        app(JobsFlowService::class)->failedNotifyingRiversideAboutCreatedJob($this->jobId);
+    }
+
     public function getJobId(): string
     {
         return $this->jobId;
