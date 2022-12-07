@@ -28,7 +28,7 @@ ssl: true
 # config for worker in supervisor
 supervisor_programs:
   - name: "worker"
-    command: php {{ remote_path }}/artisan queue:work --daemon --sleep=30 --delay=60 --tries=3 --queue=temporarily_disabled
+    command: php {{ remote_path }}/artisan queue:work --daemon --sleep=30 --delay=60 --tries=1 --queue=process_simpro_webhook,update_site_info
     state: present
     configuration: |
       process_name=%(program_name)s_%(process_num)02d
@@ -36,7 +36,7 @@ supervisor_programs:
       autorestart=true
       startretries=1
       startsecs=1
-      numprocs=4
+      numprocs=1
       redirect_stderr=true
       user=root
 
