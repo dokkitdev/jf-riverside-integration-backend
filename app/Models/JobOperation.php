@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use RonasIT\Support\Traits\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +18,7 @@ class JobOperation extends Model
     public const STATUS_SUCCESS = 'success';
     public const STATUS_FAIL = 'fail';
     public const STATUS_SKIP = 'skip';
+    public const STATUS_IN_PROGRESS = 'in_progress';
 
     protected $fillable = [
         'job_id',
@@ -32,5 +34,10 @@ class JobOperation extends Model
     public function job()
     {
         return $this->belongsTo(Job::class);
+    }
+
+    public function requestLogs(): BelongsToMany
+    {
+        return $this->belongsToMany(RequestLog::class);
     }
 }

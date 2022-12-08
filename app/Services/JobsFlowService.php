@@ -10,7 +10,6 @@ use App\Jobs\ProcessSimproWebhookJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
-use App\Resources\JobOperations\JobOperationCreateResource;
 use App\Resources\JobOperations\JobOperationHandleWebhookFailResource;
 use App\Resources\JobOperations\JobOperationHandleWebhookSuccessResource;
 use App\Resources\JobOperations\JobOperationRegisterWebhookResource;
@@ -19,8 +18,8 @@ use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
 use Exception;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use SimpleXMLElement;
+use Throwable;
 
 class JobsFlowService
 {
@@ -99,25 +98,27 @@ class JobsFlowService
         $this->simproConfig = config('services.simpro');
     }
 
-    public function createJob(array $jobDataFromRiverside): int
+    public function createJob(array $jobDataFromRiverside, JobOperation $jobOperation): int
     {
-        return DB::transaction(function () use ($jobDataFromRiverside) {
-            $job = $this->jobService->create([
-                'order_no' => $jobDataFromRiverside['job_no'],
-            ]);
+        try {
+            $simproJobId = $this->sendJobToSimpro($jobDataFromRiverside);
+        } catch (Throwable $exception) {
+            report($exception);
 
-            try {
-                $simproJobId = $this->sendJobToSimpro($job['id'], $jobDataFromRiverside);
-            } catch (Exception $exception) {
-                report($exception);
+            $jobOperation['status'] = JobOperation::STATUS_FAIL;
 
-                throw new CreateJobRequestException('Failed sending to Simpro');
-            }
+            throw new CreateJobRequestException('Failed sending to Simpro');
+        }
 
-            $this->jobOperationService->create(new JobOperationCreateResource($job['id']));
+        $job = $this->jobService->create([
+            'order_no' => $jobDataFromRiverside['job_no'],
+            'simpro_job_id' => $simproJobId,
+        ]);
 
-            return $simproJobId;
-        });
+        $jobOperation['job_id'] = $job['id'];
+        $jobOperation['status'] = JobOperation::STATUS_SUCCESS;
+
+        return $simproJobId;
     }
 
     public function initSimproWebhookProcessing(SimproWebhookResource $simproWebhookResource)
@@ -290,7 +291,7 @@ class JobsFlowService
         $this->jobOperationService->create(new JobOperationUpdateSiteInfoResource($jobId, JobOperation::STATUS_FAIL));
     }
 
-    protected function sendJobToSimpro(int $jobId, array $dataFromRiverside): int
+    protected function sendJobToSimpro(array $dataFromRiverside): int
     {
         $now = Carbon::now();
 
@@ -306,13 +307,7 @@ class JobsFlowService
             $siteId = $this->simproApiClient->postSite($siteUprn, $siteData);
         }
 
-        $simproJobId = $this->simproApiClient->postJob($siteId, $jobData);
-
-        $this->jobService->update($jobId, [
-            'simpro_job_id' => $simproJobId
-        ]);
-
-        return $simproJobId;
+        return $this->simproApiClient->postJob($siteId, $jobData);
     }
 
     protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): array

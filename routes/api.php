@@ -7,6 +7,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\SimproController;
+use App\Models\JobOperation;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,9 +50,10 @@ Route::group(['middleware' => 'guest'], function () {
 
     Route::get('/status', ['uses' => StatusController::class . '@status']);
 
-    Route::group(['middleware' => 'log_request'], function () {
-        Route::post('/jobs', ['uses' => JobController::class . '@create']);
+    Route::post('/jobs', ['uses' => JobController::class . '@create'])
+        ->middleware(['within_job_operation:' . JobOperation::OPERATION_CREATE, 'log_request']);
 
+    Route::group(['middleware' => 'log_request'], function () {
         Route::post('/simpro-webhook', ['uses' => SimproController::class . '@webhook']);
     });
 });
