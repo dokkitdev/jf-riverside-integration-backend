@@ -267,28 +267,36 @@ class JobsFlowService
         $jobs = $this->jobService->getByList($this->simproApiClient->getJobIdsWithScheduleOnDate($dateTime), 'simpro_job_id');
 
         foreach ($jobs as $job) {
-            dispatch(new UpdateSiteInfoJob($job['id']));
+            $jobOperation = app(JobOperationService::class)->create([
+                'job_id' => $job['id'],
+                'operation' => JobOperation::OPERATION_UPDATE_SITE_INFO,
+                'status' => JobOperation::STATUS_IN_PROGRESS,
+            ]);
+
+            dispatch(new UpdateSiteInfoJob($job['id'], $jobOperation['id']));
         }
     }
 
-    public function updateSiteInfo(int $jobId)
+    public function updateSiteInfo(int $jobId, int $jobOperationId)
     {
-        $job = $this->jobService->find($jobId);
+        $this->jobOperationService->withinJobOperation(function (JobOperation $jobOperation) use ($jobId) {
+            $job = $this->jobService->find($jobId);
 
-        $simproJobDetails = $this->simproApiClient->getJob($job['simpro_job_id']);
-        $riversideJobDetails = $this->riversideApiClient->getJob($job['order_no']);
+            $simproJobDetails = $this->simproApiClient->getJob($job['simpro_job_id']);
+            $riversideJobDetails = $this->riversideApiClient->getJob($job['order_no']);
 
-        $this->simproApiClient->patchSite(
-            $simproJobDetails['Site']['ID'],
-            $this->convertJobDetailsToSimproSiteData($riversideJobDetails)
-        );
+            $this->simproApiClient->patchSite(
+                $simproJobDetails['Site']['ID'],
+                $this->convertJobDetailsToSimproSiteData($riversideJobDetails)
+            );
 
-        $this->jobOperationService->create(new JobOperationUpdateSiteInfoResource($jobId, JobOperation::STATUS_SUCCESS));
+            $jobOperation['status'] = JobOperation::STATUS_SUCCESS;
+        }, $jobOperationId);
     }
 
-    public function failedUpdateSiteInfo(int $jobId)
+    public function failedQueueJob(int $jobOperationId)
     {
-        $this->jobOperationService->create(new JobOperationUpdateSiteInfoResource($jobId, JobOperation::STATUS_FAIL));
+        $this->jobOperationService->update($jobOperationId, ['status' => JobOperation::STATUS_FAIL]);
     }
 
     protected function sendJobToSimpro(array $dataFromRiverside): int
