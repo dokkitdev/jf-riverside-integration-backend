@@ -18,6 +18,7 @@ class JobTest extends TestCase
     protected static Collection $originRequestLogs;
     protected static Collection $originJobs;
     protected static Collection $originJobOperations;
+    protected static Collection $originJobOperationRequestLog;
 
     public function setUp(): void
     {
@@ -26,10 +27,13 @@ class JobTest extends TestCase
         self::$originRequestLogs = self::$originRequestLogs ?? $this->getDataSet('request_logs');
         self::$originJobs = self::$originJobs ?? $this->getDataSet('jobs');
         self::$originJobOperations = self::$originJobOperations ?? $this->getDataSet('job_operations');
+        self::$originJobOperationRequestLog = self::$originJobOperationRequestLog ?? $this->getDataSet('job_operation_request_log');
     }
 
     public function testCreateWithNewSite()
     {
+        $this->dontWrapIntoTransaction();
+
         $this->mockHttpRequestService($this->getJsonFixture('create_job__new_site__requests_chain.json'));
 
         $response = $this->xml('post', '/jobs', 'create_job__new_site__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
@@ -43,6 +47,7 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'create_job__new_site__request_logs_state.json', self::$originRequestLogs);
         $this->assertChangesEqualsFixture('jobs', 'create_job__new_site__jobs_state.json', self::$originJobs);
         $this->assertChangesEqualsFixture('job_operations', 'create_job__new_site__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__new_site__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
     }
 
     public function testCreateWithExistedSite()
@@ -60,6 +65,7 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('request_logs', 'create_job__existed_site__request_logs_state.json', self::$originRequestLogs);
         $this->assertChangesEqualsFixture('jobs', 'create_job__existed_site__jobs_state.json', self::$originJobs);
         $this->assertChangesEqualsFixture('job_operations', 'create_job__existed_site__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__existed_site__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
     }
 
     public function testCreateMultipleJobs()
@@ -73,8 +79,9 @@ class JobTest extends TestCase
         Queue::assertNothingPushed();
 
         $this->assertChangesEqualsFixture('request_logs', 'create_job__multiple_jobs__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'create_job__multiple_jobs__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__multiple_jobs__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
         $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
     public function testCreateInvalidXml()
@@ -88,8 +95,9 @@ class JobTest extends TestCase
         Queue::assertNothingPushed();
 
         $this->assertChangesEqualsFixture('request_logs', 'create_job__invalid_xml__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'create_job__invalid_xml__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__invalid_xml__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
         $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
     public function testCreateCheckValidation()
@@ -103,8 +111,9 @@ class JobTest extends TestCase
         Queue::assertNothingPushed();
 
         $this->assertChangesEqualsFixture('request_logs', 'create_job__check_validation__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'create_job__check_validation__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__check_validation__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
         $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
     public function testCreateSimproRequestFailed()
@@ -120,8 +129,9 @@ class JobTest extends TestCase
         Queue::assertNothingPushed();
 
         $this->assertChangesEqualsFixture('request_logs', 'create_job__simpro_request_failed__request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operations', 'create_job__simpro_request_failed__job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__simpro_request_failed__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
         $this->assertNoChanges('jobs', self::$originJobs);
-        $this->assertNoChanges('job_operations', self::$originJobOperations);
     }
 
     public function testSimproWebhookIncorrectSignature()

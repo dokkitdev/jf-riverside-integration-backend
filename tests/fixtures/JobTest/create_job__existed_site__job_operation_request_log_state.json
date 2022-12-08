@@ -1,0 +1,26 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 2,
+            "job_operation_id": 2,
+            "request_log_id": 2
+        },
+        {
+            "id": 3,
+            "job_operation_id": 2,
+            "request_log_id": 3
+        },
+        {
+            "id": 4,
+            "job_operation_id": 2,
+            "request_log_id": 4
+        },
+        {
+            "id": 5,
+            "job_operation_id": 2,
+            "request_log_id": 5
+        }
+    ],
+    "deleted": []
+}
