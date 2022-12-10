@@ -43,9 +43,11 @@ class JobOperationService extends EntityService
 
             throw $exception;
         } finally {
-            $jobOperation->save();
+            if ($jobOperation->shouldBePersisted()) {
+                $jobOperation->save();
 
-            $jobOperation->requestLogs()->attach(self::$requestLogBuffer);
+                $jobOperation->requestLogs()->attach(self::$requestLogBuffer);
+            }
 
             self::$requestLogBuffer = new Collection();
             self::$withinJobOperationMode = false;

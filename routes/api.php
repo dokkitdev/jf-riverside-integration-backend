@@ -53,7 +53,6 @@ Route::group(['middleware' => 'guest'], function () {
     Route::post('/jobs', ['uses' => JobController::class . '@create'])
         ->middleware(['within_job_operation:' . JobOperation::OPERATION_CREATE, 'log_request']);
 
-    Route::group(['middleware' => 'log_request'], function () {
-        Route::post('/simpro-webhook', ['uses' => SimproController::class . '@webhook']);
-    });
+    Route::post('/simpro-webhook', ['uses' => SimproController::class . '@webhook'])
+        ->middleware(['within_job_operation:' . JobOperation::OPERATION_HANDLE_WEBHOOK, 'log_request']);
 });

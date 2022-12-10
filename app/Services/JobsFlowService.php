@@ -10,10 +10,6 @@ use App\Jobs\ProcessSimproWebhookJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
 use App\Models\JobOperation;
-use App\Resources\JobOperations\JobOperationHandleWebhookFailResource;
-use App\Resources\JobOperations\JobOperationHandleWebhookSuccessResource;
-use App\Resources\JobOperations\JobOperationRegisterWebhookResource;
-use App\Resources\JobOperations\JobOperationUpdateSiteInfoResource;
 use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
 use Exception;
@@ -121,53 +117,56 @@ class JobsFlowService
         return $simproJobId;
     }
 
-    public function initSimproWebhookProcessing(SimproWebhookResource $simproWebhookResource)
+    public function initSimproWebhookProcessing(SimproWebhookResource $simproWebhookResource, JobOperation $jobOperation)
     {
-        if (!in_array($simproWebhookResource->type, self::SIMPRO_WEBHOOK_TYPES)) {
-            return;
-        }
-
         $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
         if (is_null($job)) {
+            $jobOperation->interruptPersisting();
             return;
         }
 
-        if (($simproWebhookResource->type === self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED) && !in_array($simproWebhookResource->statusId, $this->simproConfig['status_ids'])) {
-            $this->jobOperationService->create(new JobOperationRegisterWebhookResource($job['id'], $simproWebhookResource, self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS));
-        } else {
-            $this->jobOperationService->create(new JobOperationRegisterWebhookResource($job['id'], $simproWebhookResource));
+        $jobOperation['job_id'] = $job['id'];
+        $jobOperation['status'] = JobOperation::STATUS_IN_PROGRESS;
+        $jobOperation['details'] = [
+            'webhook_type' => $simproWebhookResource->type,
+            'webhook_description' => $simproWebhookResource->description,
+        ];
 
-            dispatch(new ProcessSimproWebhookJob($simproWebhookResource));
-        }
+        $jobOperation->save();
+
+        dispatch(new ProcessSimproWebhookJob($simproWebhookResource, $jobOperation['id']));
     }
 
-    public function processSimproWebhook(SimproWebhookResource $simproWebhookResource)
+    public function processSimproWebhook(SimproWebhookResource $simproWebhookResource, int $jobOperationId)
     {
-        $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
+        $this->jobOperationService->withinJobOperation(function (JobOperation $jobOperation) use ($simproWebhookResource) {
+            $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
-        switch ($simproWebhookResource->type) {
-            case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
-                $skipReason = $this->processSimproWebhookJobCompleted($job);
-                break;
-            case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
-                $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
-                break;
-            case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
-                $skipReason = $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
-                break;
-            default:
-                $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
-        }
+            switch ($simproWebhookResource->type) {
+                case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
+                    $skipReason = $this->processSimproWebhookJobCompleted($job);
+                    break;
+                case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
+                    $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
+                    break;
+                case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
+                    $skipReason = $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
+                    break;
+                default:
+                    $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
+            }
 
-        $this->jobOperationService->create(new JobOperationHandleWebhookSuccessResource($job['id'], $simproWebhookResource, $skipReason));
-    }
+            if (is_null($skipReason)) {
+                $jobOperation['status'] = JobOperation::STATUS_SUCCESS;
+            } else {
+                $details = $jobOperation['details'];
+                $details['skip_reason'] = $skipReason;
 
-    public function failedProcessingSimproWebhook(SimproWebhookResource $simproWebhookResource)
-    {
-        $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
-
-        $this->jobOperationService->create(new JobOperationHandleWebhookFailResource($job['id'], $simproWebhookResource));
+                $jobOperation['status'] = JobOperation::STATUS_SKIP;
+                $jobOperation['details'] = $details;
+            }
+        }, $jobOperationId);
     }
 
     public function processSimproWebhookJobCompleted(Job $job): ?string
