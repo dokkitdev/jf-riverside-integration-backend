@@ -1,15 +1,11 @@
 {
-    "updated": [],
-    "created": [
+    "updated": [
         {
-            "id": 2,
-            "operation": "handle_webhook",
-            "created_at": "2018-11-11 11:11:11",
+            "id": 4,
             "updated_at": "2018-11-11 11:11:11",
-            "job_id": 2,
-            "details": "{\"webhook_type\":\"job.stage.complete\",\"webhook_description\":\"Stage of Job #7777 has been moved from Pending to Complete\"}",
             "status": "success"
         }
     ],
+    "created": [],
     "deleted": []
 }

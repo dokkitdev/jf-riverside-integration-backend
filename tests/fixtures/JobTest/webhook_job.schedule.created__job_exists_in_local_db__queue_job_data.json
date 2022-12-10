@@ -1,7 +1,0 @@
-{
-    "type": "job.schedule.created",
-    "description": "Job schedule #4321 has been created.",
-    "jobId": 7777,
-    "statusId": null,
-    "scheduleId": 4321
-}

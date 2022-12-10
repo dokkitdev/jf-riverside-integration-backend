@@ -1,15 +1,11 @@
 {
-    "updated": [],
-    "created": [
+    "updated": [
         {
-            "id": 2,
-            "operation": "handle_webhook",
-            "created_at": "2018-11-11 11:11:11",
+            "id": 3,
             "updated_at": "2018-11-11 11:11:11",
-            "job_id": 3,
-            "details": "{\"webhook_type\":\"job.status\",\"webhook_description\":\"Status of Job #7778 set to \\\"Job : Abandon job\\\"\"}",
             "status": "success"
         }
     ],
+    "created": [],
     "deleted": []
 }

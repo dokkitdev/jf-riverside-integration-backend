@@ -1,15 +1,12 @@
 {
-    "updated": [],
-    "created": [
+    "updated": [
         {
-            "id": 2,
-            "operation": "handle_webhook",
-            "created_at": "2018-11-11 11:11:11",
+            "id": 4,
             "updated_at": "2018-11-11 11:11:11",
-            "job_id": 2,
-            "details": "{\"webhook_type\":\"not.used.type\",\"webhook_description\":\"Not Used Type\",\"skip_reason\":\"not_used_type\"}",
+            "details": "{\"webhook_type\":\"any.type\",\"webhook_description\":\"any description\",\"skip_reason\":\"not_used_type\"}",
             "status": "skip"
         }
     ],
+    "created": [],
     "deleted": []
 }
