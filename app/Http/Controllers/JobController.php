@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\WithinJobOperationMiddleware;
 use App\Http\Requests\Jobs\CreateJobRequest;
 use App\Resources\CreateJob\CreateJobResponseSuccessResource;
 use App\Services\JobsFlowService;
@@ -10,7 +11,7 @@ class JobController extends Controller
 {
     public function create(CreateJobRequest $request, JobsFlowService $service)
     {
-        $simproJobId = $service->createJob($request->all());
+        $simproJobId = $service->createJob($request->all(), WithinJobOperationMiddleware::getJobOperation());
 
         $resource = new CreateJobResponseSuccessResource($simproJobId);
 

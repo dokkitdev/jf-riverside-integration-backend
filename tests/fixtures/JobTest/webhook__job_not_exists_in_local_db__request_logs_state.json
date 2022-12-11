@@ -1,0 +1,19 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 4,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "self",
+            "url": "http:\/\/localhost\/simpro-webhook",
+            "method": "POST",
+            "request_body": "{\"ID\":\"any.type\",\"description\":\"any description\",\"reference\":{\"jobID\":0,\"statusID\":8888,\"scheduleID\":9999}}",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[107],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"0a1b44415196dd542419309fbdc747280fae81dd\"]}",
+            "response_status_code": 200,
+            "response_body": "",
+            "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"]}"
+        }
+    ],
+    "deleted": []
+}

@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\LogRequest;
+use App\Http\Middleware\WithinJobOperationMiddleware;
 use Fruitcake\Cors\HandleCors;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use RonasIT\Support\AutoDoc\Http\Middleware\AutoDocMiddleware;
@@ -72,5 +73,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'maintenance' => \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         'log_request' => LogRequest::class,
+        'within_job_operation' => WithinJobOperationMiddleware::class,
     ];
 }

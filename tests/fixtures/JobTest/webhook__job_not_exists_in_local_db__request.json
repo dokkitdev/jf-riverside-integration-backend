@@ -1,0 +1,12 @@
+[
+  {
+    "ID": "any.type",
+    "description": "any description",
+    "reference": {
+      "jobID": 0,
+      "statusID": 8888,
+      "scheduleID": 9999
+    }
+  },
+  "0a1b44415196dd542419309fbdc747280fae81dd"
+]
