@@ -226,7 +226,11 @@ class JobsFlowService
         $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
 
         try {
-            $this->riversideApiClient->sendAppointment($job['order_no'], $simproSchedule['Date'], $simproSchedule['Blocks'][0]['StartTime']);
+            $this->riversideApiClient->sendAppointment(
+                $job['order_no'],
+                Carbon::parse($simproSchedule['Date']),
+                Carbon::parse($simproSchedule['Blocks'][0]['StartTime']),
+            );
             $skipReason = null;
         } catch (RiversideApiAppointmentLoggedPreviouslyException $exception) {
             $skipReason = self::WEBHOOK_SKIP_RIVERSIDE_ALREADY_HAS_APPOINTMENT;
