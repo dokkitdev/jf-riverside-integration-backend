@@ -7,8 +7,8 @@
         <Request request_type="logapptextcont">
             <Parameters attribute="secret" attribute_value="fake_riverside_secret" />
             <Parameters attribute="job_no" attribute_value="job_for_webhooks" />
-            <Parameters attribute="appointment_date" attribute_value="2001-01-01" />
-            <Parameters attribute="appointment_time" attribute_value="01:02" />
+            <Parameters attribute="appointment_date" attribute_value="01/01/2001" />
+            <Parameters attribute="appointment_time" attribute_value="01:02:00" />
         </Request>
     </Body>
 </message>

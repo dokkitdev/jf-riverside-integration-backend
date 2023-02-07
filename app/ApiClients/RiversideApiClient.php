@@ -72,12 +72,12 @@ class RiversideApiClient extends BaseApiClient
         ]);
     }
 
-    public function sendAppointment(string $jobOrderNo, string $scheduleDate, string $scheduleStartTime)
+    public function sendAppointment(string $jobOrderNo, Carbon $scheduleDate, Carbon $scheduleStartTime)
     {
         $this->makeRequest('riverside_request_xml.appointment_send', [
             'job_order_no' => $jobOrderNo,
-            'schedule_date' => $scheduleDate,
-            'schedule_start_time' => $scheduleStartTime,
+            'schedule_date' => $scheduleDate->format(self::DATE_FORMAT),
+            'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT),
         ]);
     }
 
