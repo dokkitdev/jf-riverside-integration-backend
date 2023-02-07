@@ -15,6 +15,7 @@ class RiversideApiClient extends BaseApiClient
 {
     protected const DATE_FORMAT = 'd/m/Y';
     protected const TIME_FORMAT = 'H:i:s';
+    protected const TIME_FORMAT_SEND_APPOINTMENT = 'H:i';
 
     protected $baseUrl;
     protected $userName;
@@ -77,7 +78,7 @@ class RiversideApiClient extends BaseApiClient
         $this->makeRequest('riverside_request_xml.appointment_send', [
             'job_order_no' => $jobOrderNo,
             'schedule_date' => $scheduleDate->format(self::DATE_FORMAT),
-            'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT),
+            'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT_SEND_APPOINTMENT),
         ]);
     }
 
