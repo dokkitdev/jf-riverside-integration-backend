@@ -38,7 +38,7 @@ supervisor_programs:
       startsecs=1
       numprocs=1
       redirect_stderr=true
-      user=root
+      user=www-data
 
 # enable mysql
 mysql: false
