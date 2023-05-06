@@ -8,7 +8,8 @@
             "updated_at": "2018-11-11 11:11:11",
             "job_id": 4,
             "details": null,
-            "status": "success"
+            "status": "success",
+            "fail_description": null
         }
     ],
     "deleted": []
