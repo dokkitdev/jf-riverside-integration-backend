@@ -66,8 +66,6 @@ class CreateJobRequest extends Request
                 foreach ($contract->jobs->job as $job) {
                     $jobData = $this->convertXmlAttributesToArray($job) + [
                             'location' => isset($job->location) ? $this->convertXmlAttributesToArray($job->location) : null,
-                            'occupants' => null,
-                            'contact' => null,
                             'sors' => [],
                         ];
 

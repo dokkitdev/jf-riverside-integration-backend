@@ -483,28 +483,11 @@ class JobsFlowService
     {
         $simproData = [];
 
-        if (isset($dataFromRiverside['contact']['contact_type'])) {
-            $contactField = Arr::get(self::RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP, $dataFromRiverside['contact']['contact_type']);
-            if (isset($contactField)) {
-                $this->addFieldToSimproData($simproData, $dataFromRiverside, "PrimaryContact.{$contactField}", 'contact.contact_details');
-            }
-        }
-
-        if (isset($dataFromRiverside['contact']['priority'])) {
-            $priorityValue = Arr::get(self::RIVERSIDE_TO_SIMPRO_CONTACT_PRIORITY_MAP, $dataFromRiverside['contact']['priority']);
-            if (isset($priorityValue)) {
-                Arr::set($simproData, 'PrimaryContact.PreferredNotificationMethod', $priorityValue);
-            }
-        }
-
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Name', 'location.address1');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.Address', 'location.address1');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.City', 'location.address2');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.State', 'location.address3');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.PostalCode', 'location.post_code');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.Title', 'occupants.person_title');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.GivenName', 'occupants.person_forenames');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.FamilyName', 'occupants.person_surname');
 
         return $simproData;
     }
