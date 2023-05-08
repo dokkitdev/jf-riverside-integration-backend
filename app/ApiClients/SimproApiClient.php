@@ -98,6 +98,30 @@ class SimproApiClient extends BaseApiClient
         $this->makeRequest('patch', "/sites/{$siteId}", $data, [], Response::HTTP_NO_CONTENT);
     }
 
+    public function findSitePrimaryContactId(int $siteId): ?int
+    {
+        $contacts = $this->makeRequest(
+            'get',
+            "/sites/{$siteId}/contacts/",
+            [
+                'PrimaryContact' => true,
+                'columns' => 'ID',
+            ]
+        );
+
+        return (empty($contacts)) ? null : $contacts[0]['ID'];
+    }
+
+    public function postSiteContact(int $siteId, array $data): void
+    {
+        $this->makeRequest('post', "/sites/{$siteId}/contacts/", $data, [], Response::HTTP_CREATED);
+    }
+
+    public function patchSiteContact(int $siteId, int $contactId, array $data): void
+    {
+        $this->makeRequest('patch', "/sites/{$siteId}/contacts/{$contactId}", $data, [], Response::HTTP_NO_CONTENT);
+    }
+
     public function postJob(int $siteId, array $data): int
     {
         $data['Site'] = $siteId;

@@ -28,15 +28,10 @@ class JobsFlowService
     ];
 
     protected const RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP = [
-        'EML' => 'Email',
-        'MBL' => 'CellPhone',
-        'TEL' => 'WorkPhone',
-    ];
-
-    protected const RIVERSIDE_TO_SIMPRO_CONTACT_PRIORITY_MAP = [
-        '1' => 'Email',
-        '2' => 'Mobile',
-        '3' => 'Telephone',
+        'eml' => 'Email',
+        'mbl' => 'CellPhone',
+        'tel' => 'AltPhone',
+        'wtl' => 'WorkPhone',
     ];
 
     protected const RIVERSIDE_PRIORITY_4_HRS = 0;
@@ -308,14 +303,28 @@ class JobsFlowService
 
         $siteUprn = $dataFromRiverside['location']['place_ref'];
         $siteData = $this->convertDataFromRiversideToSimproSiteData($dataFromRiverside);
+        $siteContactData = $this->convertDataFromRiversideToSiteContactData($dataFromRiverside);
         $jobData = $this->convertDataFromRiversideToSimproJobData($dataFromRiverside, $now);
 
         $siteId = $this->simproApiClient->findSiteIdByUprn($siteUprn);
+        $primarySiteContactId = null;
 
         if (isset($siteId)) {
             $this->simproApiClient->patchSite($siteId, $siteData);
+
+            if (isset($siteContactData)) {
+                $primarySiteContactId = $this->simproApiClient->findSitePrimaryContactId($siteId);
+            }
         } else {
             $siteId = $this->simproApiClient->postSite($siteUprn, $siteData);
+        }
+
+        if (isset($siteContactData)) {
+            if (is_null($primarySiteContactId)) {
+                $this->simproApiClient->postSiteContact($siteId, $siteContactData);
+            } else {
+                $this->simproApiClient->patchSiteContact($siteId, $primarySiteContactId, $siteContactData);
+            }
         }
 
         return $this->simproApiClient->postJob($siteId, $jobData);
@@ -488,6 +497,51 @@ class JobsFlowService
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.City', 'location.address2');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.State', 'location.address3');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.PostalCode', 'location.post_code');
+
+        return $simproData;
+    }
+
+    protected function convertDataFromRiversideToSiteContactData(array $dataFromRiverside): ?array
+    {
+        $primaryOccupant = null;
+
+        foreach ($dataFromRiverside['occupants'] as $occupant) {
+            if (strtolower(Arr::get($occupant, 'main_contact', '')) === 'true') {
+                $primaryOccupant = $occupant;
+                break;
+            }
+
+            if (is_null($primaryOccupant)) {
+                $primaryOccupant = $occupant;
+            }
+        }
+
+        if (is_null($primaryOccupant)) {
+            return null;
+        }
+
+        $simproData = [];
+
+        $this->addFieldToSimproData($simproData, $primaryOccupant, 'Title', 'person_title');
+        $this->addFieldToSimproData($simproData, $primaryOccupant, 'GivenName', 'person_forenames');
+        $this->addFieldToSimproData($simproData, $primaryOccupant, 'FamilyName', 'person_surname');
+
+        foreach ($primaryOccupant['contacts'] as $contact) {
+            $simproField = Arr::get(
+                self::RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP,
+                strtolower(Arr::get($contact, 'contact_type'))
+            );
+
+            if (isset($simproField)) {
+                $simproData[$simproField] = Arr::get($contact, 'contact_details', '');
+            }
+        }
+
+        if (empty($simproData)) {
+            return null;
+        }
+
+        $simproData['PrimaryContact'] = true;
 
         return $simproData;
     }
