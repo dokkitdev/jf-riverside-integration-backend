@@ -22,7 +22,8 @@
                                 address3="test_address3"
                                 place_ref="test_place_ref"
                                 post_code="test_post_code"
-                        />
+                        >
+                        </location>
 
                         <sors>
                             <sor
