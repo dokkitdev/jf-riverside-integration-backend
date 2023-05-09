@@ -5,6 +5,7 @@ namespace App\Http\Requests\Jobs;
 use App\Exceptions\CreateJobRequestException;
 use App\Http\Requests\Request;
 use App\Services\JobsFlowService;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use SimpleXMLElement;
 use Exception;
@@ -65,11 +66,26 @@ class CreateJobRequest extends Request
 
                 foreach ($contract->jobs->job as $job) {
                     $jobData = $this->convertXmlAttributesToArray($job) + [
-                            'location' => isset($job->location) ? $this->convertXmlAttributesToArray($job->location) : null,
-                            'occupants' => null,
-                            'contact' => null,
-                            'sors' => [],
-                        ];
+                        'location' => isset($job->location) ? $this->convertXmlAttributesToArray($job->location) : null,
+                        'occupants' => [],
+                        'sors' => [],
+                    ];
+
+                    if (isset($job->location->Occupants->Occupant)) {
+                        foreach ($job->location->Occupants->Occupant as $occupant) {
+                            $jobDataOccupant = $this->convertXmlAttributesToArray($occupant) + [
+                                'contacts' => [],
+                            ];
+
+                            if (isset($occupant->Contacts->Contact)) {
+                                foreach ($occupant->Contacts->Contact as $contact) {
+                                    $jobDataOccupant['contacts'][] = $this->convertXmlAttributesToArray($contact);
+                                }
+                            }
+
+                            $jobData['occupants'][] = $jobDataOccupant;
+                        }
+                    }
 
                     if (isset($job->sors->sor)) {
                         foreach ($job->sors->sor as $sor) {

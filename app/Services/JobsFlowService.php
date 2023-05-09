@@ -12,7 +12,6 @@ use App\Models\Job;
 use App\Models\JobOperation;
 use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
-use Exception;
 use Illuminate\Support\Carbon;
 use SimpleXMLElement;
 use Throwable;
@@ -28,15 +27,10 @@ class JobsFlowService
     ];
 
     protected const RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP = [
-        'EML' => 'Email',
-        'MBL' => 'CellPhone',
-        'TEL' => 'WorkPhone',
-    ];
-
-    protected const RIVERSIDE_TO_SIMPRO_CONTACT_PRIORITY_MAP = [
-        '1' => 'Email',
-        '2' => 'Mobile',
-        '3' => 'Telephone',
+        'eml' => 'Email',
+        'mbl' => 'CellPhone',
+        'tel' => 'AltPhone',
+        'wtl' => 'WorkPhone',
     ];
 
     protected const RIVERSIDE_PRIORITY_4_HRS = 0;
@@ -288,10 +282,23 @@ class JobsFlowService
             $simproJobDetails = $this->simproApiClient->getJob($job['simpro_job_id']);
             $riversideJobDetails = $this->riversideApiClient->getJob($job['order_no']);
 
-            $this->simproApiClient->patchSite(
-                $simproJobDetails['Site']['ID'],
-                $this->convertJobDetailsToSimproSiteData($riversideJobDetails)
-            );
+            $simproSiteId = $simproJobDetails['Site']['ID'];
+
+            $siteData = $this->convertJobDetailsToSimproSiteData($riversideJobDetails);
+            if (isset($siteData)) {
+                $this->simproApiClient->patchSite($simproSiteId, $siteData);
+            }
+
+            $siteContactData = $this->convertJobDetailsToSimproSiteContactData($riversideJobDetails);
+            if (isset($siteContactData)) {
+                $primarySiteContactId = $this->simproApiClient->findSitePrimaryContactId($simproSiteId);
+
+                if (is_null($primarySiteContactId)) {
+                    $this->simproApiClient->postSiteContact($simproSiteId, $siteContactData);
+                } else {
+                    $this->simproApiClient->patchSiteContact($simproSiteId, $primarySiteContactId, $siteContactData);
+                }
+            }
 
             $jobOperation['status'] = JobOperation::STATUS_SUCCESS;
         }, $jobOperationId);
@@ -308,44 +315,75 @@ class JobsFlowService
 
         $siteUprn = $dataFromRiverside['location']['place_ref'];
         $siteData = $this->convertDataFromRiversideToSimproSiteData($dataFromRiverside);
+        $siteContactData = $this->convertDataFromRiversideToSiteContactData($dataFromRiverside);
         $jobData = $this->convertDataFromRiversideToSimproJobData($dataFromRiverside, $now);
 
         $siteId = $this->simproApiClient->findSiteIdByUprn($siteUprn);
+        $primarySiteContactId = null;
 
         if (isset($siteId)) {
             $this->simproApiClient->patchSite($siteId, $siteData);
+
+            if (isset($siteContactData)) {
+                $primarySiteContactId = $this->simproApiClient->findSitePrimaryContactId($siteId);
+            }
         } else {
             $siteId = $this->simproApiClient->postSite($siteUprn, $siteData);
+        }
+
+        if (isset($siteContactData)) {
+            if (is_null($primarySiteContactId)) {
+                $this->simproApiClient->postSiteContact($siteId, $siteContactData);
+            } else {
+                $this->simproApiClient->patchSiteContact($siteId, $primarySiteContactId, $siteContactData);
+            }
         }
 
         return $this->simproApiClient->postJob($siteId, $jobData);
     }
 
-    protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): array
+    protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): ?array
     {
-        if (!isset($jobDetails->Jobs->Job->Location->Occupants->Occupant)) {
-            throw new Exception('Incorrect "getjobsextcont" response format');
+        if (!isset($jobDetails->Jobs->Job->Location)) {
+            return null;
         }
 
-        $location = $jobDetails->Jobs->Job->Location;
-        $occupant = $jobDetails->Jobs->Job->Location->Occupants->Occupant;
-
-        //TODO: add after it is implemented on Riverside side:
-        //  PrimaryContact.Email, PrimaryContact.CellPhone, PrimaryContact.WorkPhone, PrimaryContact.PreferredNotificationMethod
-        return [
-            'Name' => $location['address1'],
-            'Address' => [
-                'Address' => $location['address1'],
-                'City' => $location['address2'],
-                'State' => $location['address3'],
-                'PostalCode' => $location['post_code'],
-            ],
-            'PrimaryContact' => [
-                'Title' => $occupant['Person_Title'],
-                'GivenName' => $occupant['Person_Forenames'],
-                'FamilyName' => $occupant['Person_Surname'],
-            ],
+        $dataFromRiverside = [
+            'location' => $this->convertXmlAttributesToArray($jobDetails->Jobs->Job->Location)
         ];
+
+        $siteData = $this->convertDataFromRiversideToSimproSiteData($dataFromRiverside);
+
+        return empty($siteData)
+            ? null
+            : $siteData;
+    }
+
+    protected function convertJobDetailsToSimproSiteContactData(SimpleXMLElement $jobDetails): ?array
+    {
+        if (!isset($jobDetails->Jobs->Job->Location->Occupants->Occupant)) {
+            return null;
+        }
+
+        $dataFromRiverside = [
+            'occupants' => [],
+        ];
+
+        foreach ($jobDetails->Jobs->Job->Location->Occupants->Occupant as $occupant) {
+            $jobDataOccupant = $this->convertXmlAttributesToArray($occupant) + [
+                'contacts' => [],
+            ];
+
+            if (isset($occupant->Contacts->Contact)) {
+                foreach ($occupant->Contacts->Contact as $contact) {
+                    $jobDataOccupant['contacts'][] = $this->convertXmlAttributesToArray($contact);
+                }
+            }
+
+            $dataFromRiverside['occupants'][] = $jobDataOccupant;
+        }
+
+        return $this->convertDataFromRiversideToSiteContactData($dataFromRiverside);
     }
 
     protected function processAbandonStatus(Job $job)
@@ -483,28 +521,56 @@ class JobsFlowService
     {
         $simproData = [];
 
-        if (isset($dataFromRiverside['contact']['contact_type'])) {
-            $contactField = Arr::get(self::RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP, $dataFromRiverside['contact']['contact_type']);
-            if (isset($contactField)) {
-                $this->addFieldToSimproData($simproData, $dataFromRiverside, "PrimaryContact.{$contactField}", 'contact.contact_details');
-            }
-        }
-
-        if (isset($dataFromRiverside['contact']['priority'])) {
-            $priorityValue = Arr::get(self::RIVERSIDE_TO_SIMPRO_CONTACT_PRIORITY_MAP, $dataFromRiverside['contact']['priority']);
-            if (isset($priorityValue)) {
-                Arr::set($simproData, 'PrimaryContact.PreferredNotificationMethod', $priorityValue);
-            }
-        }
-
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Name', 'location.address1');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.Address', 'location.address1');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.City', 'location.address2');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.State', 'location.address3');
         $this->addFieldToSimproData($simproData, $dataFromRiverside, 'Address.PostalCode', 'location.post_code');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.Title', 'occupants.person_title');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.GivenName', 'occupants.person_forenames');
-        $this->addFieldToSimproData($simproData, $dataFromRiverside, 'PrimaryContact.FamilyName', 'occupants.person_surname');
+
+        return $simproData;
+    }
+
+    protected function convertDataFromRiversideToSiteContactData(array $dataFromRiverside): ?array
+    {
+        $primaryOccupant = null;
+
+        foreach ($dataFromRiverside['occupants'] as $occupant) {
+            if (strtolower(Arr::get($occupant, 'main_contact', '')) === 'true') {
+                $primaryOccupant = $occupant;
+                break;
+            }
+
+            if (is_null($primaryOccupant)) {
+                $primaryOccupant = $occupant;
+            }
+        }
+
+        if (is_null($primaryOccupant)) {
+            return null;
+        }
+
+        $simproData = [];
+
+        $this->addFieldToSimproData($simproData, $primaryOccupant, 'Title', 'person_title');
+        $this->addFieldToSimproData($simproData, $primaryOccupant, 'GivenName', 'person_forenames');
+        $this->addFieldToSimproData($simproData, $primaryOccupant, 'FamilyName', 'person_surname');
+
+        foreach ($primaryOccupant['contacts'] as $contact) {
+            $simproField = Arr::get(
+                self::RIVERSIDE_TO_SIMPRO_CONTACT_TYPE_MAP,
+                strtolower(Arr::get($contact, 'contact_type'))
+            );
+
+            if (isset($simproField)) {
+                $simproData[$simproField] = Arr::get($contact, 'contact_details', '');
+            }
+        }
+
+        if (empty($simproData)) {
+            return null;
+        }
+
+        $simproData['PrimaryContact'] = true;
 
         return $simproData;
     }
@@ -518,5 +584,16 @@ class JobsFlowService
                 Arr::get($dataFromRiverside, $riversideField)
             );
         }
+    }
+
+    protected function convertXmlAttributesToArray(SimpleXMLElement $xml): array
+    {
+        $result = [];
+
+        foreach ($xml->attributes() as $attribute => $value) {
+            $result[strtolower($attribute)] = (string) $value;
+        }
+
+        return $result;
     }
 }

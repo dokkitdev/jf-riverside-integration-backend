@@ -1,0 +1,71 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 2,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/jobs\/101",
+            "method": "get",
+            "request_body": "{\"display\":\"all\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "{\"Site\":{\"ID\":1111}}",
+            "response_headers": "{\"any\":[\"headers\"]}"
+        },
+        {
+            "id": 3,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "riverside",
+            "url": "https:\/\/oh.services.riverside.org.uk\/test.openaccess\/webservice.p",
+            "method": "post",
+            "request_body": "<?xml version=\"1.0\" ?>\n<message>\n    <Header>\n        <Security username=\"fake_riverside_user_name\" password=\"fake_riverside_password\" \/>\n    <\/Header>\n    <Body>\n        <Request request_type=\"getjobsextcont\">\n            <Parameters attribute=\"secret\" attribute_value=\"fake_riverside_secret\" \/>\n            <Parameters attribute=\"job_no\" attribute_value=\"job_2\" \/>\n        <\/Request>\n    <\/Body>\n<\/message>",
+            "request_headers": "{\"Accept\":\"application\\\/xml\",\"Content-Type\":\"application\\\/xml\"}",
+            "response_status_code": 200,
+            "response_body": "<?xml version=\"1.0\" ?>\n<Root>\n    <Jobs Action_Type=\"\">\n        <Job>\n            <Location\n                    address1=\"4 DUNURE COURT\"\n                    address2=\"PENNYBURN\"\n                    address3=\"KILWINNING\"\n                    post_code=\"KA13 6SF\"\n            >SOME TEXT\n                <Occupants>\n                    <Occupant\n                            Main_Contact=\"FALSE\"\n                            Person_Forenames=\"Bugs\"\n                            Person_Surname=\"Bunny\"\n                            Person_Title=\"Mr\"\n                    >\n                        <Contacts>\n                            <Contact\n                                    Contact_Details=\"person3@example.com\"\n                                    Contact_Type=\"eml\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"5555555555\"\n                                    Contact_Type=\"mbl\"\n                            \/>\n                            <Contact\n                                    Contact_Type=\"TEL\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"not-used-value-1\"\n                                    Contact_Type=\"UNKNWN\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"not-used-value-2\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"6666666666\"\n                                    Contact_Type=\"WTL\"\n                            \/>\n                        <\/Contacts>\n                    <\/Occupant>\n                    <Occupant\n                            Main_Contact=\"FALSE\"\n                            Person_Forenames=\"Person1Forenames\"\n                            Person_Surname=\"Person1Surname\"\n                            Person_Title=\"Mrs\"\n                    >\n                        <Contacts>\n                            <Contact\n                                    Contact_Details=\"person1@example.com\"\n                                    Contact_Type=\"eml\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"1111111111\"\n                                    Contact_Type=\"mbl\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"2222222222\"\n                                    Contact_Type=\"TEL\"\n                            \/>\n                        <\/Contacts>\n                    <\/Occupant>\n                    <Occupant\n                            Person_Forenames=\"Person2Forenames\"\n                            Person_Surname=\"Person2Surname\"\n                            Person_Title=\"Mrs\"\n                    >\n                        <Contacts>\n                            <Contact\n                                    Contact_Details=\"person2@example.com\"\n                                    Contact_Type=\"eml\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"3333333333\"\n                                    Contact_Type=\"mbl\"\n                            \/>\n                            <Contact\n                                    Contact_Details=\"4444444444\"\n                                    Contact_Type=\"TEL\"\n                            \/>\n                        <\/Contacts>\n                    <\/Occupant>\n                <\/Occupants>\n            <\/Location>\n        <\/Job>\n    <\/Jobs>\n<\/Root>",
+            "response_headers": "[]"
+        },
+        {
+            "id": 4,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/1111",
+            "method": "patch",
+            "request_body": "{\"Name\":\"4 DUNURE COURT\",\"Address\":{\"Address\":\"4 DUNURE COURT\",\"City\":\"PENNYBURN\",\"State\":\"KILWINNING\",\"PostalCode\":\"KA13 6SF\"},\"Customers\":[83]}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 204,
+            "response_body": "{\"any\":\"data\"}",
+            "response_headers": "{\"any\":[\"headers\"]}"
+        },
+        {
+            "id": 5,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/1111\/contacts\/",
+            "method": "get",
+            "request_body": "{\"PrimaryContact\":\"true\",\"columns\":\"ID\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "[{\"ID\":2222}]",
+            "response_headers": "[]"
+        },
+        {
+            "id": 6,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/1111\/contacts\/2222",
+            "method": "patch",
+            "request_body": "{\"Title\":\"Mr\",\"GivenName\":\"Bugs\",\"FamilyName\":\"Bunny\",\"Email\":\"person3@example.com\",\"CellPhone\":\"5555555555\",\"AltPhone\":\"\",\"WorkPhone\":\"6666666666\",\"PrimaryContact\":true}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 204,
+            "response_body": "[]",
+            "response_headers": "[]"
+        }
+    ],
+    "deleted": []
+}

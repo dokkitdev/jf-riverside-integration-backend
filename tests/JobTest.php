@@ -32,42 +32,36 @@ class JobTest extends TestCase
         self::$originJobOperationRequestLog = self::$originJobOperationRequestLog ?? $this->getDataSet('job_operation_request_log');
     }
 
-    public function testCreateWithNewSite()
+    public function getTestCreateData()
     {
-        $this->dontWrapIntoTransaction();
-
-        $this->mockHttpRequestService($this->getJsonFixture('create_job__new_site__requests_chain.json'));
-
-        $response = $this->xml('post', '/jobs', 'create_job__new_site__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
-
-        $response->assertStatus(Response::HTTP_OK);
-
-        $this->assertEqualsFixture('create_job__new_site__response.json', $response->json());
-
-        Queue::assertNothingPushed();
-
-        $this->assertChangesEqualsFixture('request_logs', 'create_job__new_site__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'create_job__new_site__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'create_job__new_site__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__new_site__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        return [
+            ['test_case' => 'create_job__new_site'],
+            ['test_case' => 'create_job__new_site__no_primary_contact_data'],
+            ['test_case' => 'create_job__new_site__no_valuable_contact_data'],
+            ['test_case' => 'create_job__new_site__no_contact_data_at_all'],
+            ['test_case' => 'create_job__existed_site__no_primary_contact_in_simpro'],
+            ['test_case' => 'create_job__existed_site__exists_primary_contact_in_simpro'],
+            ['test_case' => 'create_job__existed_site__no_valuable_contact_data'],
+        ];
     }
 
-    public function testCreateWithExistedSite()
+    /** @dataProvider getTestCreateData */
+    public function testCreateWithNewSite($testCase)
     {
-        $this->mockHttpRequestService($this->getJsonFixture('create_job__existed_site__requests_chain.json'));
+        $this->mockHttpRequestService($this->getJsonFixture("{$testCase}/requests_chain.json"));
 
-        $response = $this->xml('post', '/jobs', 'create_job__existed_site__request.xml', ['HEADER_NAME' => 'HEADER_VALUE']);
+        $response = $this->xml('post', '/jobs', "{$testCase}/request.xml", ['HEADER_NAME' => 'HEADER_VALUE']);
 
         $response->assertStatus(Response::HTTP_OK);
 
-        $this->assertEqualsFixture('create_job__existed_site__response.json', $response->json());
+        $this->assertEqualsFixture("{$testCase}/response.json", $response->json());
 
         Queue::assertNothingPushed();
 
-        $this->assertChangesEqualsFixture('request_logs', 'create_job__existed_site__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'create_job__existed_site__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'create_job__existed_site__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'create_job__existed_site__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        $this->assertChangesEqualsFixture('request_logs', "{$testCase}/request_logs_state.json", self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', "{$testCase}/jobs_state.json", self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', "{$testCase}/job_operations_state.json", self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', "{$testCase}/job_operation_request_log_state.json", self::$originJobOperationRequestLog);
     }
 
     public function testCreateMultipleJobs()

@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class BaseApiClient
 {
+    protected const REQUEST_TIMEOUT_SECONDS = 300;
+
     protected HttpRequestService $httpRequestService;
     protected RequestLogService $requestLogService;
 
@@ -35,6 +37,7 @@ abstract class BaseApiClient
         $response = $this->httpRequestService
             ->set('http_errors', false)
             ->set('verify', false)
+            ->set('timeout', self::REQUEST_TIMEOUT_SECONDS)
             ->$method($url, $requestData, $headers)
             ->getResponse();
 

@@ -111,20 +111,32 @@ class UpdateSiteInfoTest extends TestCase
         $this->assertNoChanges('job_operation_request_log', self::$originJobOperationRequestLog);
     }
 
-    public function testUpdateSiteInfoSuccess()
+    public function getTestUpdateSiteInfoSuccessData()
     {
-        $this->mockHttpRequestService($this->getJsonFixture('update_ste_info__success__requests_chain.json'));
+        return [
+            ['test_case' => 'update_site_info__no_primary_contact_in_simpro'],
+            ['test_case' => 'update_site_info__exists_primary_contact_in_simpro'],
+            ['test_case' => 'update_site_info__no_valuable_site_and_contact_data'],
+            ['test_case' => 'update_site_info__no_site_and_contact'],
+            ['test_case' => 'update_site_info__no_main_contact_in_riverside_data'],
+        ];
+    }
+
+    /** @dataProvider getTestUpdateSiteInfoSuccessData */
+    public function testUpdateSiteInfoSuccess($testCase)
+    {
+        $this->mockHttpRequestService($this->getJsonFixture("{$testCase}/requests_chain.json"));
 
         (new UpdateSiteInfoJob(2, 3))->handle();
 
-        $this->assertChangesEqualsFixture('job_operations', 'update_ste_info__success__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('request_logs', 'update_ste_info__success__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'update_ste_info__success__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        $this->assertChangesEqualsFixture('job_operations', "{$testCase}/job_operations_state.json", self::$originJobOperations);
+        $this->assertChangesEqualsFixture('request_logs', "{$testCase}/request_logs_state.json", self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operation_request_log', "{$testCase}/job_operation_request_log_state.json", self::$originJobOperationRequestLog);
     }
 
     public function testUpdateSiteInfoError()
     {
-        $this->mockHttpRequestService($this->getJsonFixture('update_ste_info__error__requests_chain.json'));
+        $this->mockHttpRequestService($this->getJsonFixture('update_site_info__error/requests_chain.json'));
 
         $job = new UpdateSiteInfoJob(2, 3);
 
@@ -137,9 +149,9 @@ class UpdateSiteInfoTest extends TestCase
 
         $this->assertTrue($expectedExceptionThrown);
 
-        $this->assertChangesEqualsFixture('job_operations', 'update_ste_info__error__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('request_logs', 'update_ste_info__error__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'update_ste_info__error__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        $this->assertChangesEqualsFixture('job_operations', 'update_site_info__error/job_operations_state.json', self::$originJobOperations);
+        $this->assertChangesEqualsFixture('request_logs', 'update_site_info__error/request_logs_state.json', self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('job_operation_request_log', 'update_site_info__error/job_operation_request_log_state.json', self::$originJobOperationRequestLog);
     }
 
     public function testUpdateSiteInfoQueueJobFailed()
