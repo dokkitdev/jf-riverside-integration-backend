@@ -104,7 +104,7 @@ class SimproApiClient extends BaseApiClient
             'get',
             "/sites/{$siteId}/contacts/",
             [
-                'PrimaryContact' => true,
+                'PrimaryContact' => 'true',
                 'columns' => 'ID',
             ]
         );

@@ -15,6 +15,8 @@ class InitUpdateSitesInfoJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $uniqueFor = 3600;
+
     protected Carbon $dateTime;
 
     public function __construct(Carbon $dateTime)
