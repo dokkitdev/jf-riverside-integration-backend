@@ -14,6 +14,8 @@ class UpdateSiteInfoJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $uniqueFor = 3600;
+
     protected int $jobId;
     protected int $jobOperationId;
 
