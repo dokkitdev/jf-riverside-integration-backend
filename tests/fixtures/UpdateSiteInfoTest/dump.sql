@@ -14,3 +14,6 @@ INSERT INTO job_operations (id, job_id, operation, status, details, created_at, 
     (1, 1, 'create', 'success', null, '2018-10-10 10:10:10', '2018-10-10 10:10:10'),
     (2, 7, 'create', 'success', null, '2018-10-10 10:10:10', '2018-10-10 10:10:10'),
     (3, 2, 'update_site_info', 'in_progress', null, '2018-10-10 10:10:10', '2018-10-10 10:10:10');
+
+INSERT INTO job_operation_request_log (id, job_operation_id, request_log_id) VALUES
+    (1, 1, 1);

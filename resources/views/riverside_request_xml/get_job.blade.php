@@ -4,7 +4,7 @@
         <Security username="{{$user_name}}" password="{{$password}}" />
     </Header>
     <Body>
-        <Request request_type="cancelapptextcont">
+        <Request request_type="getjobsextcont">
             <Parameters attribute="secret" attribute_value="{{$secret}}" />
             <Parameters attribute="job_no" attribute_value="{{$job_order_no}}" />
         </Request>

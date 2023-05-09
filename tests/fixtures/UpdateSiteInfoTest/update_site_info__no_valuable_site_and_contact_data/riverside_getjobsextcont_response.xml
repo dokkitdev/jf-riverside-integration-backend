@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<Root>
+    <Jobs Action_Type="">
+        <Job>
+            <Location
+                    address5="4 DUNURE COURT"
+                    address6="PENNYBURN"
+                    address7="KILWINNING"
+                    post_code_qwe="KA13 6SF"
+            >SOME TEXT
+                <Occupants>
+                    <Occupant
+                            Main_Contact_qwe="TRUE"
+                            Person_Forenames_qwe="Bugs"
+                            Person_Surname_qwe="Bunny"
+                            Person_Title_qwe="Mr"
+                    >
+                        <Contacts>
+                            <Contact
+                                    Contact_Details_qwe="person3@example.com"
+                                    Contact_Type_qwe="eml"
+                            />
+                            <Contact
+                                    Contact_Details_qwe="5555555555"
+                                    Contact_Type_qwe="mbl"
+                            />
+                            <Contact
+                                    Contact_Type_qwe="TEL"
+                            />
+                            <Contact
+                                    Contact_Details="not-used-value-1"
+                                    Contact_Type="UNKNWN"
+                            />
+                            <Contact
+                                    Contact_Details="not-used-value-2"
+                            />
+                            <Contact
+                                    Contact_Details_qwe="6666666666"
+                                    Contact_Type_qwe="WTL"
+                            />
+                        </Contacts>
+                    </Occupant>
+                </Occupants>
+            </Location>
+        </Job>
+    </Jobs>
+</Root>

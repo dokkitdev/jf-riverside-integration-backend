@@ -1,0 +1,115 @@
+[
+    {
+        "request": {
+            "type": "get",
+            "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/sites/",
+            "data": {
+                "CustomFields.Value": "test_place_ref",
+                "CustomFields.CustomField.ID": 2,
+                "columns": "ID"
+            },
+            "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": "Bearer fake_simpro_token"
+            }
+        },
+        "response": {
+            "status_code": 200,
+            "data": [],
+            "headers": []
+        }
+    },
+    {
+        "request": {
+            "type": "post",
+            "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/sites/",
+            "data": {
+                "Name": "test_address1",
+                "Address": {
+                    "Address": "test_address1",
+                    "City": "test_address2",
+                    "State": "test_address3",
+                    "PostalCode": "test_post_code"
+                },
+                "Customers": [
+                    83
+                ]
+            },
+            "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": "Bearer fake_simpro_token"
+            }
+        },
+        "response": {
+            "status_code": 201,
+            "data": {
+                "ID": 1234
+            },
+            "headers": []
+        }
+    },
+    {
+        "request": {
+            "type": "patch",
+            "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/sites/1234/customFields/2",
+            "data": {
+                "Value": "test_place_ref"
+            },
+            "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": "Bearer fake_simpro_token"
+            }
+        },
+        "response": {
+            "status_code": 204,
+            "data": [],
+            "headers": []
+        }
+    },
+    {
+        "request": {
+            "type": "post",
+            "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/",
+            "data": {
+                "Site": 1234,
+                "Type": "Service",
+                "Stage": "Pending",
+                "Customer": 83,
+                "Status": 7,
+                "OrderNo": "test_new_job_no",
+                "Name": "test_short_description",
+                "Description": "Job Type: test_job_type, Description: test_long_description, Sub Location: test_sub_location_description, Appointment Information: test_appointment_date test_appointment_slot",
+                "Notes": "test_access_info test_element_code test_element_description",
+                "DueDate": "2018-11-11",
+                "DueTime": "15:11",
+                "ResponseTime": 3,
+                "Sections": [
+                    {
+                        "CostCenters": [
+                            {
+                                "CostCenter": 4,
+                                "Description": "SORJ",
+                                "Stage": "Pending"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": "Bearer fake_simpro_token"
+            }
+        },
+        "response": {
+            "status_code": 201,
+            "data": {
+                "ID": 9999
+            },
+            "headers": []
+        }
+    }
+]
