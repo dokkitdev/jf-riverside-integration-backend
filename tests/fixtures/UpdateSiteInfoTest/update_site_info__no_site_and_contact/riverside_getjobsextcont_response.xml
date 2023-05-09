@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<Root>
+    <Jobs Action_Type="">
+        <Job>
+            <Location
+                    address5="4 DUNURE COURT"
+                    address6="PENNYBURN"
+                    address7="KILWINNING"
+                    post_code_qwe="KA13 6SF"
+            >SOME TEXT
+            </Location>
+        </Job>
+    </Jobs>
+</Root>
