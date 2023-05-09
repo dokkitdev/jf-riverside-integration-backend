@@ -12,7 +12,6 @@ use App\Models\Job;
 use App\Models\JobOperation;
 use App\Resources\SimproApi\SimproWebhookResource;
 use Illuminate\Support\Arr;
-use Exception;
 use Illuminate\Support\Carbon;
 use SimpleXMLElement;
 use Throwable;
@@ -283,10 +282,23 @@ class JobsFlowService
             $simproJobDetails = $this->simproApiClient->getJob($job['simpro_job_id']);
             $riversideJobDetails = $this->riversideApiClient->getJob($job['order_no']);
 
-            $this->simproApiClient->patchSite(
-                $simproJobDetails['Site']['ID'],
-                $this->convertJobDetailsToSimproSiteData($riversideJobDetails)
-            );
+            $simproSiteId = $simproJobDetails['Site']['ID'];
+
+            $siteData = $this->convertJobDetailsToSimproSiteData($riversideJobDetails);
+            if (isset($siteData)) {
+                $this->simproApiClient->patchSite($simproSiteId, $siteData);
+            }
+
+            $siteContactData = $this->convertJobDetailsToSimproSiteContactData($riversideJobDetails);
+            if (isset($siteContactData)) {
+                $primarySiteContactId = $this->simproApiClient->findSitePrimaryContactId($simproSiteId);
+
+                if (is_null($primarySiteContactId)) {
+                    $this->simproApiClient->postSiteContact($simproSiteId, $siteContactData);
+                } else {
+                    $this->simproApiClient->patchSiteContact($simproSiteId, $primarySiteContactId, $siteContactData);
+                }
+            }
 
             $jobOperation['status'] = JobOperation::STATUS_SUCCESS;
         }, $jobOperationId);
@@ -330,31 +342,48 @@ class JobsFlowService
         return $this->simproApiClient->postJob($siteId, $jobData);
     }
 
-    protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): array
+    protected function convertJobDetailsToSimproSiteData(SimpleXMLElement $jobDetails): ?array
     {
-        if (!isset($jobDetails->Jobs->Job->Location->Occupants->Occupant)) {
-            throw new Exception('Incorrect "getjobsextcont" response format');
+        if (!isset($jobDetails->Jobs->Job->Location)) {
+            return null;
         }
 
-        $location = $jobDetails->Jobs->Job->Location;
-        $occupant = $jobDetails->Jobs->Job->Location->Occupants->Occupant;
-
-        //TODO: add after it is implemented on Riverside side:
-        //  PrimaryContact.Email, PrimaryContact.CellPhone, PrimaryContact.WorkPhone, PrimaryContact.PreferredNotificationMethod
-        return [
-            'Name' => $location['address1'],
-            'Address' => [
-                'Address' => $location['address1'],
-                'City' => $location['address2'],
-                'State' => $location['address3'],
-                'PostalCode' => $location['post_code'],
-            ],
-            'PrimaryContact' => [
-                'Title' => $occupant['Person_Title'],
-                'GivenName' => $occupant['Person_Forenames'],
-                'FamilyName' => $occupant['Person_Surname'],
-            ],
+        $dataFromRiverside = [
+            'location' => $this->convertXmlAttributesToArray($jobDetails->Jobs->Job->Location)
         ];
+
+        $siteData = $this->convertDataFromRiversideToSimproSiteData($dataFromRiverside);
+
+        return empty($siteData)
+            ? null
+            : $siteData;
+    }
+
+    protected function convertJobDetailsToSimproSiteContactData(SimpleXMLElement $jobDetails): ?array
+    {
+        if (!isset($jobDetails->Jobs->Job->Location->Occupants->Occupant)) {
+            return null;
+        }
+
+        $dataFromRiverside = [
+            'occupants' => [],
+        ];
+
+        foreach ($jobDetails->Jobs->Job->Location->Occupants->Occupant as $occupant) {
+            $jobDataOccupant = $this->convertXmlAttributesToArray($occupant) + [
+                'contacts' => [],
+            ];
+
+            if (isset($occupant->Contacts->Contact)) {
+                foreach ($occupant->Contacts->Contact as $contact) {
+                    $jobDataOccupant['contacts'][] = $this->convertXmlAttributesToArray($contact);
+                }
+            }
+
+            $dataFromRiverside['occupants'][] = $jobDataOccupant;
+        }
+
+        return $this->convertDataFromRiversideToSiteContactData($dataFromRiverside);
     }
 
     protected function processAbandonStatus(Job $job)
@@ -555,5 +584,16 @@ class JobsFlowService
                 Arr::get($dataFromRiverside, $riversideField)
             );
         }
+    }
+
+    protected function convertXmlAttributesToArray(SimpleXMLElement $xml): array
+    {
+        $result = [];
+
+        foreach ($xml->attributes() as $attribute => $value) {
+            $result[strtolower($attribute)] = (string) $value;
+        }
+
+        return $result;
     }
 }
