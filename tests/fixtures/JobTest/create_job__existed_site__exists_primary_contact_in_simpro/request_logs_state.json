@@ -47,7 +47,7 @@
             "destination": "simpro",
             "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/2345\/contacts\/",
             "method": "get",
-            "request_body": "{\"PrimaryContact\":true,\"columns\":\"ID\"}",
+            "request_body": "{\"PrimaryContact\":\"true\",\"columns\":\"ID\"}",
             "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
             "response_status_code": 200,
             "response_body": "[{\"ID\":6789}]",

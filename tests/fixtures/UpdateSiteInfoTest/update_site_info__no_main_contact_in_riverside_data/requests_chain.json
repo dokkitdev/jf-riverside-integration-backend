@@ -28,7 +28,7 @@
     "request": {
       "type": "post",
       "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
-      "data": "update_ste_info__success__riverside_getjobsextcont_request.xml",
+      "data": "update_site_info__no_main_contact_in_riverside_data/riverside_getjobsextcont_request.xml",
       "headers": {
         "Accept": "application/xml",
         "Content-Type": "application/xml"
@@ -36,7 +36,7 @@
     },
     "response": {
       "status_code": 200,
-      "data": "update_ste_info__success__riverside_getjobsextcont_response.xml",
+      "data": "update_site_info__no_main_contact_in_riverside_data/riverside_getjobsextcont_response.xml",
       "headers": []
     }
   },
@@ -52,11 +52,6 @@
           "City": "PENNYBURN",
           "State": "KILWINNING",
           "PostalCode": "KA13 6SF"
-        },
-        "PrimaryContact": {
-          "Title": "Mr",
-          "GivenName": "Bugs",
-          "FamilyName": "Bunny"
         }
       },
       "headers": {
@@ -73,6 +68,56 @@
       "headers": {
         "any": "headers"
       }
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/sites/1111/contacts/",
+      "data": {
+        "PrimaryContact": "true",
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application\/json",
+        "Content-Type": "application\/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {
+          "ID": 2222
+        }
+      ],
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "patch",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/sites/1111/contacts/2222",
+      "data": {
+        "Title": "Mr",
+        "GivenName": "Bugs",
+        "FamilyName": "Bunny",
+        "Email": "person3@example.com",
+        "CellPhone": "5555555555",
+        "AltPhone": "",
+        "WorkPhone": "6666666666",
+        "PrimaryContact": true
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 204,
+      "data": [],
+      "headers": []
     }
   }
 ]

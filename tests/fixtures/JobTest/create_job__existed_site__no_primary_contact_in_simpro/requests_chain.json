@@ -57,7 +57,7 @@
             "type": "get",
             "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/sites/2345/contacts/",
             "data": {
-                "PrimaryContact": true,
+                "PrimaryContact": "true",
                 "columns": "ID"
             },
             "headers": {
