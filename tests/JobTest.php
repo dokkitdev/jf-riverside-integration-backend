@@ -255,77 +255,74 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('job_operation_request_log', 'process_webhook_job.stage.complete__empty_part_no__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
     }
 
-    public function testProcessingSimproWebhookJobScheduleCreatedAppointmentSent()
+    public function getTestProcessingSimproWebhookJobScheduleCreatedData()
     {
-        DB::table('jobs')->where('id', 2)->update(['is_appointment_sent' => true]);
-        $originJobs = $this->getDataSet('jobs');
-
-        $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.schedule.created__appointment_sent__requests_chain.json'));
-
-        $webhookData = $this->getJsonFixture('process_webhook_job.schedule.created__appointment_sent__webhook_data.json');
-        $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
-        (new ProcessSimproWebhookJob($webhookResource, 4))->handle();
-
-        $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.schedule.created__appointment_sent__request_logs_state.json', self::$originRequestLogs);
-        $this->assertNoChanges('jobs', $originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.schedule.created__appointment_sent__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'process_webhook_job.schedule.created__appointment_sent__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        return [
+            [
+                'test_case' => 'process_webhook__job_schedule_created__appointment_sent',
+                'job_operation_id' => 3,
+            ],
+            [
+                'test_case' => 'process_webhook__job_schedule_created__riverside_unexpectedly_doesnt_have_appointment',
+                'job_operation_id' => 3,
+            ],
+            [
+                'test_case' => 'process_webhook__job_schedule_created__appointment_not_sent',
+                'job_operation_id' => 4,
+            ],
+            [
+                'test_case' => 'process_webhook__job_schedule_created__riverside_already_has_appointment',
+                'job_operation_id' => 4,
+            ],
+        ];
     }
 
-    public function testProcessingSimproWebhookJobScheduleCreatedAppointmentNotSent()
+    /** @dataProvider getTestProcessingSimproWebhookJobScheduleCreatedData */
+    public function testProcessingSimproWebhookJobScheduleCreatedAppointmentSent($testCase, $jobOperationId)
     {
-        $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.schedule.created__appointment_not_sent__requests_chain.json'));
+        $this->mockHttpRequestService($this->getJsonFixture("{$testCase}/requests_chain.json"));
 
-        $webhookData = $this->getJsonFixture('process_webhook_job.schedule.created__appointment_not_sent__webhook_data.json');
+        $webhookData = $this->getJsonFixture("{$testCase}/webhook_data.json");
         $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
-        (new ProcessSimproWebhookJob($webhookResource, 4))->handle();
+        (new ProcessSimproWebhookJob($webhookResource, $jobOperationId))->handle();
 
-        $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.schedule.created__appointment_not_sent__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'process_webhook_job.schedule.created__appointment_not_sent__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.schedule.created__appointment_not_sent__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'process_webhook_job.schedule.created__appointment_not_sent__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        $this->assertChangesEqualsFixture('request_logs', "{$testCase}/request_logs_state.json", self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', "{$testCase}/jobs_state.json", self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', "{$testCase}/job_operations_state.json", self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', "{$testCase}/job_operation_request_log_state.json", self::$originJobOperationRequestLog);
     }
 
-    public function testProcessingSimproWebhookJobScheduleCreatedRiversideAlreadyHasAppointment()
+    public function getTestProcessingSimproWebhookJobStatusChangedStatusAbandon()
     {
-        $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.schedule.created__riverside_already_has_appointment__requests_chain.json'));
-
-        $webhookData = $this->getJsonFixture('process_webhook_job.schedule.created__riverside_already_has_appointment__webhook_data.json');
-        $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
-        (new ProcessSimproWebhookJob($webhookResource, 4))->handle();
-
-        $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.schedule.created__riverside_already_has_appointment__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'process_webhook_job.schedule.created__riverside_already_has_appointment__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.schedule.created__riverside_already_has_appointment__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'process_webhook_job.schedule.created__riverside_already_has_appointment__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        return [
+            [
+                'test_case' => 'process_webhook__job_status__abandon__appointment_not_sent',
+                'job_operation_id' => 4,
+            ],
+            [
+                'test_case' => 'process_webhook__job_status__abandon__appointment_sent',
+                'job_operation_id' => 3,
+            ],
+            [
+                'test_case' => 'process_webhook__job_status__abandon__riverside_unexpectedly_doesnt_have_appointment',
+                'job_operation_id' => 3,
+            ],
+        ];
     }
 
-    public function testProcessingSimproWebhookJobStatusChangedStatusAbandonAppointmentNotSent()
+    /** @dataProvider getTestProcessingSimproWebhookJobStatusChangedStatusAbandon */
+    public function testProcessingSimproWebhookJobStatusChangedStatusAbandonAppointmentNotSent($testCase, $jobOperationId)
     {
-        $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.status__abandon__appointment_not_sent__requests_chain.json'));
+        $this->mockHttpRequestService($this->getJsonFixture("{$testCase}/requests_chain.json"));
 
-        $webhookData = $this->getJsonFixture('process_webhook_job.status__abandon__appointment_not_sent__webhook_data.json');
+        $webhookData = $this->getJsonFixture("{$testCase}/webhook_data.json");
         $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
-        (new ProcessSimproWebhookJob($webhookResource, 4))->handle();
+        (new ProcessSimproWebhookJob($webhookResource, $jobOperationId))->handle();
 
-        $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.status__abandon__appointment_not_sent__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'process_webhook_job.status__abandon__appointment_not_sent__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.status__abandon__appointment_not_sent__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'process_webhook_job.status__abandon__appointment_not_sent__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
-    }
-
-    public function testProcessingSimproWebhookJobStatusChangedStatusAbandonAppointmentSent()
-    {
-        $this->mockHttpRequestService($this->getJsonFixture('process_webhook_job.status__abandon__appointment_sent__requests_chain.json'));
-
-        $webhookData = $this->getJsonFixture('process_webhook_job.status__abandon__appointment_sent__webhook_data.json');
-        $webhookResource = SimproWebhookResource::makeFromSimproRequestData($webhookData);
-        (new ProcessSimproWebhookJob($webhookResource, 3))->handle();
-
-        $this->assertChangesEqualsFixture('request_logs', 'process_webhook_job.status__abandon__appointment_sent__request_logs_state.json', self::$originRequestLogs);
-        $this->assertChangesEqualsFixture('jobs', 'process_webhook_job.status__abandon__appointment_sent__jobs_state.json', self::$originJobs);
-        $this->assertChangesEqualsFixture('job_operations', 'process_webhook_job.status__abandon__appointment_sent__job_operations_state.json', self::$originJobOperations);
-        $this->assertChangesEqualsFixture('job_operation_request_log', 'process_webhook_job.status__abandon__appointment_sent__job_operation_request_log_state.json', self::$originJobOperationRequestLog);
+        $this->assertChangesEqualsFixture('request_logs', "{$testCase}/request_logs_state.json", self::$originRequestLogs);
+        $this->assertChangesEqualsFixture('jobs', "{$testCase}/jobs_state.json", self::$originJobs);
+        $this->assertChangesEqualsFixture('job_operations', "{$testCase}/job_operations_state.json", self::$originJobOperations);
+        $this->assertChangesEqualsFixture('job_operation_request_log', "{$testCase}/job_operation_request_log_state.json", self::$originJobOperationRequestLog);
     }
 
     public function testProcessingSimproWebhookJobStatusChangedStatusNoAccess()

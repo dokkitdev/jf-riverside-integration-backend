@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<Root>
+    <Cancel_appointment/>
+    <ErrorDetails>There is no Open Appointment for Job job_for_webhooks_appointment_sent, Appointment cannot be cancelled.</ErrorDetails>
+</Root>

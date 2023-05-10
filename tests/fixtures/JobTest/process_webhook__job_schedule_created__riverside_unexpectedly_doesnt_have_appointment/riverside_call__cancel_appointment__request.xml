@@ -6,7 +6,7 @@
     <Body>
         <Request request_type="cancelapptextcont">
             <Parameters attribute="secret" attribute_value="fake_riverside_secret" />
-            <Parameters attribute="job_no" attribute_value="job_for_webhooks" />
+            <Parameters attribute="job_no" attribute_value="job_for_webhooks_appointment_sent" />
             <Parameters attribute="appointment_abandonment_reason" attribute_value="ASSIGNED" />
         </Request>
     </Body>

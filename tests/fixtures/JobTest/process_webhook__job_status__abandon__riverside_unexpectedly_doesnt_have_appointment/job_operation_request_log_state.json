@@ -3,18 +3,13 @@
     "created": [
         {
             "id": 6,
-            "job_operation_id": 4,
+            "job_operation_id": 3,
             "request_log_id": 4
         },
         {
             "id": 7,
-            "job_operation_id": 4,
+            "job_operation_id": 3,
             "request_log_id": 5
-        },
-        {
-            "id": 8,
-            "job_operation_id": 4,
-            "request_log_id": 6
         }
     ],
     "deleted": []
