@@ -6,7 +6,6 @@ use App\Exceptions\ApiClientHttpException;
 use App\Exceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Models\RequestLog;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 use Psr\Http\Message\ResponseInterface;
 use SimpleXMLElement;
 use Exception;
@@ -16,6 +15,8 @@ class RiversideApiClient extends BaseApiClient
     protected const DATE_FORMAT = 'd/m/Y';
     protected const TIME_FORMAT = 'H:i:s';
     protected const TIME_FORMAT_SEND_APPOINTMENT = 'H:i';
+
+    protected const ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY = '/.*already has an appointment logged.*/';
 
     protected $baseUrl;
     protected $userName;
@@ -75,11 +76,19 @@ class RiversideApiClient extends BaseApiClient
 
     public function sendAppointment(string $jobOrderNo, Carbon $scheduleDate, Carbon $scheduleStartTime)
     {
-        $this->makeRequest('riverside_request_xml.appointment_send', [
-            'job_order_no' => $jobOrderNo,
-            'schedule_date' => $scheduleDate->format(self::DATE_FORMAT),
-            'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT_SEND_APPOINTMENT),
-        ]);
+        try {
+            $this->makeRequest('riverside_request_xml.appointment_send', [
+                'job_order_no' => $jobOrderNo,
+                'schedule_date' => $scheduleDate->format(self::DATE_FORMAT),
+                'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT_SEND_APPOINTMENT),
+            ]);
+        } catch (ApiClientHttpException $exception) {
+            if (preg_match(self::ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY, strtolower($exception->getResponseBody()))) {
+                throw new RiversideApiAppointmentLoggedPreviouslyException($exception);
+            }
+
+            throw $exception;
+        }
     }
 
     public function notifyAboutAbandonStatus(string $jobOrderNo, Carbon $date)
@@ -138,10 +147,6 @@ class RiversideApiClient extends BaseApiClient
     protected function parseResponse(ResponseInterface $response): SimpleXMLElement
     {
         $responseContent = (string) $response->getBody();
-
-        if (Str::contains(strtolower($responseContent), 'already has an appointment logged')) {
-            throw new RiversideApiAppointmentLoggedPreviouslyException();
-        }
 
         try {
             $xml = new SimpleXMLElement($responseContent);

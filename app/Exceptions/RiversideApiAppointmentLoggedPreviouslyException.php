@@ -2,8 +2,10 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class RiversideApiAppointmentLoggedPreviouslyException extends Exception
+class RiversideApiAppointmentLoggedPreviouslyException extends ApiClientHttpException
 {
+    public function __construct(ApiClientHttpException $initialException)
+    {
+        parent::__construct($initialException->url, $initialException->statusCode, $initialException->responseBody, $initialException);
+    }
 }
