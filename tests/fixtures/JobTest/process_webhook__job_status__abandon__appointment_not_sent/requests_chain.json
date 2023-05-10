@@ -3,7 +3,7 @@
     "request": {
       "type": "post",
       "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
-      "data": "mock_webhook_job.status__abandon__appointment_not_sent__riverside_notify_about_abandon_status__request.xml",
+      "data": "process_webhook__job_status__abandon__appointment_not_sent/riverside_call__cancel_appointment__request.xml",
       "headers": {
         "Accept": "application/xml",
         "Content-Type": "application/xml"
