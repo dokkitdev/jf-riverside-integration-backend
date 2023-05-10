@@ -17,6 +17,7 @@ class RiversideApiClient extends BaseApiClient
     protected const TIME_FORMAT_SEND_APPOINTMENT = 'H:i';
 
     protected const ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY = '/.*already has an appointment logged.*/';
+    protected const ERROR_PATTERN_NO_APPOINTMENT = '/.*there is no open appointment for job .*, appointment cannot be cancelled.*/';
 
     protected $baseUrl;
     protected $userName;
@@ -69,9 +70,15 @@ class RiversideApiClient extends BaseApiClient
 
     public function cancelAppointment(string $jobOrderNo)
     {
-        $this->makeRequest('riverside_request_xml.appointment_cancel', [
-            'job_order_no' => $jobOrderNo,
-        ]);
+        try {
+            $this->makeRequest('riverside_request_xml.appointment_cancel', [
+                'job_order_no' => $jobOrderNo,
+            ]);
+        } catch (ApiClientHttpException $exception) {
+            if (!preg_match(self::ERROR_PATTERN_NO_APPOINTMENT, strtolower($exception->getResponseBody()))) {
+                throw $exception;
+            }
+        }
     }
 
     public function sendAppointment(string $jobOrderNo, Carbon $scheduleDate, Carbon $scheduleStartTime)
