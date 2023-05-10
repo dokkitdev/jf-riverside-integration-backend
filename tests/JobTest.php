@@ -263,6 +263,10 @@ class JobTest extends TestCase
                 'job_operation_id' => 3,
             ],
             [
+                'test_case' => 'process_webhook__job_schedule_created__riverside_unexpectedly_doesnt_have_appointment',
+                'job_operation_id' => 3,
+            ],
+            [
                 'test_case' => 'process_webhook__job_schedule_created__appointment_not_sent',
                 'job_operation_id' => 4,
             ],
@@ -297,6 +301,10 @@ class JobTest extends TestCase
             ],
             [
                 'test_case' => 'process_webhook__job_status__abandon__appointment_sent',
+                'job_operation_id' => 3,
+            ],
+            [
+                'test_case' => 'process_webhook__job_status__abandon__riverside_unexpectedly_doesnt_have_appointment',
                 'job_operation_id' => 3,
             ],
         ];
