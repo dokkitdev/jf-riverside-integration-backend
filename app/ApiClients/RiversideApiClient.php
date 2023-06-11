@@ -4,6 +4,7 @@ namespace App\ApiClients;
 
 use App\Exceptions\ApiClientHttpException;
 use App\Exceptions\WarningApiClientExceptions\RiversideApiAppointmentLoggedPreviouslyException;
+use App\Exceptions\WarningApiClientExceptions\RiversideApiJobNotFoundException;
 use App\Models\RequestLog;
 use Illuminate\Support\Carbon;
 use Psr\Http\Message\ResponseInterface;
@@ -19,6 +20,7 @@ class RiversideApiClient extends BaseApiClient
     //patterns must be in lower case
     protected const ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY = '/.*already has an appointment logged.*/';
     protected const ERROR_PATTERN_NO_APPOINTMENT = '/.*there is no open appointment for job .*, appointment cannot be cancelled.*/';
+    protected const ERROR_PATTERN_JOB_NOT_FOUND = '/.*job_no .*is invalid.* job .*not found.*/';
 
     protected const KNOWN_ERRORS = [
         [
@@ -28,6 +30,10 @@ class RiversideApiClient extends BaseApiClient
         [
             'pattern' => self::ERROR_PATTERN_NO_APPOINTMENT,
             'exception_class' => null,
+        ],
+        [
+            'pattern' => self::ERROR_PATTERN_JOB_NOT_FOUND,
+            'exception_class' => RiversideApiJobNotFoundException::class,
         ],
     ];
 
