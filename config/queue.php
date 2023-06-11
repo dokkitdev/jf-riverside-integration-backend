@@ -41,6 +41,16 @@ return [
             'retry_after' => 90,
         ],
 
+        'database_with_streams' => [
+            'driver' => 'database_with_streams',
+            'table' => 'queue_worker_jobs',
+            'queue' => implode(',', [
+                'default'
+            ]),
+            'default_queue' => 'default',
+            'retry_after' => 90,
+        ],
+
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => 'localhost',
