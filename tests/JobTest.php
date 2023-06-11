@@ -201,9 +201,11 @@ class JobTest extends TestCase
             ['process_webhook__job_schedule_created__appointment_sent_previously'],
             ['process_webhook__job_schedule_created__riverside_unexpectedly_doesnt_have_appointment'],
             ['process_webhook__job_schedule_created__schedule_not_found'],
+            ['process_webhook__job_schedule_created__job_not_found'],
             ['process_webhook__job_status__abandon__appointment_not_sent_previously'],
             ['process_webhook__job_status__abandon__appointment_sent_previously'],
             ['process_webhook__job_status__abandon__riverside_unexpectedly_doesnt_have_appointment'],
+            ['process_webhook__job_status__any_status__job_not_found'],
             ['process_webhook__job_status__no_access'],
             ['process_webhook__job_status__no_access__many_log_entries'],
         ];
