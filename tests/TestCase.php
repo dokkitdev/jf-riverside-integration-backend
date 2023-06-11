@@ -5,9 +5,11 @@ namespace App\Tests;
 use App\Resources\Resource;
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use ReflectionMethod;
 use RonasIT\Support\Tests\TestCase as BaseTestCase;
 use RonasIT\Support\AutoDoc\Tests\AutoDocTestCaseTrait;
 
@@ -16,6 +18,10 @@ abstract class TestCase extends BaseTestCase
     use AutoDocTestCaseTrait;
 
     protected bool $forceExportMode = false;
+
+    protected $testCaseName = null;
+    protected $requiredOriginStates = [];
+    protected $testCaseOriginStates = [];
 
     /**
      * Creates the application.
@@ -36,6 +42,8 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        $this->setTestCase();
+
         Queue::fake();
     }
 
@@ -46,15 +54,21 @@ abstract class TestCase extends BaseTestCase
         parent::tearDown();
     }
 
-    public function assertChangesEqualsFixture(string $table, string $fixture, Collection $originData, bool $exportMode = false)
+    public function assertChangesEqualsFixture(string $table, ?string $fixture = null, ?Collection $originData = null, bool $exportMode = false)
     {
+        $fixture = $fixture ?? "{$table}_state.json";
+
+        $originData = $originData ?? $this->getOriginState($table);
+
         $changes = $this->getChanges($table, $originData);
 
         $this->assertEqualsFixture($fixture, $changes, $exportMode);
     }
 
-    public function assertNoChanges(string $table, Collection $originData)
+    public function assertNoChanges(string $table, ?Collection $originData = null)
     {
+        $originData = $originData ?? $this->getOriginState($table);
+
         $changes = $this->getChanges($table, $originData);
 
         $this->assertEquals([
@@ -62,6 +76,75 @@ abstract class TestCase extends BaseTestCase
             'created' => [],
             'deleted' => []
         ], $changes);
+    }
+
+    public function getFixturePath(string $fixtureName): string
+    {
+        $class = get_class($this);
+        $explodedClass = explode('\\', $class);
+        $className = Arr::last($explodedClass);
+
+        return base_path("tests/fixtures/{$className}/{$this->testCaseName}/{$fixtureName}");
+    }
+
+    protected function setTestCase()
+    {
+        $reflection = new ReflectionMethod(get_class($this) . "::" . $this->getName(false));
+        $docComment = $reflection->getDocComment();
+
+        if (preg_match('/@testCase\s+([a-zA-Z0-9_]+)/', $docComment, $matches)) {
+            $testCaseName = $matches[1];
+        } elseif (preg_match('/@providedTestCase/', $docComment)) {
+            $testCaseName = Arr::last($this->getProvidedData());
+        }
+
+        if (isset($testCaseName)) {
+            $this->testCaseName = $testCaseName;
+
+            $this->loadTestDump();
+        }
+
+        $this->loadOriginStates();
+    }
+
+    protected function loadOriginStates()
+    {
+        if (!isset($this->testCaseOriginStates[$this->testCaseName])) {
+            foreach ($this->requiredOriginStates as $table) {
+                $this->testCaseOriginStates[$this->testCaseName][$table] = $this->getDataSet($table);
+            }
+        }
+    }
+
+    protected function getOriginState(string $table): Collection
+    {
+        return $this->testCaseOriginStates[$this->testCaseName][$table];
+    }
+
+    protected function loadTestDump(): void
+    {
+        $clearDb = is_null($this->testCaseName);
+
+        $dump = $this->getFixture('dump.sql', false);
+
+        if (empty($dump)) {
+            return;
+        }
+
+        $dump = preg_replace('/--.*/', '', $dump);
+
+        if ($clearDb) {
+            $databaseTables = $this->getTables();
+            $scheme = config('database.default');
+
+            $this->clearDatabase($scheme, $databaseTables, array_merge($this->postgisTables, $this->truncateExceptTables));
+        }
+
+        DB::unprepared($dump);
+
+        if (config('database.default') === 'pgsql') {
+            $this->prepareSequences($this->getTables());
+        }
     }
 
     protected function getChanges(string $table, Collection $originData): array

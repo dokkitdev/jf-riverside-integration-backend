@@ -28,7 +28,7 @@
     "request": {
       "type": "post",
       "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
-      "data": "process_webhook__job_schedule_created__riverside_already_has_appointment/riverside_call__send_appointment__request.xml",
+      "data": "riverside_call__send_appointment__request.xml",
       "headers": {
         "Accept": "application/xml",
         "Content-Type": "application/xml"

@@ -3,7 +3,7 @@
     "request": {
       "type": "post",
       "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
-      "data": "process_webhook__job_status__abandon__riverside_unexpectedly_doesnt_have_appointment/riverside_call__cancel_appointment__request.xml",
+      "data": "riverside_call__cancel_appointment__request.xml",
       "headers": {
         "Accept": "application/xml",
         "Content-Type": "application/xml"
@@ -11,7 +11,7 @@
     },
     "response": {
       "status_code": 200,
-      "data": "process_webhook__job_status__abandon__riverside_unexpectedly_doesnt_have_appointment/riverside_call__cancel_appointment__response.xml",
+      "data": "riverside_call__cancel_appointment__response.xml",
       "headers": []
     }
   },
@@ -19,7 +19,7 @@
     "request": {
       "type": "post",
       "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
-      "data": "process_webhook__job_status__abandon__riverside_unexpectedly_doesnt_have_appointment/riverside_call__notify_about_abandon_status__request.xml",
+      "data": "riverside_call__notify_about_abandon_status__request.xml",
       "headers": {
         "Accept": "application/xml",
         "Content-Type": "application/xml"

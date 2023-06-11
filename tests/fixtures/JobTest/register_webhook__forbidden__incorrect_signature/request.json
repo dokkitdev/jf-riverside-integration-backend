@@ -1,0 +1,9 @@
+{
+  "ID": "any.type",
+  "description": "any description",
+  "reference": {
+    "jobID": 7777,
+    "statusID": 8888,
+    "scheduleID": 9999
+  }
+}

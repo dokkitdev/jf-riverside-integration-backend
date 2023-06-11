@@ -1,8 +1,0 @@
-{
-  "ID": "job.schedule.created",
-  "description": "Job schedule #4321 has been created.",
-  "reference": {
-    "jobID": 7778,
-    "scheduleID": 4321
-  }
-}

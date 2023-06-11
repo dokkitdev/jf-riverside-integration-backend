@@ -2,24 +2,24 @@
     "updated": [],
     "created": [
         {
+            "id": 5,
+            "job_operation_id": 4,
+            "request_log_id": 2
+        },
+        {
             "id": 6,
-            "job_operation_id": 5,
-            "request_log_id": 4
+            "job_operation_id": 4,
+            "request_log_id": 3
         },
         {
             "id": 7,
-            "job_operation_id": 5,
-            "request_log_id": 5
+            "job_operation_id": 4,
+            "request_log_id": 4
         },
         {
             "id": 8,
-            "job_operation_id": 5,
-            "request_log_id": 6
-        },
-        {
-            "id": 9,
-            "job_operation_id": 5,
-            "request_log_id": 7
+            "job_operation_id": 4,
+            "request_log_id": 5
         }
     ],
     "deleted": []
