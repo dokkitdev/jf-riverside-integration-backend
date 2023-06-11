@@ -196,6 +196,9 @@ class JobTest extends TestCase
             ['process_webhook__job_stage_complete__no_cost_centers'],
             ['process_webhook__job_stage_complete__no_sections'],
             ['process_webhook__job_stage_complete__empty_part_no'],
+            ['process_webhook__job_stage_complete__wrong_status__pattern_1'],
+            ['process_webhook__job_stage_complete__wrong_status__pattern_2'],
+            ['process_webhook__job_stage_complete__empty_description_notes'],
             ['process_webhook__job_schedule_created__appointment_not_sent_previously'],
             ['process_webhook__job_schedule_created__riverside_already_has_appointment'],
             ['process_webhook__job_schedule_created__appointment_sent_previously'],
@@ -205,6 +208,7 @@ class JobTest extends TestCase
             ['process_webhook__job_status__abandon__appointment_not_sent_previously'],
             ['process_webhook__job_status__abandon__appointment_sent_previously'],
             ['process_webhook__job_status__abandon__riverside_unexpectedly_doesnt_have_appointment'],
+            ['process_webhook__job_status__abandon__wrong_status__pattern_3'],
             ['process_webhook__job_status__any_status__job_not_found'],
             ['process_webhook__job_status__no_access'],
             ['process_webhook__job_status__no_access__many_log_entries'],
@@ -227,6 +231,35 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('jobs');
         $this->assertChangesEqualsFixture('job_operations');
         $this->assertChangesEqualsFixture('job_operation_request_log');
+    }
+
+    /**
+     * @testCase process_webhook__job_locked_in_riverside
+     */
+    public function testProcessWebhookJobLockedInRiverside(): void
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('requests_chain.json'));
+
+        $webhookData = $this->getJsonFixture('webhook_data.json');
+
+        $job = $this
+            ->getMockBuilder(ProcessSimproWebhookJob::class)
+            ->setConstructorArgs([
+                SimproWebhookResource::makeFromSimproRequestData($webhookData),
+                7,
+            ])
+            ->onlyMethods(['forceRetry'])
+            ->getMock();
+
+        $job->method('forceRetry')->with([60, 300, 600, 1200, 1800]);
+
+        $job->handle();
+
+        $this->assertChangesEqualsFixture('request_logs');
+        $this->assertChangesEqualsFixture('job_operations');
+        $this->assertChangesEqualsFixture('job_operation_request_log');
+
+        $this->assertNoChanges('jobs');
     }
 
     public function getTestProcessWebhookSkipImmediatelyData(): array

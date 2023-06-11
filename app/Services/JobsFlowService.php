@@ -5,6 +5,7 @@ namespace App\Services;
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Exceptions\CreateJobRequestException;
+use App\Exceptions\RiversideApiRecordLockedException;
 use App\Exceptions\WarningApiClientExceptions\AbstractWarningApiClientException;
 use App\Exceptions\WarningApiClientExceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Jobs\ProcessSimproWebhookJob;
@@ -73,6 +74,8 @@ class JobsFlowService
     protected const WEBHOOK_SKIP_REASON_NOT_USED_STATUS = 'not_used_status';
     protected const WEBHOOK_SKIP_REASON_EMPTY_PART_NO = 'empty_part_no';
 
+    protected const NO_DESCRIPTION_NOTES_MESSAGE = 'No description notes found';
+
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
     protected SimproApiClient $simproApiClient;
@@ -132,9 +135,9 @@ class JobsFlowService
         dispatch(new ProcessSimproWebhookJob($simproWebhookResource, $jobOperation['id']));
     }
 
-    public function processSimproWebhook(SimproWebhookResource $simproWebhookResource, int $jobOperationId)
+    public function processSimproWebhook(SimproWebhookResource $simproWebhookResource, int $jobOperationId): JobOperation
     {
-        $this->jobOperationService->withinJobOperation(function (JobOperation $jobOperation) use ($simproWebhookResource) {
+        return $this->jobOperationService->withinJobOperation(function (JobOperation $jobOperation) use ($simproWebhookResource) {
             $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
             $appendDetails = [];
@@ -167,11 +170,15 @@ class JobsFlowService
                 $appendDetails = [
                     'warning_message' => $exception->getWarningMessage(),
                 ];
+            } catch (RiversideApiRecordLockedException $exception) {
+                $jobOperation['status'] = JobOperation::STATUS_RETRY;
             }
 
             if (!empty($appendDetails)) {
                 $jobOperation['details'] = array_merge(Arr::get($jobOperation, 'details', []), $appendDetails);
             }
+
+            return $jobOperation;
         }, $jobOperationId);
     }
 
@@ -262,9 +269,15 @@ class JobsFlowService
         }
 
         foreach ($workOrders as $workOrder) {
+            $descriptionNotes = substr(strip_tags($workOrder['DescriptionNotes']), 0, 80);
+
+            if (empty($descriptionNotes)) {
+                $descriptionNotes = self::NO_DESCRIPTION_NOTES_MESSAGE;
+            }
+
             $this->riversideApiClient->sendDairyEntry(
                 $job['order_no'],
-                substr(strip_tags($workOrder['DescriptionNotes']), 0, 80),
+                $descriptionNotes,
                 $workOrder['WorkOrderDate'],
                 $workOrder['DateModified']
             );

@@ -1,0 +1,107 @@
+[
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777",
+      "data": {
+        "display": "all"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": {
+        "Sections": [
+          {
+            "ID": 7891,
+            "CostCenters": [
+              {
+                "ID": 6781,
+                "Name": "Service",
+                "Items": {
+                  "Prebuilds": [
+                    {
+                      "Prebuild": {
+                        "PartNo": "part_no_1.1.1"
+                      },
+                      "Total": {
+                        "Qty": 111
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7891/costCenters/6781/workOrders/",
+      "data": {
+        "columns": "ID"
+      },
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": [
+        {
+          "ID": 5671
+        }
+      ],
+      "headers": []
+    }
+  },
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/jobs/7777/sections/7891/costCenters/6781/workOrders/5671",
+      "data": {},
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": {
+        "DescriptionNotes": "<p>1234567890123456<b>7</b>890123456789012345678901234567890123<b>456789012345678901234567890123</p>",
+        "WorkOrderDate": "2001-01-01",
+        "DateModified": "2001-01-01T01:01:01+01:00"
+      },
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "riverside_send_sor_variations__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "riverside_send_sor_variations__response.xml",
+      "headers": []
+    }
+  }
+]
