@@ -2,9 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Models\JobOperation;
 use App\Resources\SimproApi\SimproWebhookResource;
 use App\Services\JobsFlowService;
 use App\Support\QueueWithStreams\WithStreamsInterface;
+use App\Support\QueueWithStreams\WithStreamsTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -13,7 +15,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class ProcessSimproWebhookJob implements ShouldQueue, WithStreamsInterface
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, WithStreamsTrait;
+
+    protected const BACKOFF_SECONDS = [60, 300, 600, 1200, 1800];
 
     protected SimproWebhookResource $simproWebhookResource;
     protected int $jobOperationId;
@@ -33,7 +37,11 @@ class ProcessSimproWebhookJob implements ShouldQueue, WithStreamsInterface
 
     public function handle()
     {
-        app(JobsFlowService::class)->processSimproWebhook($this->simproWebhookResource, $this->jobOperationId);
+        $jobOperation = app(JobsFlowService::class)->processSimproWebhook($this->simproWebhookResource, $this->jobOperationId);
+
+        if ($jobOperation['status'] === JobOperation::STATUS_RETRY) {
+            $this->forceRetry(self::BACKOFF_SECONDS);
+        }
     }
 
     public function failed()

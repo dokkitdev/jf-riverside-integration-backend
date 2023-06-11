@@ -32,6 +32,10 @@ class JobOperationService extends EntityService
 
         $jobOperation = isset($existedJobOperationId) ? $this->find($existedJobOperationId) : new JobOperation();
 
+        if ($jobOperation['status'] === JobOperation::STATUS_RETRY) {
+            $jobOperation['status'] = JobOperation::STATUS_IN_PROGRESS;
+        }
+
         try {
             $result = $callback($jobOperation);
 

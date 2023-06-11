@@ -5,6 +5,7 @@ namespace App\Services;
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Exceptions\CreateJobRequestException;
+use App\Exceptions\RiversideApiRecordLockedException;
 use App\Exceptions\WarningApiClientExceptions\AbstractWarningApiClientException;
 use App\Exceptions\WarningApiClientExceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Jobs\ProcessSimproWebhookJob;
@@ -132,9 +133,9 @@ class JobsFlowService
         dispatch(new ProcessSimproWebhookJob($simproWebhookResource, $jobOperation['id']));
     }
 
-    public function processSimproWebhook(SimproWebhookResource $simproWebhookResource, int $jobOperationId)
+    public function processSimproWebhook(SimproWebhookResource $simproWebhookResource, int $jobOperationId): JobOperation
     {
-        $this->jobOperationService->withinJobOperation(function (JobOperation $jobOperation) use ($simproWebhookResource) {
+        return $this->jobOperationService->withinJobOperation(function (JobOperation $jobOperation) use ($simproWebhookResource) {
             $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
             $appendDetails = [];
@@ -167,11 +168,15 @@ class JobsFlowService
                 $appendDetails = [
                     'warning_message' => $exception->getWarningMessage(),
                 ];
+            } catch (RiversideApiRecordLockedException $exception) {
+                $jobOperation['status'] = JobOperation::STATUS_RETRY;
             }
 
             if (!empty($appendDetails)) {
                 $jobOperation['details'] = array_merge(Arr::get($jobOperation, 'details', []), $appendDetails);
             }
+
+            return $jobOperation;
         }, $jobOperationId);
     }
 
