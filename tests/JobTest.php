@@ -198,6 +198,7 @@ class JobTest extends TestCase
             ['process_webhook__job_stage_complete__empty_part_no'],
             ['process_webhook__job_stage_complete__wrong_status__pattern_1'],
             ['process_webhook__job_stage_complete__wrong_status__pattern_2'],
+            ['process_webhook__job_stage_complete__empty_description_notes'],
             ['process_webhook__job_schedule_created__appointment_not_sent_previously'],
             ['process_webhook__job_schedule_created__riverside_already_has_appointment'],
             ['process_webhook__job_schedule_created__appointment_sent_previously'],
