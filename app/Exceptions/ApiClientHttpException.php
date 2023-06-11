@@ -3,20 +3,19 @@
 namespace App\Exceptions;
 
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 use Sentry\Breadcrumb;
 use function Sentry\addBreadcrumb;
 
 class ApiClientHttpException extends Exception
 {
     protected string $url;
-    protected int $statusCode;
-    protected string $responseBody;
+    protected ResponseInterface $response;
 
-    public function __construct(string $url, int $statusCode, string $responseBody, ?Exception $previousException = null)
+    public function __construct(string $url, ResponseInterface $response, ?Exception $previousException = null)
     {
         $this->url = $url;
-        $this->statusCode = $statusCode;
-        $this->responseBody = $responseBody;
+        $this->response = $response;
 
         addBreadcrumb(new Breadcrumb(
             Breadcrumb::LEVEL_ERROR,
@@ -25,12 +24,12 @@ class ApiClientHttpException extends Exception
             'HTTP request failed',
             [
                 'url' => $url,
-                'status_code' => $statusCode,
-                'response_body' => $responseBody,
+                'status_code' => $response->getStatusCode(),
+                'response_body' => (string) $response->getBody(),
             ]
         ));
 
-        parent::__construct("URL: {$url} Status code: {$statusCode}", 0, $previousException);
+        parent::__construct("URL: {$url} Status code: {$response->getStatusCode()}", 0, $previousException);
     }
 
     public function getUrl(): string
@@ -38,13 +37,8 @@ class ApiClientHttpException extends Exception
         return $this->url;
     }
 
-    public function getStatusCode(): int
+    public function getResponse(): ResponseInterface
     {
-        return $this->statusCode;
-    }
-
-    public function getResponseBody(): string
-    {
-        return $this->responseBody;
+        return $this->response;
     }
 }

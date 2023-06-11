@@ -75,7 +75,7 @@ class RiversideApiClient extends BaseApiClient
                 'job_order_no' => $jobOrderNo,
             ]);
         } catch (ApiClientHttpException $exception) {
-            if (!preg_match(self::ERROR_PATTERN_NO_APPOINTMENT, strtolower($exception->getResponseBody()))) {
+            if (!preg_match(self::ERROR_PATTERN_NO_APPOINTMENT, strtolower($exception->getResponse()->getBody()))) {
                 throw $exception;
             }
         }
@@ -90,7 +90,7 @@ class RiversideApiClient extends BaseApiClient
                 'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT_SEND_APPOINTMENT),
             ]);
         } catch (ApiClientHttpException $exception) {
-            if (preg_match(self::ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY, strtolower($exception->getResponseBody()))) {
+            if (preg_match(self::ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY, strtolower($exception->getResponse()->getBody()))) {
                 throw new RiversideApiAppointmentLoggedPreviouslyException($exception);
             }
 
@@ -164,7 +164,7 @@ class RiversideApiClient extends BaseApiClient
         }
 
         if ($isFailed) {
-            throw new ApiClientHttpException($this->getUrl(''), $response->getStatusCode(), $responseContent);
+            throw new ApiClientHttpException($this->getUrl(''), $response);
         }
 
         return $xml;

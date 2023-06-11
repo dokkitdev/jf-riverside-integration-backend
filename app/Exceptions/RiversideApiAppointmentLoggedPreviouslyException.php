@@ -6,6 +6,6 @@ class RiversideApiAppointmentLoggedPreviouslyException extends ApiClientHttpExce
 {
     public function __construct(ApiClientHttpException $initialException)
     {
-        parent::__construct($initialException->url, $initialException->statusCode, $initialException->responseBody, $initialException);
+        parent::__construct($initialException->getUrl(), $initialException->getResponse(), $initialException);
     }
 }
