@@ -229,6 +229,35 @@ class JobTest extends TestCase
         $this->assertChangesEqualsFixture('job_operation_request_log');
     }
 
+    /**
+     * @testCase process_webhook__job_locked_in_riverside
+     */
+    public function testProcessWebhookJobLockedInRiverside(): void
+    {
+        $this->mockHttpRequestService($this->getJsonFixture('requests_chain.json'));
+
+        $webhookData = $this->getJsonFixture('webhook_data.json');
+
+        $job = $this
+            ->getMockBuilder(ProcessSimproWebhookJob::class)
+            ->setConstructorArgs([
+                SimproWebhookResource::makeFromSimproRequestData($webhookData),
+                7,
+            ])
+            ->onlyMethods(['forceRetry'])
+            ->getMock();
+
+        $job->method('forceRetry')->with([60, 300, 600, 1200, 1800]);
+
+        $job->handle();
+
+        $this->assertChangesEqualsFixture('request_logs');
+        $this->assertChangesEqualsFixture('job_operations');
+        $this->assertChangesEqualsFixture('job_operation_request_log');
+
+        $this->assertNoChanges('jobs');
+    }
+
     public function getTestProcessWebhookSkipImmediatelyData(): array
     {
         return [
