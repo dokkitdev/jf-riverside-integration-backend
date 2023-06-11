@@ -22,7 +22,8 @@ class RiversideApiClient extends BaseApiClient
     //patterns must be in lower case
     protected const ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY = '/.*already has an appointment logged.*/';
     protected const ERROR_PATTERN_NO_APPOINTMENT = '/.*there is no open appointment for job .*, appointment cannot be cancelled.*/';
-    protected const ERROR_PATTERN_JOB_NOT_FOUND = '/.*job_no .*is invalid.* job .*not found.*/';
+    protected const ERROR_PATTERN_JOB_NOT_FOUND_1 = '/.*job_no .*is invalid.* job .*not found.*/';
+    protected const ERROR_PATTERN_JOB_NOT_FOUND_2 = '/.*job no.* supplied is invalid.*/';
     protected const ERROR_PATTERN_RECORD_LOCKED = '/.*record locked.*/';
     protected const ERROR_PATTERN_WRONG_STATUS_1 = '/.*job no. .* cannot have variations as it.*s status is 92.*/';
     protected const ERROR_PATTERN_WRONG_STATUS_2 = '/.*only jobs with a status of 06 can be work completed.*/';
@@ -31,7 +32,8 @@ class RiversideApiClient extends BaseApiClient
     protected const KNOWN_ERRORS = [
         ['pattern' => self::ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY, 'exception_class' => RiversideApiAppointmentLoggedPreviouslyException::class],
         ['pattern' => self::ERROR_PATTERN_NO_APPOINTMENT, 'exception_class' => null],
-        ['pattern' => self::ERROR_PATTERN_JOB_NOT_FOUND, 'exception_class' => RiversideApiJobNotFoundException::class],
+        ['pattern' => self::ERROR_PATTERN_JOB_NOT_FOUND_1, 'exception_class' => RiversideApiJobNotFoundException::class],
+        ['pattern' => self::ERROR_PATTERN_JOB_NOT_FOUND_2, 'exception_class' => RiversideApiJobNotFoundException::class],
         ['pattern' => self::ERROR_PATTERN_RECORD_LOCKED, 'exception_class' => RiversideApiRecordLockedException::class],
         ['pattern' => self::ERROR_PATTERN_WRONG_STATUS_1, 'exception_class' => RiversideApiWrongStatusException::class],
         ['pattern' => self::ERROR_PATTERN_WRONG_STATUS_2, 'exception_class' => RiversideApiWrongStatusException::class],
