@@ -74,6 +74,8 @@ class JobsFlowService
     protected const WEBHOOK_SKIP_REASON_NOT_USED_STATUS = 'not_used_status';
     protected const WEBHOOK_SKIP_REASON_EMPTY_PART_NO = 'empty_part_no';
 
+    protected const NO_DESCRIPTION_NOTES_MESSAGE = 'No description notes found';
+
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
     protected SimproApiClient $simproApiClient;
@@ -267,9 +269,15 @@ class JobsFlowService
         }
 
         foreach ($workOrders as $workOrder) {
+            $descriptionNotes = substr(strip_tags($workOrder['DescriptionNotes']), 0, 80);
+
+            if (empty($descriptionNotes)) {
+                $descriptionNotes = self::NO_DESCRIPTION_NOTES_MESSAGE;
+            }
+
             $this->riversideApiClient->sendDairyEntry(
                 $job['order_no'],
-                substr(strip_tags($workOrder['DescriptionNotes']), 0, 80),
+                $descriptionNotes,
                 $workOrder['WorkOrderDate'],
                 $workOrder['DateModified']
             );
