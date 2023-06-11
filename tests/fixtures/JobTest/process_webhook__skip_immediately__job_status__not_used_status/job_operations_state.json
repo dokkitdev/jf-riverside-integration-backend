@@ -1,0 +1,12 @@
+{
+    "updated": [
+        {
+            "id": 7,
+            "updated_at": "2018-11-11 11:11:11",
+            "details": "{\"webhook_type\":\"any.type\",\"webhook_description\":\"any description\",\"skip_reason\":\"not_used_status\"}",
+            "status": "skip"
+        }
+    ],
+    "created": [],
+    "deleted": []
+}

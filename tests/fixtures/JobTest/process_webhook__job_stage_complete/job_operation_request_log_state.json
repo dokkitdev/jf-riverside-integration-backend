@@ -1,0 +1,86 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 9,
+            "job_operation_id": 7,
+            "request_log_id": 6
+        },
+        {
+            "id": 10,
+            "job_operation_id": 7,
+            "request_log_id": 7
+        },
+        {
+            "id": 11,
+            "job_operation_id": 7,
+            "request_log_id": 8
+        },
+        {
+            "id": 12,
+            "job_operation_id": 7,
+            "request_log_id": 9
+        },
+        {
+            "id": 13,
+            "job_operation_id": 7,
+            "request_log_id": 10
+        },
+        {
+            "id": 14,
+            "job_operation_id": 7,
+            "request_log_id": 11
+        },
+        {
+            "id": 15,
+            "job_operation_id": 7,
+            "request_log_id": 12
+        },
+        {
+            "id": 16,
+            "job_operation_id": 7,
+            "request_log_id": 13
+        },
+        {
+            "id": 17,
+            "job_operation_id": 7,
+            "request_log_id": 14
+        },
+        {
+            "id": 18,
+            "job_operation_id": 7,
+            "request_log_id": 15
+        },
+        {
+            "id": 19,
+            "job_operation_id": 7,
+            "request_log_id": 16
+        },
+        {
+            "id": 20,
+            "job_operation_id": 7,
+            "request_log_id": 17
+        },
+        {
+            "id": 21,
+            "job_operation_id": 7,
+            "request_log_id": 18
+        },
+        {
+            "id": 22,
+            "job_operation_id": 7,
+            "request_log_id": 19
+        },
+        {
+            "id": 23,
+            "job_operation_id": 7,
+            "request_log_id": 20
+        },
+        {
+            "id": 24,
+            "job_operation_id": 7,
+            "request_log_id": 21
+        }
+    ],
+    "deleted": []
+}

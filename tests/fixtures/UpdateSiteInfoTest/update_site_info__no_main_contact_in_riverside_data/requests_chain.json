@@ -28,7 +28,7 @@
     "request": {
       "type": "post",
       "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
-      "data": "update_site_info__no_main_contact_in_riverside_data/riverside_getjobsextcont_request.xml",
+      "data": "riverside_getjobsextcont_request.xml",
       "headers": {
         "Accept": "application/xml",
         "Content-Type": "application/xml"
@@ -36,7 +36,7 @@
     },
     "response": {
       "status_code": 200,
-      "data": "update_site_info__no_main_contact_in_riverside_data/riverside_getjobsextcont_response.xml",
+      "data": "riverside_getjobsextcont_response.xml",
       "headers": []
     }
   },
