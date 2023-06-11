@@ -1,0 +1,58 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 6,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/jobs\/7777",
+            "method": "get",
+            "request_body": "{\"display\":\"all\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "{\"Sections\":[{\"ID\":7891,\"CostCenters\":[{\"ID\":6781,\"Name\":\"Service\",\"Items\":{\"Prebuilds\":[{\"Prebuild\":{\"PartNo\":\"part_no_1.1.1\"},\"Total\":{\"Qty\":111}}]}}]}]}",
+            "response_headers": "[]"
+        },
+        {
+            "id": 7,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/jobs\/7777\/sections\/7891\/costCenters\/6781\/workOrders\/",
+            "method": "get",
+            "request_body": "{\"columns\":\"ID\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "[{\"ID\":5671}]",
+            "response_headers": "[]"
+        },
+        {
+            "id": 8,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/jobs\/7777\/sections\/7891\/costCenters\/6781\/workOrders\/5671",
+            "method": "get",
+            "request_body": "[]",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "{\"DescriptionNotes\":\"<p>1234567890123456<b>7<\\\/b>890123456789012345678901234567890123<b>456789012345678901234567890123<\\\/p>\",\"WorkOrderDate\":\"2001-01-01\",\"DateModified\":\"2001-01-01T01:01:01+01:00\"}",
+            "response_headers": "[]"
+        },
+        {
+            "id": 9,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "riverside",
+            "url": "https:\/\/oh.services.riverside.org.uk\/test.openaccess\/webservice.p",
+            "method": "post",
+            "request_body": "<?xml version=\"1.0\" ?>\n<message>\n    <Header>\n        <Security username=\"fake_riverside_user_name\" password=\"fake_riverside_password\" \/>\n    <\/Header>\n    <Body>\n        <Request request_type=\"varyjobextcont\">\n            <Parameters attribute=\"secret\" attribute_value=\"fake_riverside_secret\" \/>\n            <Parameters attribute=\"job_no\" attribute_value=\"job_for_webhooks\" \/>\n\n                            <Parameters attribute=\"elementCode_1\" attribute_value=\"part_no_1.1.1\" \/>\n                <Parameters attribute=\"qty_1\" attribute_value=\"111\" \/>\n                    <\/Request>\n    <\/Body>\n<\/message>",
+            "request_headers": "{\"Accept\":\"application\\\/xml\",\"Content-Type\":\"application\\\/xml\"}",
+            "response_status_code": 200,
+            "response_body": "<?xml version=\"1.0\" ?>\n<Root>\n    <VaryJob\/>\n    <ErrorDetails>Job No. any_ni cannot have variations as it&apos;s status is 92<\/ErrorDetails>\n<\/Root>",
+            "response_headers": "[]"
+        }
+    ],
+    "deleted": []
+}

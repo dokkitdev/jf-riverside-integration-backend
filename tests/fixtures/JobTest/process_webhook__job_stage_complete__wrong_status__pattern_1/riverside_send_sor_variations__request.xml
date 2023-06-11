@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<message>
+    <Header>
+        <Security username="fake_riverside_user_name" password="fake_riverside_password" />
+    </Header>
+    <Body>
+        <Request request_type="varyjobextcont">
+            <Parameters attribute="secret" attribute_value="fake_riverside_secret" />
+            <Parameters attribute="job_no" attribute_value="job_for_webhooks" />
+
+                            <Parameters attribute="elementCode_1" attribute_value="part_no_1.1.1" />
+                <Parameters attribute="qty_1" attribute_value="111" />
+                    </Request>
+    </Body>
+</message>

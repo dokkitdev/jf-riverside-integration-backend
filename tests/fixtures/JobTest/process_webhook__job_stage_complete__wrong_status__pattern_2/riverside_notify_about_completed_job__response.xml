@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<Root>
+    <CompleteJob/>
+    <ErrorDetails>This Job Is At Status 92. Only Jobs With A Status Of 06 Can Be Work Completed</ErrorDetails>
+</Root>
