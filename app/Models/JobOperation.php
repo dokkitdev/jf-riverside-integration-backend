@@ -19,6 +19,7 @@ class JobOperation extends Model
     public const STATUS_FAIL = 'fail';
     public const STATUS_SKIP = 'skip';
     public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_WARNING = 'warning';
 
     protected bool $shouldBePersisted = true;
 

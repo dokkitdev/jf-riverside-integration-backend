@@ -2,7 +2,9 @@
 
 namespace App\ApiClients;
 
+use App\Exceptions\ApiClientHttpException;
 use App\Exceptions\TooManySitesFoundException;
+use App\Exceptions\WarningApiClientExceptions\SimproApiScheduleNotFoundException;
 use App\Models\RequestLog;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -158,9 +160,19 @@ class SimproApiClient extends BaseApiClient
         return $workOrders;
     }
 
-    public function getSchedule(int $simproScheduleId)
+    public function getSchedule(int $simproScheduleId): array
     {
-        return $this->makeRequest('get', "/schedules/{$simproScheduleId}");
+        try {
+            $schedule = $this->makeRequest('get', "/schedules/{$simproScheduleId}");
+        } catch (ApiClientHttpException $exception) {
+            if ($exception->getResponse()->getStatusCode() === Response::HTTP_NOT_FOUND) {
+                throw new SimproApiScheduleNotFoundException($exception->getUrl(), $exception->getResponse(), $exception);
+            }
+
+            throw $exception;
+        }
+
+        return $schedule;
     }
 
     public function getStatusAttemptsCount(int $simproJobId, string $statusText): int

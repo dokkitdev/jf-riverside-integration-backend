@@ -1,0 +1,19 @@
+[
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/schedules/4321",
+      "data": {},
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 404,
+      "data": {"any": "data"},
+      "headers": []
+    }
+  }
+]

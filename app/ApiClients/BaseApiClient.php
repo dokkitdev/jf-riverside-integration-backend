@@ -53,7 +53,7 @@ abstract class BaseApiClient
         ]);
 
         if ($response->getStatusCode() !== $expectedStatusCode) {
-            throw new ApiClientHttpException($url, $response->getStatusCode(), (string) $response->getBody());
+            throw new ApiClientHttpException($url, $response);
         }
 
         return $response;

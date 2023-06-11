@@ -5,7 +5,8 @@ namespace App\Services;
 use App\ApiClients\RiversideApiClient;
 use App\ApiClients\SimproApiClient;
 use App\Exceptions\CreateJobRequestException;
-use App\Exceptions\RiversideApiAppointmentLoggedPreviouslyException;
+use App\Exceptions\WarningApiClientExceptions\AbstractWarningApiClientException;
+use App\Exceptions\WarningApiClientExceptions\RiversideApiAppointmentLoggedPreviouslyException;
 use App\Jobs\ProcessSimproWebhookJob;
 use App\Jobs\UpdateSiteInfo\UpdateSiteInfoJob;
 use App\Models\Job;
@@ -71,7 +72,6 @@ class JobsFlowService
     protected const WEBHOOK_SKIP_REASON_NOT_USED_TYPE = 'not_used_type';
     protected const WEBHOOK_SKIP_REASON_NOT_USED_STATUS = 'not_used_status';
     protected const WEBHOOK_SKIP_REASON_EMPTY_PART_NO = 'empty_part_no';
-    protected const WEBHOOK_SKIP_RIVERSIDE_ALREADY_HAS_APPOINTMENT = 'riverside_already_has_appointment';
 
     protected JobService $jobService;
     protected JobOperationService $jobOperationService;
@@ -137,124 +137,42 @@ class JobsFlowService
         $this->jobOperationService->withinJobOperation(function (JobOperation $jobOperation) use ($simproWebhookResource) {
             $job = $this->jobService->findBy('simpro_job_id', $simproWebhookResource->jobId);
 
-            switch ($simproWebhookResource->type) {
-                case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
-                    $skipReason = $this->processSimproWebhookJobCompleted($job);
-                    break;
-                case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
-                    $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
-                    break;
-                case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
-                    $skipReason = $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
-                    break;
-                default:
-                    $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
-            }
+            $appendDetails = [];
 
-            if (is_null($skipReason)) {
-                $jobOperation['status'] = JobOperation::STATUS_SUCCESS;
-            } else {
-                $details = $jobOperation['details'];
-                $details['skip_reason'] = $skipReason;
-
-                $jobOperation['status'] = JobOperation::STATUS_SKIP;
-                $jobOperation['details'] = $details;
-            }
-        }, $jobOperationId);
-    }
-
-    public function processSimproWebhookJobCompleted(Job $job): ?string
-    {
-        $simproJob = $this->simproApiClient->getJob($job['simpro_job_id']);
-
-        $workOrders = [];
-        $sorElements = [];
-
-        foreach ($simproJob['Sections'] as $section) {
-            foreach ($section['CostCenters'] as $costCenter) {
-                if ($costCenter['Name'] === $this->simproConfig['sor_variations']['cost_center_name']) {
-                    foreach ($costCenter['Items']['Prebuilds'] as $prebuild) {
-                        if (Arr::has($prebuild, 'Prebuild.PartNo') && Arr::has($prebuild, 'Total.Qty')) {
-                            $elementCode = Arr::get($prebuild, 'Prebuild.PartNo');
-
-                            if (empty($elementCode)) {
-                                return self::WEBHOOK_SKIP_REASON_EMPTY_PART_NO;
-                            }
-
-                            $sorElements[] = [
-                                'element_code' => $elementCode,
-                                'qty' => Arr::get($prebuild, 'Total.Qty')
-                            ];
-                        }
-                    }
+            try {
+                switch ($simproWebhookResource->type) {
+                    case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
+                        $skipReason = $this->processSimproWebhookJobCompleted($job);
+                        break;
+                    case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
+                        $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
+                        break;
+                    case self::SIMPRO_WEBHOOK_TYPE_JOB_SCHEDULE_CREATED:
+                        $skipReason = $this->processSimproWebhookJobScheduleCreated($job, $simproWebhookResource->scheduleId);
+                        break;
+                    default:
+                        $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_TYPE;
                 }
 
-                $workOrders = array_merge($workOrders, $this->simproApiClient->getWorkOrders($job['simpro_job_id'], $section['ID'], $costCenter['ID']));
+                if (is_null($skipReason)) {
+                    $jobOperation['status'] = JobOperation::STATUS_SUCCESS;
+                } else {
+                    $jobOperation['status'] = JobOperation::STATUS_SKIP;
+                    $appendDetails = [
+                        'skip_reason' => $skipReason,
+                    ];
+                }
+            } catch (AbstractWarningApiClientException $exception) {
+                $jobOperation['status'] = JobOperation::STATUS_WARNING;
+                $appendDetails = [
+                    'warning_message' => $exception->getWarningMessage(),
+                ];
             }
-        }
 
-        if (!empty($sorElements)) {
-            $this->riversideApiClient->sendSorVariations($job['order_no'], $sorElements);
-        }
-
-        foreach ($workOrders as $workOrder) {
-            $this->riversideApiClient->sendDairyEntry(
-                $job['order_no'],
-                substr(strip_tags($workOrder['DescriptionNotes']), 0, 80),
-                $workOrder['WorkOrderDate'],
-                $workOrder['DateModified']
-            );
-        }
-
-        $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], Carbon::now());
-
-        return null;
-    }
-
-    public function processSimproWebhookJobScheduleCreated(Job $job, int $simproJobScheduleId): ?string
-    {
-        if ($job['is_appointment_sent']) {
-            $this->riversideApiClient->cancelAppointment($job['order_no']);
-        }
-
-        $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
-
-        try {
-            $this->riversideApiClient->sendAppointment(
-                $job['order_no'],
-                Carbon::parse($simproSchedule['Date']),
-                Carbon::parse($simproSchedule['Blocks'][0]['StartTime']),
-            );
-            $skipReason = null;
-        } catch (RiversideApiAppointmentLoggedPreviouslyException $exception) {
-            $skipReason = self::WEBHOOK_SKIP_RIVERSIDE_ALREADY_HAS_APPOINTMENT;
-        }
-
-        $this->jobService->update($job['id'], [
-            'is_appointment_sent' => true
-        ]);
-
-        return $skipReason;
-    }
-
-    public function processSimproWebhookJobStatusChanged(Job $job, int $simproStatusId): ?string
-    {
-        $status = array_search($simproStatusId, $this->simproConfig['status_ids']);
-
-        $skipReason = null;
-
-        switch ($status) {
-            case self::SIMPRO_JOB_STATUS_ABANDON:
-                $this->processAbandonStatus($job);
-                break;
-            case self::SIMPRO_JOB_STATUS_NO_ACCESS:
-                $this->processNoAccessStatus($job);
-                break;
-            default:
-                $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS;
-        }
-
-        return $skipReason;
+            if (!empty($appendDetails)) {
+                $jobOperation['details'] = array_merge(Arr::get($jobOperation, 'details', []), $appendDetails);
+            }
+        }, $jobOperationId);
     }
 
     public function initUpdateSitesInfo(Carbon $dateTime)
@@ -307,6 +225,102 @@ class JobsFlowService
     public function failedQueueJob(int $jobOperationId)
     {
         $this->jobOperationService->update($jobOperationId, ['status' => JobOperation::STATUS_FAIL]);
+    }
+
+    protected function processSimproWebhookJobCompleted(Job $job): ?string
+    {
+        $simproJob = $this->simproApiClient->getJob($job['simpro_job_id']);
+
+        $workOrders = [];
+        $sorElements = [];
+
+        foreach ($simproJob['Sections'] as $section) {
+            foreach ($section['CostCenters'] as $costCenter) {
+                if ($costCenter['Name'] === $this->simproConfig['sor_variations']['cost_center_name']) {
+                    foreach ($costCenter['Items']['Prebuilds'] as $prebuild) {
+                        if (Arr::has($prebuild, 'Prebuild.PartNo') && Arr::has($prebuild, 'Total.Qty')) {
+                            $elementCode = Arr::get($prebuild, 'Prebuild.PartNo');
+
+                            if (empty($elementCode)) {
+                                return self::WEBHOOK_SKIP_REASON_EMPTY_PART_NO;
+                            }
+
+                            $sorElements[] = [
+                                'element_code' => $elementCode,
+                                'qty' => Arr::get($prebuild, 'Total.Qty')
+                            ];
+                        }
+                    }
+                }
+
+                $workOrders = array_merge($workOrders, $this->simproApiClient->getWorkOrders($job['simpro_job_id'], $section['ID'], $costCenter['ID']));
+            }
+        }
+
+        if (!empty($sorElements)) {
+            $this->riversideApiClient->sendSorVariations($job['order_no'], $sorElements);
+        }
+
+        foreach ($workOrders as $workOrder) {
+            $this->riversideApiClient->sendDairyEntry(
+                $job['order_no'],
+                substr(strip_tags($workOrder['DescriptionNotes']), 0, 80),
+                $workOrder['WorkOrderDate'],
+                $workOrder['DateModified']
+            );
+        }
+
+        $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], Carbon::now());
+
+        return null;
+    }
+
+    protected function processSimproWebhookJobScheduleCreated(Job $job, int $simproJobScheduleId): ?string
+    {
+        $this->cancelAppointment($job);
+
+        $simproSchedule = $this->simproApiClient->getSchedule($simproJobScheduleId);
+
+        try {
+            $this->riversideApiClient->sendAppointment(
+                $job['order_no'],
+                Carbon::parse($simproSchedule['Date']),
+                Carbon::parse($simproSchedule['Blocks'][0]['StartTime']),
+            );
+            $skipReason = null;
+        } catch (RiversideApiAppointmentLoggedPreviouslyException $exception) {
+            $this->jobService->update($job['id'], [
+                'is_appointment_sent' => true
+            ]);
+
+            throw $exception;
+        }
+
+        $this->jobService->update($job['id'], [
+            'is_appointment_sent' => true
+        ]);
+
+        return $skipReason;
+    }
+
+    protected function processSimproWebhookJobStatusChanged(Job $job, int $simproStatusId): ?string
+    {
+        $status = array_search($simproStatusId, $this->simproConfig['status_ids']);
+
+        $skipReason = null;
+
+        switch ($status) {
+            case self::SIMPRO_JOB_STATUS_ABANDON:
+                $this->processAbandonStatus($job);
+                break;
+            case self::SIMPRO_JOB_STATUS_NO_ACCESS:
+                $this->processNoAccessStatus($job);
+                break;
+            default:
+                $skipReason = self::WEBHOOK_SKIP_REASON_NOT_USED_STATUS;
+        }
+
+        return $skipReason;
     }
 
     protected function sendJobToSimpro(array $dataFromRiverside): int
@@ -388,13 +402,7 @@ class JobsFlowService
 
     protected function processAbandonStatus(Job $job)
     {
-        if ($job['is_appointment_sent']) {
-            $this->riversideApiClient->cancelAppointment($job['order_no']);
-
-            $this->jobService->update($job['id'], [
-                'is_appointment_sent' => false
-            ]);
-        }
+        $this->cancelAppointment($job);
 
         $this->riversideApiClient->notifyAboutAbandonStatus($job['order_no'], Carbon::now());
     }
@@ -404,6 +412,17 @@ class JobsFlowService
         $attemptsCount = $this->simproApiClient->getStatusAttemptsCount($job['simpro_job_id'], $this->simproConfig['no_access_status_text']);
 
         $this->riversideApiClient->notifyAboutNoAccessStatus($job['order_no'], $attemptsCount, Carbon::now());
+    }
+
+    protected function cancelAppointment(Job $job)
+    {
+        if ($job['is_appointment_sent']) {
+            $this->riversideApiClient->cancelAppointment($job['order_no']);
+
+            $this->jobService->update($job['id'], [
+                'is_appointment_sent' => false
+            ]);
+        }
     }
 
     protected function convertDataFromRiversideToSimproJobData(array $dataFromRiverside, Carbon $now): array

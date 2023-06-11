@@ -3,7 +3,8 @@
 namespace App\ApiClients;
 
 use App\Exceptions\ApiClientHttpException;
-use App\Exceptions\RiversideApiAppointmentLoggedPreviouslyException;
+use App\Exceptions\WarningApiClientExceptions\RiversideApiAppointmentLoggedPreviouslyException;
+use App\Exceptions\WarningApiClientExceptions\RiversideApiJobNotFoundException;
 use App\Models\RequestLog;
 use Illuminate\Support\Carbon;
 use Psr\Http\Message\ResponseInterface;
@@ -16,8 +17,25 @@ class RiversideApiClient extends BaseApiClient
     protected const TIME_FORMAT = 'H:i:s';
     protected const TIME_FORMAT_SEND_APPOINTMENT = 'H:i';
 
+    //patterns must be in lower case
     protected const ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY = '/.*already has an appointment logged.*/';
     protected const ERROR_PATTERN_NO_APPOINTMENT = '/.*there is no open appointment for job .*, appointment cannot be cancelled.*/';
+    protected const ERROR_PATTERN_JOB_NOT_FOUND = '/.*job_no .*is invalid.* job .*not found.*/';
+
+    protected const KNOWN_ERRORS = [
+        [
+            'pattern' => self::ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY,
+            'exception_class' => RiversideApiAppointmentLoggedPreviouslyException::class,
+        ],
+        [
+            'pattern' => self::ERROR_PATTERN_NO_APPOINTMENT,
+            'exception_class' => null,
+        ],
+        [
+            'pattern' => self::ERROR_PATTERN_JOB_NOT_FOUND,
+            'exception_class' => RiversideApiJobNotFoundException::class,
+        ],
+    ];
 
     protected $baseUrl;
     protected $userName;
@@ -70,32 +88,18 @@ class RiversideApiClient extends BaseApiClient
 
     public function cancelAppointment(string $jobOrderNo)
     {
-        try {
-            $this->makeRequest('riverside_request_xml.appointment_cancel', [
-                'job_order_no' => $jobOrderNo,
-            ]);
-        } catch (ApiClientHttpException $exception) {
-            if (!preg_match(self::ERROR_PATTERN_NO_APPOINTMENT, strtolower($exception->getResponseBody()))) {
-                throw $exception;
-            }
-        }
+        $this->makeRequest('riverside_request_xml.appointment_cancel', [
+            'job_order_no' => $jobOrderNo,
+        ]);
     }
 
     public function sendAppointment(string $jobOrderNo, Carbon $scheduleDate, Carbon $scheduleStartTime)
     {
-        try {
-            $this->makeRequest('riverside_request_xml.appointment_send', [
-                'job_order_no' => $jobOrderNo,
-                'schedule_date' => $scheduleDate->format(self::DATE_FORMAT),
-                'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT_SEND_APPOINTMENT),
-            ]);
-        } catch (ApiClientHttpException $exception) {
-            if (preg_match(self::ERROR_PATTERN_APPOINTMENT_LOGGED_PREVIOUSLY, strtolower($exception->getResponseBody()))) {
-                throw new RiversideApiAppointmentLoggedPreviouslyException($exception);
-            }
-
-            throw $exception;
-        }
+        $this->makeRequest('riverside_request_xml.appointment_send', [
+            'job_order_no' => $jobOrderNo,
+            'schedule_date' => $scheduleDate->format(self::DATE_FORMAT),
+            'schedule_start_time' => $scheduleStartTime->format(self::TIME_FORMAT_SEND_APPOINTMENT),
+        ]);
     }
 
     public function notifyAboutAbandonStatus(string $jobOrderNo, Carbon $date)
@@ -164,9 +168,27 @@ class RiversideApiClient extends BaseApiClient
         }
 
         if ($isFailed) {
-            throw new ApiClientHttpException($this->getUrl(''), $response->getStatusCode(), $responseContent);
+            $this->handleFailResponse($this->getUrl(''), $response);
         }
 
         return $xml;
+    }
+
+    protected function handleFailResponse(string $url, ResponseInterface $response): void
+    {
+        $responseBody = strtolower($response->getBody());
+
+        foreach (self::KNOWN_ERRORS as $knownError) {
+            if (preg_match($knownError['pattern'], $responseBody)) {
+                if (is_null($knownError['exception_class'])) {
+                    //ignore the problem
+                    return;
+                } else {
+                    throw new $knownError['exception_class']($url, $response);
+                }
+            }
+        }
+
+        throw new ApiClientHttpException($url, $response);
     }
 }
