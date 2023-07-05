@@ -145,7 +145,7 @@ class JobsFlowService
             try {
                 switch ($simproWebhookResource->type) {
                     case self::SIMPRO_WEBHOOK_TYPE_JOB_COMPLETED:
-                        $skipReason = $this->processSimproWebhookJobCompleted($job);
+                        $skipReason = $this->processSimproWebhookJobCompleted($job, $simproWebhookResource->dateTriggered);
                         break;
                     case self::SIMPRO_WEBHOOK_TYPE_JOB_STATUS_CHANGED:
                         $skipReason = $this->processSimproWebhookJobStatusChanged($job, $simproWebhookResource->statusId);
@@ -234,7 +234,7 @@ class JobsFlowService
         $this->jobOperationService->update($jobOperationId, ['status' => JobOperation::STATUS_FAIL]);
     }
 
-    protected function processSimproWebhookJobCompleted(Job $job): ?string
+    protected function processSimproWebhookJobCompleted(Job $job, Carbon $webhookDateTriggered): ?string
     {
         $simproJob = $this->simproApiClient->getJob($job['simpro_job_id']);
 
@@ -283,7 +283,7 @@ class JobsFlowService
             );
         }
 
-        $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], Carbon::now());
+        $this->riversideApiClient->notifyAboutCompletedJob($job['order_no'], $webhookDateTriggered);
 
         return null;
     }
