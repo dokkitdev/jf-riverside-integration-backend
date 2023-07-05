@@ -1,6 +1,7 @@
 {
     "type": "any.type",
     "description": "any description",
+    "dateTriggered": "2018-11-10T11:11:11+01:00",
     "jobId": 7777,
     "statusId": 8888,
     "scheduleId": 9999

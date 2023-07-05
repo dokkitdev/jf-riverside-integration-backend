@@ -25,6 +25,7 @@ class SimproWebhookRequest extends Request
             'reference.jobID' => 'required|integer',
             'reference.statusID' => 'required_if:ID,job.status|integer',
             'reference.scheduleID' => 'required_if:ID,job.schedule.created|integer',
+            'date_triggered' => 'required|date',
         ];
     }
 

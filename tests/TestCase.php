@@ -6,6 +6,7 @@ use App\Resources\Resource;
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -209,6 +210,12 @@ abstract class TestCase extends BaseTestCase
     {
         if ($data instanceof Resource) {
             $data = (array) $data;
+
+            foreach ($data as &$field) {
+                if ($field instanceof Carbon) {
+                    $field = $field->format('Y-m-d\\TH:i:sP');
+                }
+            }
         }
 
         if ($exportMode || $this->forceExportMode) {

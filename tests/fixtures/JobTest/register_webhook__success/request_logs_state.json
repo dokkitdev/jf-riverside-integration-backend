@@ -8,8 +8,8 @@
             "destination": "self",
             "url": "http:\/\/localhost\/simpro-webhook",
             "method": "POST",
-            "request_body": "{\"ID\":\"any.type\",\"description\":\"any description\",\"reference\":{\"jobID\":7777,\"statusID\":8888,\"scheduleID\":9999}}",
-            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[110],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"6c07e446dddbb7fcd8c7a5d6389e8008feb68924\"]}",
+            "request_body": "{\"ID\":\"any.type\",\"description\":\"any description\",\"reference\":{\"jobID\":7777,\"statusID\":8888,\"scheduleID\":9999},\"date_triggered\":\"2018-11-10T11:11:11+01:00\"}",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"application\\\/json\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"content-length\":[155],\"content-type\":[\"application\\\/json\"],\"x-response-signature\":[\"d0f0b2bf90fa584ad04ba7f0efd5d2d2df2b7872\"]}",
             "response_status_code": 200,
             "response_body": "",
             "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"text\\\/html; charset=UTF-8\"]}"

@@ -3,5 +3,6 @@
     "description": "Stage of Job #7777 has been moved from Pending to Complete",
     "reference": {
         "jobID": 7777
-    }
+    },
+    "date_triggered": "2018-11-10T11:11:11+01:00"
 }
