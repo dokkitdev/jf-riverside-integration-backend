@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<Root>
+    <CancelJobs/>
+    <ErrorDetails>Job_no any_no is invalid. Job not found.</ErrorDetails>
+</Root>

@@ -1,0 +1,7 @@
+{
+    "type": "job.stage.complete",
+    "description": "Stage of Job #7777 has been moved from Pending to Complete",
+    "jobId": 7777,
+    "statusId": null,
+    "scheduleId": null
+}

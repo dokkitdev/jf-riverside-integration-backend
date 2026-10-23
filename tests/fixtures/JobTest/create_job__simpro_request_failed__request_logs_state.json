@@ -1,0 +1,71 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 4,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "self",
+            "url": "http:\/\/localhost\/jobs",
+            "method": "POST",
+            "request_body": "<?xml version=\"1.0\" ?>\n<root version=\"1.1\">\n    <contractor>\n        <contracts>\n            <contract>\n                <jobs>\n                    <job\n                            job_no=\"test_new_job_no\"\n                            job_type_code=\"SORJ\"\n                            short_description=\"test_short_description\"\n                            long_description=\"test_long_description\"\n                            sub_location_description=\"test_sub_location_description\"\n                            job_type=\"test_job_type\"\n                            access_info=\"test_access_info\"\n                            latest_priority=\"0\"\n                    >\n                        <location\n                                address1=\"test_address1\"\n                                address2=\"test_address2\"\n                                address3=\"test_address3\"\n                                place_ref=\"test_place_ref\"\n                                post_code=\"test_post_code\"\n                        \/>\n\n                        <sors>\n                            <sor\n                                    element_code=\"test_element_code\"\n                                    element_description=\"test_element_description\"\n                            \/>\n                        <\/sors>\n                    <\/job>\n                <\/jobs>\n            <\/contract>\n        <\/contracts>\n    <\/contractor>\n<\/root>\n",
+            "request_headers": "{\"host\":[\"localhost\"],\"user-agent\":[\"Symfony\"],\"accept\":[\"text\\\/html,application\\\/xhtml+xml,application\\\/xml;q=0.9,*\\\/*;q=0.8\"],\"accept-language\":[\"en-us,en;q=0.5\"],\"accept-charset\":[\"ISO-8859-1,utf-8;q=0.7,*;q=0.7\"],\"header-name\":[\"HEADER_VALUE\"],\"content-type\":[\"application\\\/x-www-form-urlencoded\"]}",
+            "response_status_code": 400,
+            "response_body": "{\"IsSuccess\":false,\"WorkOrderNo\":\"\",\"DiagnosticMessage\":\"Failed sending to Simpro\"}",
+            "response_headers": "{\"cache-control\":[\"no-cache, private\"],\"content-type\":[\"application\\\/json\"]}"
+        },
+        {
+            "id": 5,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/",
+            "method": "get",
+            "request_body": "{\"CustomFields.Value\":\"test_place_ref\",\"CustomFields.CustomField.ID\":2,\"columns\":\"ID\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "[]",
+            "response_headers": "[]"
+        },
+        {
+            "id": 6,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/",
+            "method": "post",
+            "request_body": "{\"Name\":\"test_address1\",\"Address\":{\"Address\":\"test_address1\",\"City\":\"test_address2\",\"State\":\"test_address3\",\"PostalCode\":\"test_post_code\"},\"Customers\":[83]}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 201,
+            "response_body": "{\"ID\":1234}",
+            "response_headers": "[]"
+        },
+        {
+            "id": 7,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/1234\/customFields\/2",
+            "method": "patch",
+            "request_body": "{\"Value\":\"test_place_ref\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 204,
+            "response_body": "[]",
+            "response_headers": "[]"
+        },
+        {
+            "id": 8,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/jobs\/",
+            "method": "post",
+            "request_body": "{\"ResponseTime\":3,\"DueDate\":\"2018-11-11\",\"DueTime\":\"15:11\",\"Sections\":[{\"CostCenters\":[{\"CostCenter\":4,\"Description\":\"SORJ\",\"Stage\":\"Pending\"}]}],\"Description\":\"Job Type: test_job_type, Description: test_long_description, Sub Location: test_sub_location_description\",\"Notes\":\"test_access_info test_element_code test_element_description\",\"OrderNo\":\"test_new_job_no\",\"Name\":\"test_short_description\",\"Site\":1234,\"Type\":\"Service\",\"Stage\":\"Pending\",\"Customer\":83,\"Status\":7}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 500,
+            "response_body": "{\"any\":\"data\"}",
+            "response_headers": "[]"
+        }
+    ],
+    "deleted": []
+}

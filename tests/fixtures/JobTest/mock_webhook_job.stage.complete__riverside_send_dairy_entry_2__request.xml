@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<message>
+    <Header>
+        <Security username="fake_riverside_user_name" password="fake_riverside_password" />
+    </Header>
+    <Body>
+        <Request request_type="creatediaryextcont">
+            <Parameters attribute="secret" attribute_value="fake_riverside_secret" />
+            <Parameters attribute="reference" attribute_value="job_for_webhooks" />
+            <Parameters attribute="text" attribute_value="description_notes_2" />
+            <Parameters attribute="reference_type" attribute_value="RJ" />
+            <Parameters attribute="entry_status" attribute_value="N" />
+            <Parameters attribute="entry_type" attribute_value="MISC" />
+            <Parameters attribute="entry_date" attribute_value="2001-01-02" />
+            <Parameters attribute="entry_time" attribute_value="02:02:02" />
+        </Request>
+    </Body>
+</message>

@@ -1,0 +1,10 @@
+[
+  {
+    "ID": "job.stage.complete",
+    "description": "Stage of Job #7777 has been moved from Pending to Complete",
+    "reference": {
+      "jobID": 7777
+    }
+  },
+  "8ffd9276f46631cb7122328f819b22876a9d7417"
+]

@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<Root>
+    <Jobs>
+        <Job>
+            <Location
+                address1="4 DUNURE COURT"
+                address2="PENNYBURN"
+                address3="KILWINNING"
+                post_code="KA13 6SF"
+            >
+                <Occupants>
+                    <Occupant
+                        Person_Forenames="Bugs"
+                        Person_Surname="Bunny"
+                        Person_Title="Mr"
+                    >
+                    </Occupant>
+                </Occupants>
+            </Location>
+        </Job>
+    </Jobs>
+</Root>

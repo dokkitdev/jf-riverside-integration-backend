@@ -1,0 +1,43 @@
+[
+  {
+    "request": {
+      "type": "get",
+      "url": "https://gassure.simprocloud.com/api/v1.0/companies/0/schedules/4321",
+      "data": {},
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer fake_simpro_token"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": {
+        "Date": "2001-01-01",
+        "Blocks": [
+          {
+            "StartTime": "01:02"
+          }
+        ]
+      },
+      "headers": []
+    }
+  },
+
+  {
+    "request": {
+      "type": "post",
+      "url": "https://oh.services.riverside.org.uk/test.openaccess/webservice.p",
+      "data": "mock_webhook_job.schedule.created__riverside_appointment_send__request.xml",
+      "headers": {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml"
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "data": "<?xml version=\"1.0\" ?>\n<Root><Log_appointment/><ErrorDetails>job_no 401483866 already has an Appointment logged for Resource  on the 17/11/22 at 14:30. Please reshedule or cancel.</ErrorDetails></Root>",
+      "headers": []
+    }
+  }
+]

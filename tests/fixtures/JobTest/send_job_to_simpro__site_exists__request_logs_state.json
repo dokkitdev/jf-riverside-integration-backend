@@ -1,0 +1,45 @@
+{
+    "updated": [],
+    "created": [
+        {
+            "id": 2,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/",
+            "method": "get",
+            "request_body": "{\"CustomFields.Value\":\"test_place_ref\",\"CustomFields.CustomField.ID\":2,\"columns\":\"ID\"}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 200,
+            "response_body": "[{\"ID\":2345}]",
+            "response_headers": "[]"
+        },
+        {
+            "id": 3,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/sites\/2345",
+            "method": "patch",
+            "request_body": "{\"PrimaryContact\":{\"Email\":\"test_Contact_Details\",\"PreferredNotificationMethod\":\"Telephone\",\"Title\":\"test_Person_Title\",\"GivenName\":\"test_Person_Forenames\",\"FamilyName\":\"test_Person_Surname\"},\"Name\":\"test_address1\",\"Address\":{\"Address\":\"test_address1\",\"City\":\"test_address2\",\"State\":\"test_address3\",\"PostalCode\":\"test_post_code\"},\"Customers\":[83]}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 204,
+            "response_body": "[]",
+            "response_headers": "[]"
+        },
+        {
+            "id": 4,
+            "created_at": "2018-11-11 11:11:11",
+            "updated_at": "2018-11-11 11:11:11",
+            "destination": "simpro",
+            "url": "https:\/\/gassure.simprocloud.com\/api\/v1.0\/companies\/0\/jobs\/",
+            "method": "post",
+            "request_body": "{\"ResponseTime\":3,\"DueDate\":\"2018-11-11\",\"DueTime\":\"15:11\",\"Sections\":[{\"CostCenters\":[{\"CostCenter\":4,\"Description\":\"SORJ\",\"Stage\":\"Pending\"}]}],\"Description\":\"test_job_type test_long_description test_sub_location_description\",\"Notes\":\"test_access_info test_element_code test_element_description\",\"OrderNo\":\"test_job_no\",\"Name\":\"test_short_description\",\"Site\":2345,\"Type\":\"Service\",\"Stage\":\"Pending\",\"Customer\":83,\"Status\":7}",
+            "request_headers": "{\"Accept\":\"application\\\/json\",\"Content-Type\":\"application\\\/json\",\"Authorization\":\"Bearer fake_simpro_token\"}",
+            "response_status_code": 201,
+            "response_body": "{\"ID\":9999}",
+            "response_headers": "[]"
+        }
+    ],
+    "deleted": []
+}

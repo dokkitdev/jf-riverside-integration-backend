@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Services\JobOperationService;
+use Illuminate\Console\Command;
+
+class Tmp extends Command
+{
+    protected $signature = 'tmp';
+
+    public function handle()
+    {
+        $webhook = json_decode(
+            '{"ID":"job.stage.complete","build":"gassure.simprocloud.com","description":"Stage of Job #401465 has been moved from Progress to Complete","name":"Job","action":"stage.complete","reference":{"companyID":0,"jobID":401465,"stage":"complete"},"date_triggered":"2023-06-30T09:22:30+01:00"}',
+            true
+        );
+
+        $jobOperation = app(JobOperationService::class)->find(29728);
+
+        dump($webhook);
+        dump($jobOperation);
+    }
+}
+
